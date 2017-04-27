@@ -3,12 +3,12 @@ COMMON:=./common
 OUTPUT:=./bin
 MAIN:=../main
 WKSTACK:=./WKStack
+UDPSERVER:=./udpserver
 PLATFORM:=./platform
 
 P?=linux
 
-
-CSRCS := $(wildcard *.c $(COMMON)/*.c $(MQTT)/*.c $(WKSTACK)/*.c $(PLATFORM)/$(P)/*.c)
+CSRCS := $(wildcard *.c $(COMMON)/*.c $(MQTT)/*.c $(WKSTACK)/*.c $(UDPSERVER)/*.c $(PLATFORM)/$(P)/*.c)
 OBJS = $(CSRCS:.c = .o)
 
 CC = gcc
@@ -18,7 +18,8 @@ INCLUDES := \
 	-I$(MQTT)  \
 	-I$(PLATFORM)  \
 	-I$(WKSTACK)  \
-	-I$(PLATFORM)/${P}  \
+	-I$(UDPSERVER)  \
+	-I$(PLATFORM)/${P}  
 
 LIBS = -L/
 

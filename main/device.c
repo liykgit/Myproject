@@ -446,7 +446,7 @@ int main(int argc, char **argv)
 */
     WK_Start(PRODUCTID, MAC, KEY);
 
-    #define UDP_SERVER_PORT 119
+    #define UDP_SERVER_PORT 30319
     UDPServer_start(UDP_SERVER_PORT); 
 
 

@@ -11,7 +11,7 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
-
+#include <netinet/in.h>
 
 //----------------------- sys ---------------------------------
 
@@ -51,7 +51,7 @@ int put_mutex(void *lock);
 
 
 
-//-------------- udp ------------------------
+//-------------- socket ------------------------
 
 #define UDP_RECV_TIMEOUT_S 5
 #define UDP_RECV_TIMEOUT_MS 0
@@ -63,7 +63,29 @@ int create_udp_socket(int *sock);
 int close_udp_socket(int sock);
 
 
-int udp_recv(int sock, unsigned char *buffer, int length, struct sockaddr *client_addr, unsigned int *client_addr_len);
+int udp_recvfrom(int s, char *buf, int len, int flags, struct sockaddr *from, int *fromlen);
+
+
+
+#define CONN_NOSSL 0
+#define CONN_SSL   1
+
+#define CONN_MODE CONN_NOSSL
+
+#define TCP_TIMEOUT_S  			(6)
+#define TCP_TIMEOUT_MS 			(0)
+
+#define TCP_TRY_TIMES 3
+
+int create_socket(int *sock);
+int connect_server(int *sock, char *url, int port, int ssl);
+
+int tcp_close(int sock, int ssl);
+
+int tcp_send(int sock, unsigned char *buffer, int length, int ssl);
+int tcp_recv(int sock, unsigned char *buffer, int length, int ssl);
+
+int socket_bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
 
 //------------ thread ----------------------
 
@@ -106,21 +128,4 @@ void log_uninit();
 
 //-------------- tcp --------------------
 
-#define CONN_NOSSL 0
-#define CONN_SSL   1
-
-#define CONN_MODE CONN_NOSSL
-
-#define TCP_TIMEOUT_S  			(6)
-#define TCP_TIMEOUT_MS 			(0)
-
-#define TCP_TRY_TIMES 3
-
-int create_socket(int *sock);
-int connect_server(int *sock, char *url, int port, int ssl);
-
-int tcp_close(int sock, int ssl);
-
-int tcp_send(int sock, unsigned char *buffer, int length, int ssl);
-int tcp_recv(int sock, unsigned char *buffer, int length, int ssl);
 

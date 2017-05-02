@@ -65,6 +65,7 @@ int close_udp_socket(int sock);
 
 int udp_recvfrom(int s, char *buf, int len, int flags, struct sockaddr *from, int *fromlen);
 
+int udp_sendto(int sock, unsigned char *buffer, int length, struct sockaddr_in *client_addr);
 
 
 #define CONN_NOSSL 0

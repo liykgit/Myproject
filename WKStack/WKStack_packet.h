@@ -2,7 +2,7 @@
 #define _WKSTACK_PACKET_H_JSKFJLKSDJFKSDF_
 
 // First host, connect this host to get endpoint
-#define WKSTACK_FIRST_CONNECT_HOST "192.168.3.3"
+#define WKSTACK_FIRST_CONNECT_HOST "192.168.3.2"
 #define WKSTACK_FIRST_CONNECT_PORT 1884
 
 #define DP_COUNT_MAX 32
@@ -22,6 +22,9 @@
 #define WKSTACK_TOPIC_CONTROL_FMT "/iot/dm/%s/control"
 #define WKSTACK_TOPIC_OTA_SUB_FMT "/iot/ota/%s/sub" // For both Module and MCU ota (Server -> Device)
 #define WKSTACK_TOPIC_OTA_PUB_FMT "/iot/ota/%s/pub" // For Module ota (Device -> Server)
+
+#define WKSTACK_TOPIC_BINDING_SUB_FMT "/iot/binding/%s/sub" // For both Module and MCU ota (Server -> Device)
+#define WKSTACK_TOPIC_BINDING_PUB_FMT "/iot/binding/%s/pub" // For Module ota (Device -> Server)
 
 #define WKSTACK_TOPIC_OTA_MCU_OUT_FMT "/iot/in/mcu/%s/ota" // For MCU ota (Device -> Server)
 
@@ -63,9 +66,12 @@
 #define WKSTACK_OTA_INDEX_STATE         65005
 #define WKSTACK_OTA_INDEX_PERCENT       65006
 #define WKSTACK_OTA_INDEX_RESULT        65007
-#define WKSTACK_OTA_INDEX_ERR_MSG        65008
+#define WKSTACK_OTA_INDEX_ERR_MSG       65008
 #define WKSTACK_OTA_INDEX_MOD_VER       65020
 
+#define WKSTACK_BINDING_INDEX_USERID    65040
+#define WKSTACK_BINDING_INDEX_TICKET    65041
+#define WKSTACK_BINDING_INDEX_ERROR     65042
 
 #define INDEX_SZ (4)
 #define TYPE_SZ (4)
@@ -92,5 +98,6 @@ int WKStack_publish_knock();
 int WKStack_publish_realonline();
 int WKStack_subscribe_control();
 int WKStack_subscribe_ota();
+int WKStack_subscribe_bindng();
 
 #endif

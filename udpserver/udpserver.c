@@ -2,12 +2,12 @@
 #include "common.h"
 #include "udpserver.h"
 
-static int udp_fd = -1;
+int udp_fd = -1;
 
 static unsigned char recv_buf[UDP_RECV_BUFFER_SIZE];
 
 
-int udp_recv(int sock, unsigned char *buffer, int length, struct sockaddr *client_addr, unsigned int *client_addr_len)
+static int udp_recv(int sock, unsigned char *buffer, int length, struct sockaddr *client_addr, unsigned int *client_addr_len)
 {
     fd_set fdRead;
 	struct timeval tm;
@@ -33,7 +33,7 @@ int udp_recv(int sock, unsigned char *buffer, int length, struct sockaddr *clien
 			if(ret > 0){
 				printf( "recvd buffer: \n");
                 
-                printf("%s\n", buffer);
+                user_cmd_handle(buffer, ret, client_addr);
 
 				return ret;
 			}else if(ret < 0){//recv err
@@ -102,3 +102,9 @@ socket_fail:
     return -1;
 
 }
+
+int udpserver_sendto(struct sockaddr_int *client_addr, char *buf, int length) {
+
+    return udp_sendto(udp_fd, buf, length, client_addr);
+}
+

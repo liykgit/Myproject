@@ -36,6 +36,11 @@ int udp_recvfrom(int s, char *buf, int len, int flags, struct sockaddr *from, in
     return recvfrom(s, buf, len, flags, from, fromlen);  
 }
 
+
+int udp_sendto(int sock, unsigned char *buffer, int length, struct sockaddr_in *client_addr){
+    return sendto(sock, buffer, length, 0, client_addr, sizeof(struct sockaddr_in));
+}
+
 int socket_bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen) {
 
     return bind(sockfd, addr, addrlen);

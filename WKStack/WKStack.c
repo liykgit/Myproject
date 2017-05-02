@@ -68,6 +68,7 @@ static int WKStack_connect_cb(mqtt_errno_t err)
 
                     WKStack_subscribe_control();
                     WKStack_subscribe_ota();
+                    WKStack_subscribe_binding();
 
                 }
                 break;

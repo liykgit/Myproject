@@ -26,6 +26,8 @@ typedef struct{
     char ota_sub_topic[WKSTACK_TOPIC_LEN];
 
 
+    char binding_pub_topic[WKSTACK_TOPIC_LEN];
+    char binding_sub_topic[WKSTACK_TOPIC_LEN];
     //char ota_mcu_out_topic[WKSTACK_TOPIC_LEN];
 
     WKStack_ota_t ota;

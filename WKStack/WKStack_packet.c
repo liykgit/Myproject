@@ -8,6 +8,9 @@
 #include "WKStack_lib.h"
 #include "WKStack_packet.h"
 
+#include "pushlist.h"
+#include "udpserver.h"
+
 mqtt_connect_data_t data = { {'M', 'Q', 'T', 'C'}, 0, 4, 0, 1, 0, { {'M', 'Q', 'T', 'W'}, 0, 0, 0, 0, 0 }, 0, 0 };
 
 static WKStack_datapoint_t dps[DP_COUNT_MAX];
@@ -59,8 +62,9 @@ static WKStack_datapoint_t *fill_dp_chunk(WKStack_datapoint_t *pdp, TLV_t *ptlv)
                 printf("string index %d, len %d\n", pdp->index, ptlv->len);
 
                 pdp->value.string = mem_alloc(ptlv->len + 1);
-                pdp->value.string[ptlv->len + 1] = 0; 
+                memset(pdp->value.string, 0, ptlv->len + 1);
                 memcpy(pdp->value.string, ptlv->value, ptlv->len);
+                //pdp->value.string[ptlv->len + 1] = NULL;
                 printf("%s\n", pdp->value.string);
         }
         break;
@@ -218,7 +222,7 @@ static int WKStack_unpack_ota(unsigned char *payload, int len)
     for(i = 0; i < count; i++) {
         //free the string buffer
         if(dps[i].type == 4) {
-            mem_free(dps[i].value.string);
+            free(dps[i].value.string);
             dps[i].value.string = NULL;
         }
     }
@@ -226,6 +230,88 @@ static int WKStack_unpack_ota(unsigned char *payload, int len)
     if(WKStack.ota_cb != NULL)
         //TODO target is hard-coded to 0
         WKStack.ota_cb(&(WKStack.ota), 0, type);
+
+	return 0;
+}
+
+predicate_t is_client(void *ele, void *arg) {
+   
+    if(!ele)
+        return 0;
+
+    printf("ele %s\n",  ((client_info_t *)ele)->user_id);
+    printf("%s\n", (char *)arg);
+
+    if(strcmp(((client_info_t *)ele)->user_id, (char *)arg) == 0) {
+        
+        return 1;
+    }
+    else 
+        return 0;
+}
+
+static int WKStack_unpack_binding(unsigned char *payload, int len)
+{
+    printf("<LOG> WKStack_unpack_control E\n");
+
+    int count = decode_payload((char *)payload, len);
+    if(count <= 0)  
+        return 0;
+
+    int i = 0;
+    
+    char *user_id = 0;
+    char *bind_error = 0;
+    char *bind_ticket = 0;
+
+    for(; i < count; i++) {
+
+        switch(dps[i].index) {
+            
+            case WKSTACK_BINDING_INDEX_USERID: {
+                user_id = dps[i].value.string;
+            }
+            break;
+
+            case WKSTACK_BINDING_INDEX_TICKET: {
+                bind_ticket = dps[i].value.string;
+            }
+            break;
+            
+            case WKSTACK_BINDING_INDEX_ERROR: {
+                bind_error = dps[i].value.string;
+            }
+            break;
+        }
+    }
+    
+    if(bind_error) {
+        printf("bind error %s\n", bind_error);
+
+    }
+
+    if(user_id && bind_ticket) {
+        printf("%s, %s\n", user_id, bind_ticket);
+        
+        client_info_t *client_info = 0;
+        client_info = (client_info_t *)plist_find(is_client, user_id);
+        if(client_info) {
+            udpserver_sendto(&client_info->addr, bind_ticket, strlen(bind_ticket));
+        }
+        else {
+            printf("No user for bind ticket, plist too small ? \n");
+        }
+    }
+
+    for(i = 0; i < count; i++) {
+        //free the string buffer
+        if(dps[i].type == 4) {
+            mem_free(dps[i].value.string);
+            dps[i].value.string = NULL;
+        }
+    }
+
+	//printf("### MEM FREE : %d.\n", qcom_mem_heap_get_free_size());
 
 	return 0;
 }
@@ -388,6 +474,9 @@ int WKStack_unpack_welcome(unsigned char *payload, int len) {
         sprintf(WKStack.control_topic, WKSTACK_TOPIC_CONTROL_FMT, WKStack.params.did);
         sprintf(WKStack.ota_sub_topic, WKSTACK_TOPIC_OTA_SUB_FMT, WKStack.params.did);
         sprintf(WKStack.ota_pub_topic, WKSTACK_TOPIC_OTA_PUB_FMT, WKStack.params.did);
+
+        sprintf(WKStack.binding_sub_topic, WKSTACK_TOPIC_BINDING_SUB_FMT, WKStack.params.did);
+        sprintf(WKStack.binding_pub_topic, WKSTACK_TOPIC_BINDING_PUB_FMT, WKStack.params.did);
     }
 
 	//printf("### MEM FREE : %d.\n", qcom_mem_heap_get_free_size());
@@ -443,4 +532,37 @@ int WKStack_subscribe_ota()
     return 0;
 }
 
+
+int WKStack_subscribe_binding()
+{
+	mqtt_subscribe(WKStack.binding_sub_topic, NULL, WKStack_unpack_binding);
+
+    return 0;
+}
+
+
+int WKStack_publish_bind_request(char *userId) 
+{
+    char buf[64];
+    int buf_size = 64;
+
+	memset(buf, 0, sizeof(buf));
+
+    int offset = 0;
+
+    char tag[4] = {0, 0, WKSTACK_DATAPOINT_TYPE_STRING, 0};
+    *(unsigned short*)tag = WKSTACK_BINDING_INDEX_USERID;
+
+    int item_size = tlv_put_string(buf+offset, tag, userId, buf_size - offset);
+
+    if(item_size >= 0)
+        offset += item_size;
+    else { 
+        printf("ota publish buffer not large enough\n");
+        return -1;
+    }
+
+    printf("publishing binding request, buf size  %d\n", offset);
+    return mqtt_publish(WKStack.binding_pub_topic, (unsigned char*)buf, offset, MQTT_QOS1, MQTT_RETAIN_FALSE, (mqtt_cb_t)0);
+}
 

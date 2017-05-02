@@ -429,9 +429,9 @@ int main(int argc, char **argv)
 		printf("%s %s %s %s\n", params.mac, params.sn, params.devtype, params.key);
 	}
 */
-    #define PRODUCTID "y14RYspl"
-    #define KEY     "JJxVAto46gamV5c3"
-    #define MAC "845DD7420129"
+    #define PRODUCTID "k1fNmNng"
+    #define KEY     "JkgzNQ4InxXjhp4g"
+    #define MAC "845DD74A6C5C"
 
 /*
 	tcp_config_fp = fopen("Ctrlserver.config", "r");

@@ -3,11 +3,11 @@
 
 #define LIST_SIZE 4
 
-typedef int (*predicate_t)(void *element);
+typedef int (*predicate_t)(void *element, void *arg);
 
 void *plist_push(void *ele);
 
-void * plist_find(predicate_t func);
+void * plist_find(predicate_t func, void *arg);
 
 
 #endif

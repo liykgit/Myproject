@@ -3,6 +3,7 @@
 
 static void *_list[LIST_SIZE];
 
+//TODO maeke this thread safe
 
 void *plist_push(void *ele)
 {
@@ -13,7 +14,7 @@ void *plist_push(void *ele)
     return victim;
 }
 
-void * plist_find(predicate_t func)
+void * plist_find(predicate_t func, void * arg)
 {
     int i = 0; 
      
@@ -23,13 +24,14 @@ void * plist_find(predicate_t func)
         if(!e) 
             break;
         
-        if(func(e)) 
+        if(func(e, arg)) 
             return e; 
     }
 
     return 0;
 }
 
+/* test code
 predicate_t find4(void *e) {
    
     return (int)e == 4;
@@ -59,4 +61,4 @@ int main() {
 
     return 0;
 }
-
+*/

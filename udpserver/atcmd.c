@@ -33,9 +33,40 @@ typedef struct {
 
 #define FIND                "FIND"
 #define BIND                "BIND"
+#define RAW                 "RAW"
 
+void exec_passthrough(int argc, char *argv[], struct socketaddr_in *client_addr)
+{
 
-extern int udp_fd;
+    if(argc <= 1) {
+        udpserver_sendto(client_addr, PARAM_ERROR, strlen(PARAM_ERROR));
+    }
+    else if(argc == 2){
+        
+        printf("passthrough to server %s\n", argv[1]);
+        
+        int buf_sz = strlen(argv[1]) >> 1 ;
+        char *buf = malloc(buf_sz);
+
+        memset(buf, 0, buf_sz);
+
+        hex2bin(argv[1], buf);
+        
+
+        WKStack_report_raw(buf, buf_sz);
+
+        int i = 0;
+        for (i = 0; i < buf_sz; i++)
+        {
+            printf("%02x ", *buf++);
+        }
+
+    }
+    else {
+        udpserver_sendto(client_addr, PARAM_ERROR, strlen(PARAM_ERROR));
+    }
+}
+
 
 void exec_find(int argc, char *argv[], struct socketaddr_in *client_addr)
 {
@@ -50,7 +81,6 @@ void exec_find(int argc, char *argv[], struct socketaddr_in *client_addr)
     else {
         sprintf((char *)buf, "%s#%s", WKStack.params.devtype, WKStack.params.mac);
     }
-
 
     udpserver_sendto(client_addr, buf, strlen(buf));
 }
@@ -92,6 +122,12 @@ const cmd_handle_t command_handle[]= {
         .command = BIND, //!< restart system
         .execute = exec_bind
     },
+
+    {
+        .command = RAW, 
+        .execute = exec_passthrough
+    },
+
 };
 
 #define COMMAND_COUNT (sizeof(command_handle) / sizeof(cmd_handle_t))

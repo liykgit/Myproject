@@ -12,6 +12,4 @@ unsigned long get_tick(void);
 void aes_ecb(char *aes, unsigned char *session, unsigned char *key);
 
 
-int hex2bin(const char* src, char* target);
-
 #endif

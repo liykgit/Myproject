@@ -15,18 +15,7 @@ mqtt_connect_data_t data = { {'M', 'Q', 'T', 'C'}, 0, 4, 0, 1, 0, { {'M', 'Q', '
 
 static WKStack_datapoint_t dps[DP_COUNT_MAX];
 
-/*
-static void print_hex(char *buf, int len)
-{
 
-	int			i;
-
-	for (i = 0; i < len; i++)
-	{
-		printf("%02x ", *buf++);
-	}
-}
-*/
 
 static WKStack_datapoint_t *fill_dp_chunk(WKStack_datapoint_t *pdp, TLV_t *ptlv) {
 
@@ -64,7 +53,7 @@ static WKStack_datapoint_t *fill_dp_chunk(WKStack_datapoint_t *pdp, TLV_t *ptlv)
                 pdp->value.string = mem_alloc(ptlv->len + 1);
                 memset(pdp->value.string, 0, ptlv->len + 1);
                 memcpy(pdp->value.string, ptlv->value, ptlv->len);
-                //pdp->value.string[ptlv->len + 1] = NULL;
+
                 printf("%s\n", pdp->value.string);
         }
         break;
@@ -146,8 +135,7 @@ int WKStack_publish_ota_request(char *version)
 
 
 
-// tmp_buffer: |  128  | 64  | 64 |  256  | 256|   256    |
-// store:      |version| port|aes |session|host|aes string|
+
 static int WKStack_unpack_ota(unsigned char *payload, int len)
 {
     LOG(LEVEL_DEBUG, "<LOG> WKStack_unpack_ota E\n");
@@ -222,7 +210,7 @@ static int WKStack_unpack_ota(unsigned char *payload, int len)
     for(i = 0; i < count; i++) {
         //free the string buffer
         if(dps[i].type == 4) {
-            free(dps[i].value.string);
+            mem_free(dps[i].value.string);
             dps[i].value.string = NULL;
         }
     }

@@ -378,12 +378,9 @@ another:
 			LOG(LEVEL_ERROR, "<ERR> mqtt payload malloc error\n");
 			return -4;
 		}
-		printf("CHRIS x\n");
         memcpy(pmsg->payload, p, pmsg->length);
-		printf("CHRIS y\n");
 
         print_hex(pmsg->payload, pmsg->length);  
-		printf("CHRIS z\n");
 
     }else if(pmsg->length < 0){
 		FreeBuddle(pmsg);

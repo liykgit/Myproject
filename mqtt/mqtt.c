@@ -59,14 +59,12 @@ int mqtt_publish(char *topic, unsigned char *msg, int msg_len, mqtt_qos_t qos, m
         return -2;
     }
 
-    printf("CHRIS in mqtt_publish i\n");
     package = GetFree2Send();
     if(package == NULL) {
         LOG(LEVEL_ERROR, "<ERR> mqtt send buddle not free\n");
 		return -1;
 	}
 
-    printf("CHRIS in mqtt_publish j\n");
     package->payload = (unsigned char *)mem_alloc(msg_len);
     if(package->payload == NULL){
         LOG(LEVEL_ERROR, "<ERR> mqtt malloc error\n");
@@ -74,25 +72,16 @@ int mqtt_publish(char *topic, unsigned char *msg, int msg_len, mqtt_qos_t qos, m
         return -3;
     }
 
-    printf("CHRIS in mqtt_publish\n");
     package->msg_id = mqtt_msgid();
-    printf("CHRIS in mqtt_publish a\n");
     strcpy(package->topic, topic);
-    printf("CHRIS in mqtt_publish b\n");
     package->retain = retain;
-    printf("CHRIS in mqtt_publish c\n");
     package->qos = qos;
-    printf("CHRIS in mqtt_publish d\n");
     package->type = MQTT_PUBLISH;
-    printf("CHRIS in mqtt_publish f\n");
     package->cb = cb;
     memcpy(package->payload, msg, msg_len);
-    printf("CHRIS in mqtt_publish g\n");
     package->length = msg_len;
     package->used = BUDDLE_USED;
-    printf("CHRIS in mqtt_publish 2\n");
 
-    printf("CHRIS in mqtt_publish 2\n");
 
     release_sem(&ctrl_thread_sem);
 

@@ -61,6 +61,7 @@ void exec_passthrough(int argc, char *argv[], struct socketaddr_in *client_addr)
             printf("%02x ", *buf++);
         }
 
+        mem_free(buf);
     }
     else {
         udpserver_sendto(client_addr, PARAM_ERROR, strlen(PARAM_ERROR));

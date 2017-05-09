@@ -19,7 +19,7 @@ static int udp_recv(int sock, unsigned char *buffer, int length, struct sockaddr
 	FD_ZERO(&fdRead);
 	FD_SET(sock, &fdRead);
 
-	ret	= select(sock + 1, &fdRead, 0, 0, &tm);
+	ret	= sys_select(sock + 1, &fdRead, 0, 0, &tm);
 
 	if(ret < 0){// error
 		printf( "udp sockfd select error\n");
@@ -37,11 +37,8 @@ static int udp_recv(int sock, unsigned char *buffer, int length, struct sockaddr
 
 				return ret;
 			}else if(ret < 0){//recv err
-				printf( "<ERR> udp recv error(errno:%d)\n", errno);
-				if(errno == 104 || errno == 9)
-					return -4;
-				else
-					return -2;
+				printf( "<ERR> udp recv error \n");
+			    return ret;
 			}else{// == 0 //socket close
 				printf( "<ERR> udp close socket\n");
 				return -3;// careful : sometime select =1 ,but read 0 byte data
@@ -72,7 +69,7 @@ int UDPServer_start(int port) {
     
     ret = create_udp_socket(&udp_fd);
     if(ret != 0){
-		printf("Create_udp_socket failed(errno:%d)\n", errno);
+		printf("Create_udp_socket failed\n");
 		goto socket_fail;
     }
 
@@ -83,9 +80,9 @@ int UDPServer_start(int port) {
     local_addr.sin_family = AF_INET;
     local_addr.sin_port = htons(port);
 
-    ret = bind(udp_fd, (const struct sockaddr *)&local_addr, sizeof(struct sockaddr_in));
+    ret = socket_bind(udp_fd, (const struct sockaddr *)&local_addr, sizeof(struct sockaddr_in));
     if(ret != 0) {
-		printf("bind failed(errno:%d)\n", errno);
+		printf("bind failed\n");
 		goto bind_fail;
     }
 

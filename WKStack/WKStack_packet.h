@@ -98,6 +98,6 @@ int WKStack_publish_knock();
 int WKStack_publish_realonline();
 int WKStack_subscribe_control();
 int WKStack_subscribe_ota();
-int WKStack_subscribe_bindng();
+int WKStack_subscribe_binding();
 
 #endif

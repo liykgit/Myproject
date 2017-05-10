@@ -28,7 +28,7 @@ int mqtt_start(char *host, unsigned short port, mqtt_connect_data_t *data, mqtt_
         mqtt.connect_cb = cb;
         mqtt.state = MQTT_STATE_START;
 
-        release_sem(&ctrl_thread_sem);
+        vg_release_sem(&ctrl_thread_sem);
     }else{
         return -1;
     }
@@ -41,7 +41,7 @@ int mqtt_stop(void)
     if(mqtt.state == MQTT_STATE_RUNNING){
         mqtt.state = MQTT_STATE_STOP;
 
-        release_sem(&ctrl_thread_sem);
+        vg_release_sem(&ctrl_thread_sem);
     }else{
         return -1;
     }
@@ -65,7 +65,7 @@ int mqtt_publish(char *topic, unsigned char *msg, int msg_len, mqtt_qos_t qos, m
 		return -1;
 	}
 
-    package->payload = (unsigned char *)mem_alloc(msg_len);
+    package->payload = (unsigned char *)vg_alloc(msg_len);
     if(package->payload == NULL){
         LOG(LEVEL_ERROR, "<ERR> mqtt malloc error\n");
         FreeBuddle(package);
@@ -82,8 +82,7 @@ int mqtt_publish(char *topic, unsigned char *msg, int msg_len, mqtt_qos_t qos, m
     package->length = msg_len;
     package->used = BUDDLE_USED;
 
-
-    release_sem(&ctrl_thread_sem);
+    vg_release_sem(&ctrl_thread_sem);
 
     return (int)(package->msg_id);
 }
@@ -118,7 +117,7 @@ int mqtt_subscribe(char *topic, mqtt_cb_t result_cb, mqtt_topic_cb_t topic_cb)
         return -3;
     }
 
-    release_sem(&ctrl_thread_sem);
+    vg_release_sem(&ctrl_thread_sem);
 
 	return (int)(msg->msg_id);
 }
@@ -155,7 +154,7 @@ int mqtt_unsubscribe(char *topic, mqtt_cb_t result_cb)
         return -3;
     }
 
-    release_sem(&ctrl_thread_sem);
+    vg_release_sem(&ctrl_thread_sem);
 
 	return (int)(msg->msg_id);
 }
@@ -196,14 +195,14 @@ int mqtt_puback(unsigned short msg_id)
         return -1;
     }
 
-	pmsg->tick = get_tick();
+	pmsg->tick = vg_get_tick();
 	pmsg->type = MQTT_PUBACK;
 	pmsg->cb = NULL;
 	pmsg->times = 1;
     pmsg->msg_id = msg_id;
 	pmsg->used = BUDDLE_USED;
 
-    release_sem(&ctrl_thread_sem);
+    vg_release_sem(&ctrl_thread_sem);
 
     return 0;
 }
@@ -222,14 +221,14 @@ int mqtt_pubrec(unsigned short msg_id)
         return -1;
     }
 
-	pmsg->tick = get_tick();
+	pmsg->tick = vg_get_tick();
 	pmsg->type = MQTT_PUBREC;
 	pmsg->cb = NULL;
 	pmsg->times = 1;
     pmsg->msg_id = msg_id;
 	pmsg->used = BUDDLE_USED;
 
-    release_sem(&ctrl_thread_sem);
+    vg_release_sem(&ctrl_thread_sem);
 
     return 0;
 }
@@ -248,14 +247,14 @@ int mqtt_pubrel(unsigned short msg_id)
         return -1;
     }
 
-	pmsg->tick = get_tick();
+	pmsg->tick = vg_get_tick();
 	pmsg->type = MQTT_PUBREL;
 	pmsg->cb = NULL;
 	pmsg->times = 1;
     pmsg->msg_id = msg_id;
 	pmsg->used = BUDDLE_USED;
 
-    release_sem(&ctrl_thread_sem);
+    vg_release_sem(&ctrl_thread_sem);
 
     return 0;
 }
@@ -274,14 +273,14 @@ int mqtt_pubcomp(unsigned short msg_id)
         return -1;
     }
 
-	pmsg->tick = get_tick();
+	pmsg->tick = vg_get_tick();
 	pmsg->type = MQTT_PUBCOMP;
 	pmsg->cb = NULL;
 	pmsg->times = 1;
     pmsg->msg_id = msg_id;
 	pmsg->used = BUDDLE_USED;
 
-    release_sem(&ctrl_thread_sem);
+    vg_release_sem(&ctrl_thread_sem);
 
     return 0;
 }
@@ -308,7 +307,7 @@ static int mqtt_connect()
     ret = mqtt_send(mqtt.send_buf, len);
     if(ret > 0){
         mqtt.state = MQTT_STATE_WAIT_CONNACK;
-        release_sem(&recv_thread_sem);
+        vg_release_sem(&recv_thread_sem);
     }else{
         LOG(LEVEL_ERROR, "<ERR> Mqtt send connect failed\n");
         goto err;
@@ -322,7 +321,7 @@ err:
         mqtt.error_number = MQTT_SOCKET_ERROR;
 
     mqtt.state = MQTT_STATE_ERROR;
-	release_sem(&ctrl_thread_sem);
+	vg_release_sem(&ctrl_thread_sem);
 
     return -1;
 }
@@ -345,7 +344,7 @@ static int mqtt_disconnect()
         mqtt.state = MQTT_STATE_ERROR;
     }
 
-	release_sem(&ctrl_thread_sem);
+	vg_release_sem(&ctrl_thread_sem);
     return 0;
 }
 
@@ -355,7 +354,7 @@ static thread_ret_t mqtt_ctrl_thread(thread_params_t args)
 
     while(1){
         LOG(LEVEL_NORMAL, "<LOG> Ctrl thread wait...(%d)\n", mqtt.keepalive);
-        ret = wait_sem(&ctrl_thread_sem, mqtt.keepalive);
+        ret = vg_wait_sem(&ctrl_thread_sem, mqtt.keepalive);
 
         if(ret == -1){ // Timeout
             if(mqtt.ping_times > MQTT_RETRY_TIMES){
@@ -406,7 +405,7 @@ static thread_ret_t mqtt_recv_thread(thread_params_t args)
 start:
     // Wait for connect completed
     LOG(LEVEL_NORMAL, "<LOG> Recv thread IDLE...\n");
-    wait_sem(&recv_thread_sem, -1);
+    vg_wait_sem(&recv_thread_sem, -1);
 
     LOG(LEVEL_NORMAL, "<LOG> Recv thread process...\n");
 
@@ -432,7 +431,7 @@ start:
                 mqtt.error_number = MQTT_SOCKET_ERROR;
                 mqtt.state = MQTT_STATE_ERROR;
 
-                release_sem(&ctrl_thread_sem);
+                vg_release_sem(&ctrl_thread_sem);
             }
 		}else if(len < 2){
   			//LOG(LEVEL_NORMAL, "<LOG> read buf length less than 2bytes(%d)\n", len);
@@ -452,13 +451,13 @@ int mqtt_init(int keepalive, int window_size)
 {
     mqtt.window_size = window_size;
 
-    mqtt.send_buf = (char *)mem_alloc(mqtt.window_size);
+    mqtt.send_buf = (char *)vg_alloc(mqtt.window_size);
     if(mqtt.send_buf == NULL){
         return -1;
     }
-    mqtt.recv_buf = (char *)mem_alloc(mqtt.window_size);
+    mqtt.recv_buf = (char *)vg_alloc(mqtt.window_size);
     if(mqtt.recv_buf == NULL){
-        mem_free(mqtt.send_buf);
+        vg_free(mqtt.send_buf);
         return -1;
     }
 
@@ -475,11 +474,11 @@ int mqtt_init(int keepalive, int window_size)
 
     mqtt.state = MQTT_STATE_IDLE;
 
-    create_sem(&ctrl_thread_sem, "ctrl_thread");
-    create_sem(&recv_thread_sem, "recv_thread");
+    vg_create_sem(&ctrl_thread_sem, "ctrl_thread");
+    vg_create_sem(&recv_thread_sem, "recv_thread");
 
-    start_thread(mqtt_ctrl_thread, NULL, 4096 + 1024);
-	start_thread(mqtt_recv_thread, NULL, 4096);
+    vg_start_thread(mqtt_ctrl_thread, NULL, 4096 + 1024);
+	vg_start_thread(mqtt_recv_thread, NULL, 4096);
 
     return 0;
 }

@@ -216,7 +216,7 @@ int mqtt_process_send()
 
                 if(ret > 0){
                     // Send PUBLISH succeed, move send to flight
-                    msg->tick = get_tick();
+                    msg->tick = vg_get_tick();
                     if((msg->type == MQTT_PUBLISH && msg->qos == MQTT_QOS0)
                         || (msg->type == MQTT_PUBACK)
                         || (msg->type == MQTT_PUBREC)
@@ -241,7 +241,7 @@ int mqtt_process_send()
 
 int mqtt_process_error()
 {
-    tcp_close(mqtt.sockfd, CONN_MODE);
+    vg_tcp_close(mqtt.sockfd, CONN_MODE);
 
     mqtt_topic_init();
 

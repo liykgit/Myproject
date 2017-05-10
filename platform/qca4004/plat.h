@@ -6,15 +6,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <semaphore.h>
-#include <pthread.h>
-#include <errno.h>
+unsigned long get_tick(void);
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
 
-//----------------------- sys ---------------------------------
+
+#define msleep(ms) usleep(ms * 1000)
+
+#define vg_alloc malloc
+#define vg_free free
+
 
 #define msleep(ms) usleep(ms * 1000)
 
@@ -25,14 +25,17 @@
 unsigned long vg_get_tick(void);
 //-------------------- mutex & sem --------------------------------
 
+
+//-------------------- mutex & sem --------------------------------
+
 pthread_mutex_t lock;
 
-//TODO remove these
 sem_t ctrl_thread_sem;
 sem_t recv_thread_sem;
 sem_t g_sendbuddle_sem;
 sem_t g_flightbuddle_sem;
 sem_t g_pendbuddle_sem;
+
 
 int vg_create_sem(void *handle, char *name);
 
@@ -47,7 +50,6 @@ int vg_create_mutex(void *lock, char *name);
 int vg_get_mutex(void *lock);
 
 int vg_put_mutex(void *lock);
-
 
 //-------------- socket ------------------------
 
@@ -85,7 +87,6 @@ int vg_recv(int sock, unsigned char *buffer, int length, int ssl);
 
 int vg_bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
 
-int vg_tcp_close(int sock, int ssl);
 //------------ thread ----------------------
 
 typedef void * thread_ret_t;

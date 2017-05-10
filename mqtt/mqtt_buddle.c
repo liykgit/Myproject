@@ -66,16 +66,16 @@ void mqtt_buddle_init() {
 		pend_buddle[i].attr = ATTR_PEND;
 	}
 
-	create_mutex(&lock, "buddle_lock");
+	vg_create_mutex(&lock, "buddle_lock");
 
 	free_count = BUDDLE_MAX;
 	send_count = 0;
 	flight_count = 0;
 	pend_count = 0;
 
-	create_sem(&g_sendbuddle_sem, "send_lock");
-	create_sem(&g_flightbuddle_sem, "flight_lock");
-	create_sem(&g_pendbuddle_sem, "pend_lock");
+	vg_create_sem(&g_sendbuddle_sem, "send_lock");
+	vg_create_sem(&g_flightbuddle_sem, "flight_lock");
+	vg_create_sem(&g_pendbuddle_sem, "pend_lock");
 
 }
 
@@ -90,7 +90,7 @@ void FreeBuddle(mqtt_package_t *pItem) {
 	unsigned char t_attr = pItem->attr;
 
 	if(pItem->payload != NULL){
-		mem_free(pItem->payload);
+		vg_free(pItem->payload);
 		pItem->payload == NULL;
 	}
 
@@ -101,7 +101,7 @@ void FreeBuddle(mqtt_package_t *pItem) {
 	case ATTR_SEND:
 		if(send_count >= SEND_MAX)
 		{
-			release_sem(&g_sendbuddle_sem);
+			vg_release_sem(&g_sendbuddle_sem);
 		}
 		send_count--;
 		break;
@@ -112,7 +112,7 @@ void FreeBuddle(mqtt_package_t *pItem) {
 	case ATTR_PEND:
 		if(pend_count >= PEND_MAX)
 		{
-			release_sem(&g_pendbuddle_sem);
+			vg_release_sem(&g_pendbuddle_sem);
 		}
 		pend_count--;
 		break;
@@ -129,14 +129,14 @@ void ResetBuddle()
 
 	if(send_count >= SEND_MAX)
 	{
-		release_sem(&g_sendbuddle_sem);
+		vg_release_sem(&g_sendbuddle_sem);
 	}
 	if(pend_count >= PEND_MAX)
 	{
-		release_sem(&g_pendbuddle_sem);
+		vg_release_sem(&g_pendbuddle_sem);
 	}
 
-	get_mutex(&lock);
+	vg_get_mutex(&lock);
 	free_count = BUDDLE_MAX;
 	send_count		= 0;
 	flight_count		= 0;
@@ -156,7 +156,7 @@ void ResetBuddle()
 		memset(&pend_buddle[i], 0, sizeof(mqtt_package_t));
 		pend_buddle[i].attr = ATTR_PEND;
 	}
-	put_mutex(&lock);
+	vg_put_mutex(&lock);
 }
 /************************************************************************
  * @brief
@@ -179,7 +179,7 @@ mqtt_package_t *GetFree2Send() {
 //			pRet->used = BUDDLE_USED;
 			send_count++;
 			free_count--;
-//			printf("<%d> send %d, %d, %d, %d\n", get_tick(), free_count, send_count, flight_count, pend_count);
+//			printf("<%d> send %d, %d, %d, %d\n", vg_get_tick(), free_count, send_count, flight_count, pend_count);
 //			put_mutex(&lock);
 			return pRet;
 		}
@@ -221,7 +221,7 @@ mqtt_package_t * GetLastSendBuddle() {
 
 	if(send_count >= SEND_MAX)
 	{
-		release_sem(&g_sendbuddle_sem);
+		vg_release_sem(&g_sendbuddle_sem);
 	}
 
 //	get_mutex(&lock);
@@ -323,7 +323,7 @@ mqtt_package_t *GetFree2Flight() {
 			pRet = &flight_buddle[i];
 			flight_count++;
 			free_count--;
-//			printf("<%d> flight %d, %d, %d, %d\n", get_tick(), free_count, send_count, flight_count, pend_count);
+//			printf("<%d> flight %d, %d, %d, %d\n", vg_get_tick(), free_count, send_count, flight_count, pend_count);
 //			put_mutex(&lock);
 			return pRet;
 		}
@@ -424,7 +424,7 @@ mqtt_package_t *GetLastPendingBuddle() {
 
 	if(pend_count >= PEND_MAX)
 	{
-		release_sem(&g_pendbuddle_sem);
+		vg_release_sem(&g_pendbuddle_sem);
 	}
 
 	//get_mutex(&lock);
@@ -457,7 +457,7 @@ mqtt_package_t *GetFree2Pending() {
 
 	if(pend_count >= PEND_MAX) {
 		//mqtt_printf("<ERR> pending_count = %d(max is %d)\n", pend_count, PEND_MAX);
-		wait_sem(&g_pendbuddle_sem, -1);
+		vg_wait_sem(&g_pendbuddle_sem, -1);
 	}
 
 	//get_mutex(&lock);
@@ -469,7 +469,7 @@ mqtt_package_t *GetFree2Pending() {
 //			pRet->used = BUDDLE_USED;
 			pend_count++;
 			free_count--;
-//			printf("<%d> pend %d, %d, %d, %d\n", get_tick(), free_count, send_count, flight_count, pend_count);
+//			printf("<%d> pend %d, %d, %d, %d\n", vg_get_tick(), free_count, send_count, flight_count, pend_count);
 			break;
 		}
 	}
@@ -487,7 +487,7 @@ void MoveFlight2Pending(mqtt_package_t *pItem) {
 	}
 
 	if(pend_count >= PEND_MAX) {
-		wait_sem(&g_pendbuddle_sem, -1);
+		vg_wait_sem(&g_pendbuddle_sem, -1);
 	}
 
 //	get_mutex(&lock);
@@ -567,7 +567,7 @@ void RemoveTimeoutBuddle()
 		if(flight_buddle[i].used == BUDDLE_USED)
 		{
 			pRet = &flight_buddle[i];
-			if((get_tick() - pRet->tick) > (mqtt.keepalive))
+			if((vg_get_tick() - pRet->tick) > (mqtt.keepalive))
 			{
 				//mqtt_printf("<LOG> flight msg %d timeout, release.\n", pRet->msg_id);
 				FreeBuddle(pRet);
@@ -582,7 +582,7 @@ void RemoveTimeoutBuddle()
 		if(pend_buddle[i].used == BUDDLE_USED)
 		{
 			pRet = &pend_buddle[i];
-			if((get_tick() - pRet->tick) > (mqtt.keepalive))
+			if((vg_get_tick() - pRet->tick) > (mqtt.keepalive))
 			{
 				//mqtt_printf("<LOG> pend msg %d timeout, release.\n", pRet->msg_id);
 				FreeBuddle(pRet);
@@ -601,7 +601,7 @@ mqtt_package_t *check_flight(int ping_times)
 	for(i=0; i<FLIGHT_MAX; i++){
 		if(flight_buddle[i].used == BUDDLE_USED){
 			pRet = &flight_buddle[i];
-			if((get_tick() - pRet->tick) > mqtt.keepalive){
+			if((vg_get_tick() - pRet->tick) > mqtt.keepalive){
 				if(pRet->times + ping_times > MQTT_RETRY_TIMES){
 					return pRet;
 				}else{

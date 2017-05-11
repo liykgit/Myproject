@@ -45,13 +45,14 @@ void exec_passthrough(int argc, char *argv[], struct socketaddr_in *client_addr)
         
         printf("passthrough to server %s\n", argv[1]);
         
-        int buf_sz = strlen(argv[1]) >> 1 ;
-        char *buf = malloc(buf_sz);
+        char *payload = argv[1]+ strlen("AT+RAW=");
+
+        int buf_sz = strlen(payload) >> 1 ;
+        char *buf = vg_malloc(buf_sz);
 
         memset(buf, 0, buf_sz);
 
-        hex2bin(argv[1], buf);
-        
+        hex2bin(payload, buf);
 
         WKStack_report_raw(buf, buf_sz);
 
@@ -61,7 +62,7 @@ void exec_passthrough(int argc, char *argv[], struct socketaddr_in *client_addr)
             printf("%02x ", *buf++);
         }
 
-        vg_free(buf);
+        ///vg_free(buf);
     }
     else {
         udpserver_sendto(client_addr, PARAM_ERROR, strlen(PARAM_ERROR));

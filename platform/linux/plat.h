@@ -18,7 +18,7 @@
 
 #define msleep(ms) usleep(ms * 1000)
 
-#define vg_alloc malloc
+#define vg_malloc malloc
 #define vg_free free
 
 

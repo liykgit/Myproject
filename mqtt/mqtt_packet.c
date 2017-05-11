@@ -372,7 +372,7 @@ another:
 	LOG(LEVEL_DEBUG, "<LOG>msg len: %x, topic len: %x\n", msg_len, topic_len);
 
     if(pmsg->length > 0){
-		pmsg->payload = (unsigned char *)vg_alloc(pmsg->length);
+		pmsg->payload = (unsigned char *)vg_malloc(pmsg->length);
 		if(pmsg->payload == NULL){
 			FreeBuddle(pmsg);
 			LOG(LEVEL_ERROR, "<ERR> mqtt payload malloc error\n");

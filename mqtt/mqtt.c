@@ -65,7 +65,7 @@ int mqtt_publish(char *topic, unsigned char *msg, int msg_len, mqtt_qos_t qos, m
 		return -1;
 	}
 
-    package->payload = (unsigned char *)vg_alloc(msg_len);
+    package->payload = (unsigned char *)vg_malloc(msg_len);
     if(package->payload == NULL){
         LOG(LEVEL_ERROR, "<ERR> mqtt malloc error\n");
         FreeBuddle(package);
@@ -451,11 +451,11 @@ int mqtt_init(int keepalive, int window_size)
 {
     mqtt.window_size = window_size;
 
-    mqtt.send_buf = (char *)vg_alloc(mqtt.window_size);
+    mqtt.send_buf = (char *)vg_malloc(mqtt.window_size);
     if(mqtt.send_buf == NULL){
         return -1;
     }
-    mqtt.recv_buf = (char *)vg_alloc(mqtt.window_size);
+    mqtt.recv_buf = (char *)vg_malloc(mqtt.window_size);
     if(mqtt.recv_buf == NULL){
         vg_free(mqtt.send_buf);
         return -1;

@@ -28,6 +28,7 @@ unsigned long vg_get_tick(void);
 
 //-------------------- mutex & sem --------------------------------
 
+
 pthread_mutex_t lock;
 
 sem_t ctrl_thread_sem;

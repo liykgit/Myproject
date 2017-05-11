@@ -4,6 +4,9 @@
 #include "mqtt_buddle.h"
 #include "mqtt_packet.h"
 
+
+extern vg_sem_t ctrl_thread_sem;
+
 int mqtt_pack_connect(unsigned char *buf, int buflen, mqtt_connect_data_t *options)
 {
     unsigned char *ptr = buf;

@@ -1,4 +1,6 @@
 
+#ifndef _PLAT_H
+#define _PLAT_H
 
 #include <unistd.h>
 
@@ -116,3 +118,4 @@ void now(char *time_buf);
 #define LOG(level, fmt, args...) do{if(level >= LOG_LEVEL){printf(fmt, ##args);}}while(0)
 #endif
 
+#endif

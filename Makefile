@@ -1,10 +1,11 @@
-MQTT:=./mqtt
-COMMON:=./common
+LIBDIR:=lib
 OUTPUT:=./bin
-MAIN:=../main
-WKSTACK:=./WKStack
-UDPSERVER:=./udpserver
-PLATFORM:=./platform
+MQTT:=./$(LIBDIR)/mqtt
+COMMON:=./$(LIBDIR)/common
+MAIN:=../$(LIBDIR)/main
+WKSTACK:=./$(LIBDIR)/WKStack
+UDPSERVER:=./$(LIBDIR)/udpserver
+PLATFORM:=./$(LIBDIR)/platform
 
 P?=linux
 
@@ -26,7 +27,7 @@ LIBS = -L/
 CCFLAGS = -g -w -O0 -lpthread -lssl -lcrypt -lcrypto -lrt $(INCLUDES) -D_PLATFORM_=${P}
 
 
-all: $(OBJS) ./main/device.c
+all: $(OBJS) ./main.c
 	$(CC) $^ -o $(OUTPUT)/WKdevice $(CCFLAGS)
 
 

@@ -45,30 +45,30 @@ void exec_passthrough(int argc, char *argv[], struct socketaddr_in *client_addr)
         
         printf("passthrough to server %s\n", argv[1]);
         
-        char *payload = argv[1]+ strlen("AT+RAW=");
+        int buf_sz = strlen(argv[1]) >> 1 ;
 
-        int buf_sz = strlen(payload) >> 1 ;
         char *buf = vg_malloc(buf_sz);
 
         memset(buf, 0, buf_sz);
 
-        hex2bin(payload, buf);
+        hex2bin(argv[1], buf);
 
         WKStack_report_raw(buf, buf_sz);
 
         int i = 0;
+        char *pbuf = buf;
         for (i = 0; i < buf_sz; i++)
         {
-            printf("%02x ", *buf++);
+            printf("%02x ", *pbuf++);
         }
 
-        ///vg_free(buf);
+        vg_free(buf);
+        udpserver_sendto(client_addr, OK, strlen(OK));
     }
     else {
         udpserver_sendto(client_addr, PARAM_ERROR, strlen(PARAM_ERROR));
     }
 }
-
 
 void exec_find(int argc, char *argv[], struct socketaddr_in *client_addr)
 {
@@ -101,14 +101,14 @@ void exec_bind(int argc, char *argv[], struct socketaddr_in *client_addr)
         printf("bind request from user %s\n", argv[1]);
         WKStack_publish_bind_request(argv[1]);
 
-        client_info_t *cinfo = malloc(sizeof(client_info_t));
+        client_info_t *cinfo = vg_malloc(sizeof(client_info_t));
         memcpy(&cinfo->addr, client_addr, sizeof(struct sockaddr_in));
 
         strncpy(cinfo->user_id, argv[1], 16);
 
         void *victim = plist_push(cinfo);
         if(victim)
-            free(victim);
+            vg_free(victim);
     }
     else {
         udpserver_sendto(client_addr, PARAM_ERROR, strlen(PARAM_ERROR));

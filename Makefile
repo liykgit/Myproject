@@ -35,7 +35,7 @@ clean:
 	rm -f $(MQTT)/*.o
 	rm -f $(COMMON)/*.o
 	rm -f $(MAIN)/*.o
-	rm -f $(OUTPUT)/linux/WKdevice
+	rm -f $(OUTPUT)/*
 
 cl:
 	rm -f ./log/*

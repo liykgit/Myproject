@@ -13,8 +13,6 @@ mqtt_connect_data_t data = { {'M', 'Q', 'T', 'C'}, 0, 4, 0, 1, 0, { {'M', 'Q', '
 
 static WKStack_datapoint_t dps[DP_COUNT_MAX];
 
-
-
 static WKStack_datapoint_t *fill_dp_chunk(WKStack_datapoint_t *pdp, TLV_t *ptlv) {
 
     printf("fill_dp_chunk E\n");

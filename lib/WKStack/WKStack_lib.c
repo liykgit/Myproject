@@ -5,4 +5,4 @@
 
 WKStack_t WKStack;
 
-const char *WKStack_version = "0.3.0";
+const char *WKStack_version = "1.0.0";

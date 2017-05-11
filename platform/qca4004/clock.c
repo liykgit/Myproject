@@ -1,6 +1,5 @@
 
-#include <sys/time.h>
-#include <string.h>
+#include "plat.h" 
 
 unsigned long vg_get_tick(void)
 {

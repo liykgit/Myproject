@@ -7,6 +7,9 @@
 #include "mqtt_buddle.h"
 #include "mqtt_packet.h"
 
+vg_sem_t ctrl_thread_sem;
+vg_sem_t recv_thread_sem;
+
 mqtt_state_t mqtt_state()
 {
     return mqtt.state;

@@ -1,25 +1,25 @@
+#ifndef _PLAT_H
+#define _PLAT_H
+
+#include "qcom_common.h"
+#include "qcom_uart.h"
+#include "qcom/basetypes.h"
+#include "qcom_internal.h"
+#include "qcom/qcom_cli.h"
+#include "qcom/socket_api.h"
+#include "qcom/select_api.h"
+#include "qcom_ssl.h"
+#include "qca_ssl_client.h"
+#include "tx_api.h"
+
+#define strcat strcat_ext
+#define msleep qcom_thread_msleep
+
+#define vg_alloc mem_alloc
+#define vg_free mem_free
 
 
-#include <unistd.h>
-
-#include <time.h>
-#include <stdio.h>
-#include <stdlib.h>
-
-unsigned long get_tick(void);
-
-
-
-#define msleep(ms) usleep(ms * 1000)
-
-#define vg_alloc malloc
-#define vg_free free
-
-
-#define msleep(ms) usleep(ms * 1000)
-
-#define vg_alloc malloc
-#define vg_free free
+#define vg_fd_set q_fd_set
 
 
 unsigned long vg_get_tick(void);
@@ -28,15 +28,8 @@ unsigned long vg_get_tick(void);
 
 //-------------------- mutex & sem --------------------------------
 
-
-pthread_mutex_t lock;
-
-sem_t ctrl_thread_sem;
-sem_t recv_thread_sem;
-sem_t g_sendbuddle_sem;
-sem_t g_flightbuddle_sem;
-sem_t g_pendbuddle_sem;
-
+typedef TX_MUTEX vg_mutex_t;
+typedef TX_SEMAPHORE vg_sem_t;
 
 int vg_create_sem(void *handle, char *name);
 
@@ -62,7 +55,6 @@ int vg_udp_socket(int *sock);
 
 
 int vg_udp_close(int sock);
-
 
 int vg_recvfrom(int s, char *buf, int len, int flags, struct sockaddr *from, int *fromlen);
 
@@ -120,3 +112,4 @@ void now(char *time_buf);
 #define LOG(level, fmt, args...) do{if(level >= LOG_LEVEL){printf(fmt, ##args);}}while(0)
 #endif
 
+#endif

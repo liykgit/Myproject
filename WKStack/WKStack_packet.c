@@ -1,5 +1,4 @@
 
-#include <string.h>
 #include "common.h"
 #include "tlv.h"
 #include "mqtt.h"

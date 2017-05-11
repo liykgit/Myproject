@@ -24,6 +24,12 @@
 #include "mqtt_lib.h"
 #include "common.h"
 
+vg_mutex_t lock;
+vg_sem_t g_sendbuddle_sem;
+vg_sem_t g_flightbuddle_sem;
+vg_sem_t g_pendbuddle_sem;
+
+
 mqtt_package_t send_buddle[SEND_MAX];
 mqtt_package_t flight_buddle[FLIGHT_MAX];
 mqtt_package_t pend_buddle[PEND_MAX];

@@ -1,7 +1,4 @@
 
-#include <stdint.h>
-#include <string.h>
-
 #include "common.h"
 
 int is_valid_ip(const char *url)

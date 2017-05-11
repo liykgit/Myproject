@@ -2,8 +2,7 @@
 
 int vg_create_sem(void *handle, char *name)
 {
-
-	sem_init((sem_t *)handle, 0, 0);
+	tx_semaphore_create(handle, name, 0);
 
 	return 0;
 }
@@ -12,7 +11,7 @@ int vg_release_sem(void *handle)
 {
 	int ret = 0;
 
-	ret = sem_post ((sem_t *)handle);
+	tx_semaphore_put((TX_SEMAPHORE*)handle);
 
 	printf( "release sem ret = %d\n", ret);
 	return ret;
@@ -21,40 +20,24 @@ int vg_release_sem(void *handle)
 int vg_wait_sem(void *handle, int tm)
 {
 	int ret = -1;
-	struct timespec timeout;
-
-
-	if(tm < 0){
-		ret = sem_wait((sem_t *)handle);
-	}else{
-		ret = clock_gettime(CLOCK_REALTIME, &timeout);
-		if(ret < 0)
-			return -1;
-
-		timeout.tv_sec += tm/1000;
-
-		ret = sem_timedwait((sem_t *)handle, &timeout);
-	}
-
-
-	if(ret < -1 && errno == ETIMEDOUT){
+	ret = tx_semaphore_get((TX_SEMAPHORE*)handle, (tm < 0) ? 0xFFFFFFFF : tm);
+	if(ret != TX_SUCCESS){
 		ret = -1;
 	}
 
-	printf( "wait sem ret = %d\n", ret);
+	LOG(LEVEL_DEBUG, "<LOG> wait sem ret = %d\n", ret);
 	return ret;
 }
 
 void vg_delete_sem(void *handle)
 {
-
-	sem_destroy((sem_t *)handle);
+	tx_semaphore_delete((TX_SEMAPHORE*)handle);
 }
 
 int vg_create_mutex(void *lock, char *name)
 {
 
-	pthread_mutex_init((pthread_mutex_t *)lock, NULL);
+	tx_mutex_create(lock, "mutex tsk", TX_NO_INHERIT);
 
 	return 0;
 }
@@ -62,7 +45,11 @@ int vg_create_mutex(void *lock, char *name)
 int vg_get_mutex(void *lock)
 {
 
-	pthread_mutex_lock((pthread_mutex_t *)lock);
+	int status =  tx_mutex_get(lock, TX_WAIT_FOREVER);
+	if (status != TX_SUCCESS) {
+        LOG(LEVEL_ERROR, "<ERR> get mutex ret = %d\n", status);
+		return -1;
+	}
 
 	return 0;
 }
@@ -70,12 +57,15 @@ int vg_get_mutex(void *lock)
 int vg_put_mutex(void *lock)
 {
 
-	pthread_mutex_unlock((pthread_mutex_t *)lock);
-
+	int status =  tx_mutex_put((TX_MUTEX*)lock);
+	if (status != TX_SUCCESS) {
+        LOG(LEVEL_ERROR, "<ERR> put mutex ret = %d\n", status);
+		return -1;
+	}
 	return 0;
 }
 
-int vg_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout) {
+int vg_select(int nfds, vg_fd_set *readfds, vg_fd_set *writefds, vg_fd_set *exceptfds, struct timeval *timeout) {
     return select(nfds, readfds, writefds, exceptfds, timeout);
 }
 

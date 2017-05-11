@@ -1,9 +1,7 @@
 #ifndef _UDPSERVER_H
 #define _UDPSERVER_H
 
-#include <netinet/in.h>
-#include <sys/types.h>  
-#include <sys/socket.h>
+#include "plat.h"
 
 #define UDP_RECV_BUFFER_SIZE 512
 

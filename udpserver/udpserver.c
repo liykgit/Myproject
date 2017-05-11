@@ -9,7 +9,7 @@ static unsigned char recv_buf[UDP_RECV_BUFFER_SIZE];
 
 static int udp_recv(int sock, unsigned char *buffer, int length, struct sockaddr *client_addr, unsigned int *client_addr_len)
 {
-    fd_set fdRead;
+    vg_fd_set fdRead;
 	struct timeval tm;
 	int	ret;
 

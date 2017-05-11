@@ -4,6 +4,8 @@
 #include "mqtt_buddle.h"
 #include "mqtt_packet.h"
 
+extern vg_sem_t ctrl_thread_sem;
+
 int mqtt_pack_connect(unsigned char *buf, int buflen, mqtt_connect_data_t *options)
 {
     unsigned char *ptr = buf;
@@ -349,7 +351,7 @@ another:
 
     pmsg->type = header.bits.type;
     pmsg->qos = header.bits.qos;
-    pmsg->tick = get_tick();
+    pmsg->tick = vg_get_tick();
 
 	pmsg->length = msg_len;
 
@@ -372,7 +374,7 @@ another:
 	LOG(LEVEL_DEBUG, "<LOG>msg len: %x, topic len: %x\n", msg_len, topic_len);
 
     if(pmsg->length > 0){
-		pmsg->payload = (unsigned char *)mem_alloc(pmsg->length);
+		pmsg->payload = (unsigned char *)vg_malloc(pmsg->length);
 		if(pmsg->payload == NULL){
 			FreeBuddle(pmsg);
 			LOG(LEVEL_ERROR, "<ERR> mqtt payload malloc error\n");
@@ -390,7 +392,7 @@ another:
 
     pmsg->used = BUDDLE_USED;
 
-	release_sem(&ctrl_thread_sem);
+	vg_release_sem(&ctrl_thread_sem);
 
 	// another packet
 	if(flag == 1){

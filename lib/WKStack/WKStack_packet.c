@@ -1,6 +1,4 @@
 
-#include <string.h>
-#include "base64.h"
 #include "common.h"
 #include "tlv.h"
 #include "mqtt.h"
@@ -14,8 +12,6 @@
 mqtt_connect_data_t data = { {'M', 'Q', 'T', 'C'}, 0, 4, 0, 1, 0, { {'M', 'Q', 'T', 'W'}, 0, 0, 0, 0, 0 }, 0, 0 };
 
 static WKStack_datapoint_t dps[DP_COUNT_MAX];
-
-
 
 static WKStack_datapoint_t *fill_dp_chunk(WKStack_datapoint_t *pdp, TLV_t *ptlv) {
 
@@ -50,7 +46,7 @@ static WKStack_datapoint_t *fill_dp_chunk(WKStack_datapoint_t *pdp, TLV_t *ptlv)
         case 4: {
                 printf("string index %d, len %d\n", pdp->index, ptlv->len);
 
-                pdp->value.string = mem_alloc(ptlv->len + 1);
+                pdp->value.string = vg_malloc(ptlv->len + 1);
                 memset(pdp->value.string, 0, ptlv->len + 1);
                 memcpy(pdp->value.string, ptlv->value, ptlv->len);
 
@@ -210,7 +206,7 @@ static int WKStack_unpack_ota(unsigned char *payload, int len)
     for(i = 0; i < count; i++) {
         //free the string buffer
         if(dps[i].type == 4) {
-            mem_free(dps[i].value.string);
+            vg_free(dps[i].value.string);
             dps[i].value.string = NULL;
         }
     }
@@ -294,7 +290,7 @@ static int WKStack_unpack_binding(unsigned char *payload, int len)
     for(i = 0; i < count; i++) {
         //free the string buffer
         if(dps[i].type == 4) {
-            mem_free(dps[i].value.string);
+            vg_free(dps[i].value.string);
             dps[i].value.string = NULL;
         }
     }
@@ -324,7 +320,7 @@ static int WKStack_unpack_control(unsigned char *payload, int len)
     for(i = 0; i < count; i++) {
         //free the string buffer
         if(dps[i].type == 4) {
-            mem_free(dps[i].value.string);
+            vg_free(dps[i].value.string);
             dps[i].value.string = NULL;
         }
     }

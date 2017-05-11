@@ -2,8 +2,8 @@
 #include <string.h>
 
 #include "common.h"
-
 #include "mqtt_lib.h"
+
 
 static unsigned short g_packetid = 0x8;
 mqtt_t mqtt;
@@ -251,7 +251,7 @@ int mqtt_send(unsigned char *buf, int len)
 		return -1;
 
 repeat:
-    ret = tcp_send(mqtt.sockfd, buf, len, CONN_MODE);
+    ret = vg_tcp_send(mqtt.sockfd, buf, len, CONN_MODE);
     if(ret >= 0){
         if(ret == 0){
             LOG(LEVEL_ERROR, "<ERR> tcp send length 0\n");
@@ -284,7 +284,7 @@ int mqtt_recv(unsigned char *buf, int len)
 	int rdlen = 0;
 
 repeat:
-	rdlen = tcp_recv(mqtt.sockfd, buf, len, CONN_MODE);
+	rdlen = vg_tcp_recv(mqtt.sockfd, buf, len, CONN_MODE);
 	if(rdlen >= 0){//read or timeout
 #if 0
 		if(rdlen == 0){
@@ -317,18 +317,22 @@ repeat:
 
 	return -4;
 }
+
+
+
 int mqtt_socket(char *ip, int port)
 {
 	int ret = -1;
 
-	if(create_socket(&(mqtt.sockfd)) != 0){
+	if(vg_tcp_socket(&(mqtt.sockfd)) != 0){
 		//printf("<ERR> createSocket fail.\n");
 		return -1;
 	}
 
-	ret = connect_server(&(mqtt.sockfd), ip, port, CONN_MODE);
+	ret = vg_connect_server(&(mqtt.sockfd), ip, port, CONN_MODE);
 	if(ret != 0){
 		return -2;
 	}
 	return 0;
 }
+

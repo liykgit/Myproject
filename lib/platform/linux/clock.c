@@ -1,8 +1,8 @@
 
 #include <sys/time.h>
-#include <string.h>
+#include "plat.h"
 
-unsigned long get_tick(void)
+unsigned long vg_get_tick(void)
 {
 	struct timeval tv;
 	gettimeofday(&tv, NULL);

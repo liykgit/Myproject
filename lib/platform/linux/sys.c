@@ -1,6 +1,6 @@
 #include "plat.h"
 
-int create_sem(void *handle, char *name)
+int vg_create_sem(void *handle, char *name)
 {
 
 	sem_init((sem_t *)handle, 0, 0);
@@ -8,7 +8,7 @@ int create_sem(void *handle, char *name)
 	return 0;
 }
 
-int release_sem(void *handle)
+int vg_release_sem(void *handle)
 {
 	int ret = 0;
 
@@ -18,7 +18,7 @@ int release_sem(void *handle)
 	return ret;
 }
 
-int wait_sem(void *handle, int tm)
+int vg_wait_sem(void *handle, int tm)
 {
 	int ret = -1;
 	struct timespec timeout;
@@ -45,13 +45,13 @@ int wait_sem(void *handle, int tm)
 	return ret;
 }
 
-void delete_sem(void *handle)
+void vg_delete_sem(void *handle)
 {
 
 	sem_destroy((sem_t *)handle);
 }
 
-int create_mutex(void *lock, char *name)
+int vg_create_mutex(void *lock, char *name)
 {
 
 	pthread_mutex_init((pthread_mutex_t *)lock, NULL);
@@ -59,7 +59,7 @@ int create_mutex(void *lock, char *name)
 	return 0;
 }
 
-int get_mutex(void *lock)
+int vg_get_mutex(void *lock)
 {
 
 	pthread_mutex_lock((pthread_mutex_t *)lock);
@@ -67,11 +67,15 @@ int get_mutex(void *lock)
 	return 0;
 }
 
-int put_mutex(void *lock)
+int vg_put_mutex(void *lock)
 {
 
 	pthread_mutex_unlock((pthread_mutex_t *)lock);
 
 	return 0;
+}
+
+int vg_select(int nfds, vg_fd_set *readfds, vg_fd_set *writefds, vg_fd_set *exceptfds, struct timeval *timeout) {
+    return select(nfds, readfds, writefds, exceptfds, timeout);
 }
 

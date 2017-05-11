@@ -75,7 +75,7 @@ int vg_put_mutex(void *lock)
 	return 0;
 }
 
-int vg_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout) {
+int vg_select(int nfds, vg_fd_set *readfds, vg_fd_set *writefds, vg_fd_set *exceptfds, struct timeval *timeout) {
     return select(nfds, readfds, writefds, exceptfds, timeout);
 }
 

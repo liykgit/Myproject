@@ -15,7 +15,7 @@
 #define strcat strcat_ext
 #define msleep qcom_thread_msleep
 
-#define vg_alloc mem_alloc
+#define vg_malloc mem_alloc
 #define vg_free mem_free
 
 

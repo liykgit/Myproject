@@ -5,6 +5,7 @@
 #include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <semaphore.h>
 #include <pthread.h>
@@ -16,6 +17,9 @@
 
 //----------------------- sys ---------------------------------
 
+
+#define vg_fd_set fd_set
+
 #define msleep(ms) usleep(ms * 1000)
 
 #define vg_malloc malloc
@@ -25,14 +29,8 @@
 unsigned long vg_get_tick(void);
 //-------------------- mutex & sem --------------------------------
 
-pthread_mutex_t lock;
-
-//TODO remove these
-sem_t ctrl_thread_sem;
-sem_t recv_thread_sem;
-sem_t g_sendbuddle_sem;
-sem_t g_flightbuddle_sem;
-sem_t g_pendbuddle_sem;
+typedef sem_t vg_sem_t;
+typedef pthread_mutex_t vg_mutex_t;
 
 int vg_create_sem(void *handle, char *name);
 

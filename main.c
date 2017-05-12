@@ -3,8 +3,8 @@
 #include <string.h>
 #include <errno.h>
 
-#include "tlv.h"
 #include "WKStack.h"
+#include "tlv.h"
 
 #include "common.h"
 

@@ -1,16 +1,15 @@
 LIBDIR:=lib
-OUTPUT:=./bin
-MQTT:=./$(LIBDIR)/mqtt
-COMMON:=./$(LIBDIR)/common
-MAIN:=../$(LIBDIR)/main
-WKSTACK:=./$(LIBDIR)/WKStack
-UDPSERVER:=./$(LIBDIR)/udpserver
-PLATFORM:=./$(LIBDIR)/platform
+OBJDIR:=obj
+OUTPUT:=./output
+MQTT:=$(LIBDIR)/mqtt
+COMMON:=$(LIBDIR)/common
+WKSTACK:=$(LIBDIR)/WKStack
+UDPSERVER:=$(LIBDIR)/udpserver
+PLATFORM:=$(LIBDIR)/platform
 
 P?=linux
 
-CSRCS := $(wildcard *.c $(COMMON)/*.c $(MQTT)/*.c $(WKSTACK)/*.c $(UDPSERVER)/*.c $(PLATFORM)/$(P)/*.c)
-OBJS = $(CSRCS:.c = .o)
+CSRCS := $(wildcard $(COMMON)/*.c $(MQTT)/*.c $(WKSTACK)/*.c $(UDPSERVER)/*.c $(PLATFORM)/$(P)/*.c)
 
 CC = gcc
 
@@ -22,19 +21,30 @@ INCLUDES := \
 	-I$(UDPSERVER)  \
 	-I$(PLATFORM)/${P}  
 
-LIBS = -L/
 
-CCFLAGS = -g -w -O0 -lpthread -lssl -lcrypt -lcrypto -lrt $(INCLUDES) -D_PLATFORM_=${P}
+CCFLAGS = -g -w -O0 -lpthread -lssl -lcrypt -lcrypto -lrt $(INCLUDES)
+
+VENGA_BIN=device
+
+VENGA_LIB=libvenga.a
 
 
-all: $(OBJS) ./main.c
-	$(CC) $^ -o $(OUTPUT)/WKdevice $(CCFLAGS)
+default: all
+
+objs: 
+	$(CC) -c $(CSRCS) $(CCFLAGS) 
+
+lib: objs
+	$(AR) rc $(OUTPUT)/$(VENGA_LIB) $(wildcard ./*.o)
+
+all: lib
+	$(CC) main.c $(CSRCS) $(CCFLAGS) -o $(OUTPUT)/$(VENGA_BIN)
 
 
 clean:
+	rm -f ./*.o
 	rm -f $(MQTT)/*.o
 	rm -f $(COMMON)/*.o
-	rm -f $(MAIN)/*.o
 	rm -f $(OUTPUT)/*
 
 cl:

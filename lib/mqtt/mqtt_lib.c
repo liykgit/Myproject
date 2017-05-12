@@ -318,8 +318,6 @@ repeat:
 	return -4;
 }
 
-
-
 int mqtt_socket(char *ip, int port)
 {
 	int ret = -1;

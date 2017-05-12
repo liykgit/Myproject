@@ -107,6 +107,9 @@ static int WKStack_connect_cb(mqtt_errno_t err)
         if(err == MQTT_SOCKET_ERROR) {
             WKStack_connect_ep();
         }
+        else if(err == MQTT_DISCONNECT_SUCCEED) {
+             WKStack.state = WKSTACK_OFFLINE;
+        }
     }
 
     return 0;
@@ -169,12 +172,14 @@ int WKStack_start(WKStack_cb_t connect_cb, WKStack_ota_cb_t ota_cb)
             printf("My did is %s\n", params->did);
             printf("host is %s\n", params->host);
 
-            memset(params->host, 0, WKSTACK_HOST_LEN);
-            params->port = 0;
             
             WKStack.state = WKSTACK_WAIT_ONLINE;
         }
         else {
+
+            memset(params->host, 0, WKSTACK_HOST_LEN);
+            params->port = 0;
+
             WKStack.state = WKSTACK_INIT;
         }
     }

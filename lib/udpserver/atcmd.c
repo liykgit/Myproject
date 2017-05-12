@@ -1,4 +1,5 @@
 
+#include "WKStack.h"
 #include "WKStack_lib.h"
 #include "udpserver.h"
 #include "common.h"
@@ -34,6 +35,20 @@ typedef struct {
 #define FIND                "FIND"
 #define BIND                "BIND"
 #define RAW                 "RAW"
+#define ONLINE              "ONLINE"
+#define OFFLINE             "OFFLINE"
+
+
+void exec_online(int argc, char *argv[], struct socketaddr_in *client_addr)
+{
+    WKStack_start(NULL, NULL);
+}
+
+
+void exec_offline(int argc, char *argv[], struct socketaddr_in *client_addr)
+{    
+    WKStack_stop();
+}
 
 void exec_passthrough(int argc, char *argv[], struct socketaddr_in *client_addr)
 {
@@ -129,7 +144,15 @@ const cmd_handle_t command_handle[]= {
         .command = RAW, 
         .execute = exec_passthrough
     },
+    {
+        .command = ONLINE, 
+        .execute = exec_online
+    },
 
+    {
+        .command = OFFLINE, 
+        .execute = exec_offline
+    }
 };
 
 #define COMMAND_COUNT (sizeof(command_handle) / sizeof(cmd_handle_t))

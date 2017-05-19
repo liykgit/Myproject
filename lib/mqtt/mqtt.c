@@ -355,7 +355,7 @@ static thread_ret_t mqtt_ctrl_thread(thread_params_t args)
     int ret = 0;
 
     while(1){
-        LOG(LEVEL_NORMAL, "<LOG> Ctrl thread wait...(%d)\n", mqtt.keepalive);
+        LOG(LEVEL_DEBUG, "<LOG> Ctrl thread wait...(%d)\n", mqtt.keepalive);
         ret = vg_wait_sem(&ctrl_thread_sem, mqtt.keepalive);
 
         if(ret == -1){ // Timeout
@@ -369,7 +369,6 @@ static thread_ret_t mqtt_ctrl_thread(thread_params_t args)
             }
         }
 
-        LOG(LEVEL_NORMAL, "<LOG> Ctrl thread process(%d)...\n", mqtt.state);
         switch(mqtt.state){
         case MQTT_STATE_IDLE:
             /* do nothing */
@@ -406,10 +405,8 @@ static thread_ret_t mqtt_recv_thread(thread_params_t args)
     int len = 0;
 start:
     // Wait for connect completed
-    LOG(LEVEL_NORMAL, "<LOG> Recv thread IDLE...\n");
+    LOG(LEVEL_DEBUG, "<LOG> Recv thread IDLE...\n");
     vg_wait_sem(&recv_thread_sem, -1);
-
-    LOG(LEVEL_NORMAL, "<LOG> Recv thread process...\n");
 
     memset(mqtt.recv_buf, 0, mqtt.window_size);
     while(1){
@@ -422,7 +419,6 @@ start:
         // Select in recv
         len = 0;
 
-        LOG(LEVEL_NORMAL, "<LOG> Recv thread wait in recv...\n");
         len = mqtt_recv(mqtt.recv_buf, mqtt.window_size);
         if(len < 0) {
             // If there is not next connect task, then go to error, else goto recv directory

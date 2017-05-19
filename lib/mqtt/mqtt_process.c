@@ -132,7 +132,7 @@ int mqtt_process_pend()
             break;
 
         case MQTT_PINGRESP:
-            LOG(LEVEL_NORMAL, "<LOG> mqtt ping finish\n");
+            LOG(LEVEL_DEBUG, "<LOG> mqtt ping finish\n");
             mqtt.ping_times = 0;
             break;
         default:

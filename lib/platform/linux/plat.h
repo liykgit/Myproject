@@ -104,7 +104,7 @@ enum log_level {
 	LEVEL_ERROR = 2
 };
 
-#define LOG_LEVEL LEVEL_DEBUG
+#define LOG_LEVEL LEVEL_NORMAL
 
 #ifdef LOG_IN_FILE
 extern FILE *log_fp;

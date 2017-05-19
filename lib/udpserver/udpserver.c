@@ -25,7 +25,7 @@ static int udp_recv(int sock, unsigned char *buffer, int length, struct sockaddr
 		printf( "udp sockfd select error\n");
 		return -1;
 	}else if(ret == 0){
-		printf( "udp sockfd select timeout\n");
+		//printf( "udp sockfd select timeout\n");
 		return 0;
 	} else {
 	    if(FD_ISSET(sock, &fdRead)){
@@ -100,7 +100,7 @@ socket_fail:
 
 }
 
-int udpserver_sendto(struct sockaddr_int *client_addr, char *buf, int length) {
+int udpserver_sendto(struct sockaddr_in *client_addr, char *buf, int length) {
 
     return vg_sendto(udp_fd, buf, length, client_addr);
 }

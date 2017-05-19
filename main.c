@@ -9,9 +9,9 @@
 #include "common.h"
 
 
-#define PRODUCTID   "k1fNmNng"
-#define KEY         "JkgzNQ4InxXjhp4g"
-#define MAC         "845DD74A6C5C"
+#define PRODUCTID   "yyOzvi6x"
+#define KEY         "k1xdfwoV6gJtOlAC"
+#define MAC         "A1B2C3D4E110"
 
 #define UDP_SERVER_PORT 30319
 

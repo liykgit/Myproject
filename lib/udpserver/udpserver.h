@@ -8,7 +8,7 @@
 //int udp_recv(int sock, unsigned char *buffer, int length, struct sockaddr *client_addr, unsigned int *client_addr_len);
 
 
-//int udpserver_sendto(struct sockaddr_int *client_addr, char *buf, int length);
+int udpserver_sendto(struct sockaddr_in *client_addr, char *buf, int length);
 
 typedef struct client_info {
     struct sockaddr_in addr;

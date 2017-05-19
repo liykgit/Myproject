@@ -14,7 +14,7 @@ int vg_release_sem(void *handle)
 
 	ret = sem_post ((sem_t *)handle);
 
-	printf( "release sem ret = %d\n", ret);
+	LOG(LEVEL_DEBUG, "release sem ret = %d\n", ret);
 	return ret;
 }
 
@@ -41,7 +41,7 @@ int vg_wait_sem(void *handle, int tm)
 		ret = -1;
 	}
 
-	printf( "wait sem ret = %d\n", ret);
+	LOG(LEVEL_DEBUG, "wait sem ret = %d\n", ret);
 	return ret;
 }
 

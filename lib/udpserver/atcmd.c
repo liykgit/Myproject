@@ -42,12 +42,14 @@ typedef struct {
 void exec_online(int argc, char *argv[], struct socketaddr_in *client_addr)
 {
     WKStack_start(NULL, NULL);
+    udpserver_sendto(client_addr, OK, strlen(OK));
 }
 
 
 void exec_offline(int argc, char *argv[], struct socketaddr_in *client_addr)
 {    
     WKStack_stop();
+    udpserver_sendto(client_addr, OK, strlen(OK));
 }
 
 void exec_passthrough(int argc, char *argv[], struct socketaddr_in *client_addr)
@@ -101,7 +103,6 @@ void exec_find(int argc, char *argv[], struct socketaddr_in *client_addr)
 
     udpserver_sendto(client_addr, buf, strlen(buf));
 }
-
 
 extern int WKStack_publish_bind_request(char *userId);
 

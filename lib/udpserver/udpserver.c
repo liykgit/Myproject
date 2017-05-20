@@ -31,7 +31,6 @@ static int udp_recv(int sock, unsigned char *buffer, int length, struct sockaddr
 	    if(FD_ISSET(sock, &fdRead)){
             ret = vg_recvfrom(sock, (char*)buffer, length, 0, (struct sockaddr *)client_addr, client_addr_len);
 			if(ret > 0){
-				printf( "recvd buffer: \n");
                 
                 user_cmd_handle(buffer, ret, client_addr);
 

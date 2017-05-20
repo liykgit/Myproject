@@ -35,8 +35,17 @@ typedef struct {
 #define FIND                "FIND"
 #define BIND                "BIND"
 #define RAW                 "RAW"
+#define NETSTAT             "NETSTAT"
 #define ONLINE              "ONLINE"
 #define OFFLINE             "OFFLINE"
+
+void exec_netstat(int argc, char *argv[], struct socketaddr_in *client_addr)
+{
+    char stat = '0' + WKStack_state();
+
+    udpserver_sendto(client_addr, &stat, 1);
+
+}
 
 
 void exec_online(int argc, char *argv[], struct socketaddr_in *client_addr)
@@ -153,6 +162,11 @@ const cmd_handle_t command_handle[]= {
     {
         .command = OFFLINE, 
         .execute = exec_offline
+    },
+
+    {
+        .command = NETSTAT, 
+        .execute = exec_netstat
     }
 };
 

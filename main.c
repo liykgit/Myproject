@@ -13,7 +13,6 @@
 #define KEY         "k1xdfwoV6gJtOlAC"
 #define MAC         "A1B2C3D4E110"
 
-#define UDP_SERVER_PORT 30319
 
 int connect_cb(WKStack_state_t state)
 {
@@ -96,7 +95,6 @@ int main(int argc, char **argv)
 */
     WK_Start(PRODUCTID, MAC, KEY);
 
-    UDPServer_start(UDP_SERVER_PORT); 
 
     while(1){
         msleep(2000);

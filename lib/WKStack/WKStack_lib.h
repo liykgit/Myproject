@@ -39,4 +39,7 @@ typedef struct{
 
 extern WKStack_t WKStack;
 
+#define UDP_SERVER_PORT 30319
+
+
 #endif

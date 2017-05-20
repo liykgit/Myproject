@@ -31,7 +31,6 @@ static int udp_recv(int sock, unsigned char *buffer, int length, struct sockaddr
 	    if(FD_ISSET(sock, &fdRead)){
             ret = vg_recvfrom(sock, (char*)buffer, length, 0, (struct sockaddr *)client_addr, client_addr_len);
 			if(ret > 0){
-				printf( "recvd buffer: \n");
                 
                 user_cmd_handle(buffer, ret, client_addr);
 
@@ -50,7 +49,7 @@ static int udp_recv(int sock, unsigned char *buffer, int length, struct sockaddr
 	return 0;
 }
 
-void UDPServer_start_handler() {
+ static thread_ret_t udp_handler_thread() {
 
     struct sockaddr_in client_addr;
     memset(&client_addr, 0, sizeof(struct sockaddr_in));
@@ -60,10 +59,9 @@ void UDPServer_start_handler() {
         unsigned int client_addr_len;
         udp_recv(udp_fd, (unsigned char *)&recv_buf, sizeof(recv_buf), &client_addr, &client_addr_len);
     }
-
 }
 
-int UDPServer_start(int port) {
+int  UDPServer_start(int port) {
 
     int ret = 0;
     
@@ -86,7 +84,7 @@ int UDPServer_start(int port) {
 		goto bind_fail;
     }
 
-    UDPServer_start_handler();
+    vg_start_thread(udp_handler_thread, NULL, 1024);
 
     return 0;
 

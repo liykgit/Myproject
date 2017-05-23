@@ -306,9 +306,15 @@ WKStack_state_t WKStack_state()
     return WKStack.state;
 }
 
-void WKStack_did(char *buf, int size)
+int WKStack_did(char *buf, int size)
 {
-    memcpy(buf, WKStack.params.did, size);
+    int did_len = strlen(WKStack.params.did);
+    
+    if(did_len + 1 > size)
+        return -1;
+
+    strcpy(buf, WKStack.params.did);
+    return 0;
 }
 
 int WKStack_report_ota_progress(WKStack_ota_target_t target, WKStack_ota_report_t report, WKStack_report_cb_t cb)

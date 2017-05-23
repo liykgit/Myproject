@@ -2,7 +2,7 @@
 #define _WKSTACK_PACKET_H_JSKFJLKSDJFKSDF_
 
 // First host, connect this host to get endpoint
-#define WKSTACK_FIRST_CONNECT_HOST "192.168.3.6"
+#define WKSTACK_FIRST_CONNECT_HOST "35.165.194.227"
 #define WKSTACK_FIRST_CONNECT_PORT 1884
 
 #define DP_COUNT_MAX 32

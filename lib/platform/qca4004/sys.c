@@ -66,6 +66,6 @@ int vg_put_mutex(void *lock)
 }
 
 int vg_select(int nfds, vg_fd_set *readfds, vg_fd_set *writefds, vg_fd_set *exceptfds, struct timeval *timeout) {
-    return select(nfds, readfds, writefds, exceptfds, timeout);
+    return qcom_select(nfds, readfds, writefds, exceptfds, timeout);
 }
 

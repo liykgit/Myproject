@@ -38,6 +38,7 @@ typedef struct {
 #define NETSTAT             "NETSTAT"
 #define ONLINE              "ONLINE"
 #define OFFLINE             "OFFLINE"
+#define DID                 "DID"
 
 void exec_netstat(int argc, char *argv[], struct socketaddr_in *client_addr)
 {
@@ -47,6 +48,15 @@ void exec_netstat(int argc, char *argv[], struct socketaddr_in *client_addr)
 
 }
 
+void exec_did(int argc, char *argv[], struct socketaddr_in *client_addr)
+{
+    char buf[64];
+    memset(buf, 0, 64);
+    
+    WKStack_did(buf, 64);
+
+    udpserver_sendto(client_addr, buf, strlen(buf));
+}
 
 void exec_online(int argc, char *argv[], struct socketaddr_in *client_addr)
 {
@@ -167,6 +177,11 @@ const cmd_handle_t command_handle[]= {
     {
         .command = NETSTAT, 
         .execute = exec_netstat
+    },
+
+    {
+        .command = DID, 
+        .execute = exec_did
     }
 };
 

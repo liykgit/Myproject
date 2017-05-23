@@ -75,6 +75,10 @@ void exec_passthrough(int argc, char *argv[], struct socketaddr_in *client_addr)
 
         char *buf = vg_malloc(buf_sz);
 
+		if（!buf） {
+			LOG(LEVEL_ERROR, "exec_pathrough : OOM\n");
+			return;
+		}
         memset(buf, 0, buf_sz);
 
         hex2bin(argv[1], buf);
@@ -104,10 +108,10 @@ void exec_find(int argc, char *argv[], struct socketaddr_in *client_addr)
     memset(buf, 0, sizeof(buf));
     
     if(strlen(WKStack.params.did) > 0) {
-        sprintf((char *)buf, "%s#%s#%s", WKStack.params.devtype, WKStack.params.mac, WKStack.params.did);
+        sprintf((char *)buf, "VENGAS:%s#%s#%s:VENGAE", WKStack.params.devtype, WKStack.params.mac, WKStack.params.did);
     } 
     else {
-        sprintf((char *)buf, "%s#%s", WKStack.params.devtype, WKStack.params.mac);
+        sprintf((char *)buf, "VENGAS:%s#%s:VENGAE", WKStack.params.devtype, WKStack.params.mac);
     }
 
     udpserver_sendto(client_addr, buf, strlen(buf));

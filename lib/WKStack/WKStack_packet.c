@@ -279,8 +279,12 @@ static int WKStack_unpack_binding(unsigned char *payload, int len)
         
         client_info_t *client_info = 0;
         client_info = (client_info_t *)plist_find(is_client, user_id);
+        
+        char buf[128];
+        sprintf(buf, "VENGAS:%s:VENGAE", bind_ticket);
+
         if(client_info) {
-            udpserver_sendto(&client_info->addr, bind_ticket, strlen(bind_ticket));
+            udpserver_sendto(&client_info->addr, buf, strlen(buf));
         }
         else {
             printf("No user for bind ticket, plist too small ? \n");

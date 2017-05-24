@@ -53,7 +53,7 @@ int mqtt_stop(void)
 
 int mqtt_publish(char *topic, unsigned char *msg, int msg_len, mqtt_qos_t qos, mqtt_retain_t retain, mqtt_cb_t cb)
 {
-    printf("mqtt_publish E\n");
+    LOG(LEVEL_DEBUG, "mqtt_publish E\n");
     mqtt_package_t *package;
 
     if (mqtt.state != MQTT_STATE_RUNNING){
@@ -85,6 +85,8 @@ int mqtt_publish(char *topic, unsigned char *msg, int msg_len, mqtt_qos_t qos, m
     package->used = BUDDLE_USED;
 
     vg_release_sem(&ctrl_thread_sem);
+
+    LOG(LEVEL_DEBUG, "mqtt_publish X\n");
 
     return (int)(package->msg_id);
 }

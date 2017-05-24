@@ -19,8 +19,6 @@
 
 extern WKStack_t WKStack;
 
-extern int udp_fd;
-
 typedef enum{
     AT_COMMAND = 0,
     NONE_AT_COMMAND,
@@ -38,7 +36,6 @@ typedef struct {
 #define NETSTAT             "NETSTAT"
 #define ONLINE              "ONLINE"
 #define OFFLINE             "OFFLINE"
-#define DID                 "DID"
 
 void exec_netstat(int argc, char *argv[], struct socketaddr_in *client_addr)
 {
@@ -48,15 +45,6 @@ void exec_netstat(int argc, char *argv[], struct socketaddr_in *client_addr)
 
 }
 
-void exec_did(int argc, char *argv[], struct socketaddr_in *client_addr)
-{
-    char buf[64];
-    memset(buf, 0, 64);
-    
-    WKStack_did(buf, 64);
-
-    udpserver_sendto(client_addr, buf, strlen(buf));
-}
 
 void exec_online(int argc, char *argv[], struct socketaddr_in *client_addr)
 {
@@ -74,6 +62,7 @@ void exec_offline(int argc, char *argv[], struct socketaddr_in *client_addr)
 void exec_passthrough(int argc, char *argv[], struct socketaddr_in *client_addr)
 {
 
+    LOG(LEVEL_DEBUG, "exec_passthrough E\n");
     if(argc <= 1) {
         udpserver_sendto(client_addr, PARAM_ERROR, strlen(PARAM_ERROR));
     }
@@ -85,10 +74,6 @@ void exec_passthrough(int argc, char *argv[], struct socketaddr_in *client_addr)
 
         char *buf = vg_malloc(buf_sz);
 
-		if(!buf) {
-			LOG(LEVEL_ERROR, "exec_pathrough : OOM\n");
-			return;
-		}
         memset(buf, 0, buf_sz);
 
         hex2bin(argv[1], buf);
@@ -108,30 +93,31 @@ void exec_passthrough(int argc, char *argv[], struct socketaddr_in *client_addr)
     else {
         udpserver_sendto(client_addr, PARAM_ERROR, strlen(PARAM_ERROR));
     }
+    LOG(LEVEL_DEBUG, "exec_passthrough X\n");
 }
 
 void exec_find(int argc, char *argv[], struct socketaddr_in *client_addr)
 {
-    printf("find argc %d\n", argc);
-
+    LOG(LEVEL_DEBUG, "exec_find E\n");
     char buf[128];
     memset(buf, 0, sizeof(buf));
     
     if(strlen(WKStack.params.did) > 0) {
-        sprintf((char *)buf, "VENGAS:%s#%s#%s:VENGAE", WKStack.params.devtype, WKStack.params.mac, WKStack.params.did);
+        sprintf((char *)buf, "VENGAS:FIND:%s#%s#%s:VENGAE", WKStack.params.devtype, WKStack.params.mac, WKStack.params.did);
+        udpserver_sendto(client_addr, buf, strlen(buf));
     } 
     else {
-        sprintf((char *)buf, "VENGAS:%s#%s:VENGAE", WKStack.params.devtype, WKStack.params.mac);
+        //sprintf((char *)buf, "VENGAS:FIND:%s#%s:VENGAE", WKStack.params.devtype, WKStack.params.mac);
     }
 
-    udpserver_sendto(client_addr, buf, strlen(buf));
+    LOG(LEVEL_DEBUG, "exec_find X\n");
 }
 
 extern int WKStack_publish_bind_request(char *userId);
 
 void exec_bind(int argc, char *argv[], struct socketaddr_in *client_addr)
 {
-
+    LOG(LEVEL_DEBUG, "exec_bind E\n");
     if(argc <= 1) {
         udpserver_sendto(client_addr, PARAM_ERROR, strlen(PARAM_ERROR));
     }
@@ -144,7 +130,6 @@ void exec_bind(int argc, char *argv[], struct socketaddr_in *client_addr)
         memcpy(&cinfo->addr, client_addr, sizeof(struct sockaddr_in));
 
         strncpy(cinfo->user_id, argv[1], 16);
-
         void *victim = plist_push(cinfo);
         if(victim)
             vg_free(victim);
@@ -152,9 +137,10 @@ void exec_bind(int argc, char *argv[], struct socketaddr_in *client_addr)
     else {
         udpserver_sendto(client_addr, PARAM_ERROR, strlen(PARAM_ERROR));
     }
+    LOG(LEVEL_DEBUG, "exec_bind X\n");
 }
 
-const cmd_handle_t command_handle[]= {
+const cmd_handle_t udp_command_handle[]= {
     {
         .command = FIND, //!< restart system
         .execute = exec_find
@@ -181,17 +167,12 @@ const cmd_handle_t command_handle[]= {
     {
         .command = NETSTAT, 
         .execute = exec_netstat
-    },
-
-    {
-        .command = DID, 
-        .execute = exec_did
     }
 };
 
-#define COMMAND_COUNT (sizeof(command_handle) / sizeof(cmd_handle_t))
+#define COMMAND_COUNT (sizeof(udp_command_handle) / sizeof(cmd_handle_t))
 
-int user_cmd_handle(unsigned char *cmd, int len, struct sockaddr_in *client_addr)
+int udp_user_cmd_handle(unsigned char *cmd, int len, struct sockaddr_in *client_addr)
 {
     int i;
     int j;
@@ -254,7 +235,7 @@ REPEATED_PARSING:
 
             //抽取参数
             //第一次抽取参数以'=\r\n'为分割符
-            if ((argv[argc++] = strtok(cmd, "=\r\n")) == NULL)
+            if ((argv[argc++] = vg_strtok(cmd, "=\r\n")) == NULL)
             {
                 printf(FORMAT_ERROR);
 
@@ -263,11 +244,11 @@ REPEATED_PARSING:
 
             while (i < COMMAND_COUNT)
             {
-                if (strcmp(cmd, command_handle[i].command) == 0)
+                if (strcmp(cmd, udp_command_handle[i].command) == 0)
                 {
                     do
                     {
-                        if ((argv[argc] = strtok(NULL, ",")) != NULL)
+                        if ((argv[argc] = vg_strtok(NULL, ",")) != NULL)
                         {
                             if (argc++ > PARAM_MAX - 1)
                             {
@@ -310,7 +291,7 @@ REPEATED_PARSING:
                     }
 
                     //调用命令handle
-                    command_handle[i].execute(argc, argv, client_addr);
+                    udp_command_handle[i].execute(argc, argv, client_addr);
 
                     break;
                 }

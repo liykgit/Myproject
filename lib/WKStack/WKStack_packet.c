@@ -236,7 +236,7 @@ predicate_t is_client(void *ele, void *arg) {
 
 static int WKStack_unpack_binding(unsigned char *payload, int len)
 {
-    printf("<LOG> WKStack_unpack_control E\n");
+    LOG(LEVEL_DEBUG, "WKStack_unpack_binding E\n");
 
     int count = decode_payload((char *)payload, len);
     if(count <= 0)  
@@ -281,7 +281,7 @@ static int WKStack_unpack_binding(unsigned char *payload, int len)
         client_info = (client_info_t *)plist_find(is_client, user_id);
         
         char buf[128];
-        sprintf(buf, "VENGAS:%s:VENGAE", bind_ticket);
+        sprintf(buf, "VENGAS:BIND:%s:VENGAE", bind_ticket);
 
         if(client_info) {
             udpserver_sendto(&client_info->addr, buf, strlen(buf));
@@ -300,6 +300,7 @@ static int WKStack_unpack_binding(unsigned char *payload, int len)
     }
 
 	//printf("### MEM FREE : %d.\n", qcom_mem_heap_get_free_size());
+    LOG(LEVEL_DEBUG, "WKStack_unpack_binding X\n");
 
 	return 0;
 }
@@ -531,8 +532,10 @@ int WKStack_subscribe_binding()
 
 int WKStack_publish_bind_request(char *userId) 
 {
-    char buf[64];
-    int buf_size = 64;
+    LOG(LEVEL_DEBUG, "WKStack_publish_bind_request, userId %s\n", userId);
+
+    char buf[32];
+    int buf_size = 32;
 
 	memset(buf, 0, sizeof(buf));
 
@@ -549,8 +552,7 @@ int WKStack_publish_bind_request(char *userId)
         printf("ota publish buffer not large enough\n");
         return -1;
     }
-
-    printf("publishing binding request, buf size  %d\n", offset);
+    LOG(LEVEL_DEBUG, "publishing binding request, buf size  %d\n", offset);
     return mqtt_publish(WKStack.binding_pub_topic, (unsigned char*)buf, offset, MQTT_QOS1, MQTT_RETAIN_FALSE, (mqtt_cb_t)0);
 }
 

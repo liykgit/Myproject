@@ -69,3 +69,12 @@ int vg_select(int nfds, vg_fd_set *readfds, vg_fd_set *writefds, vg_fd_set *exce
     return qcom_select(nfds, readfds, writefds, exceptfds, timeout);
 }
 
+void *vg_malloc(unsigned int sz) {
+    return mem_alloc(sz);
+}
+
+void vg_free(void *ptr) {
+    if(!ptr) {
+        mem_free(ptr);
+    }
+}

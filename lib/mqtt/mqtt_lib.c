@@ -244,11 +244,16 @@ int mqtt_topic_init(void)
 
 int mqtt_send(unsigned char *buf, int len)
 {
+    LOG(LEVEL_ERROR, "mqtt_send E\n");
 	int send_repeat = MQTT_RETRY_TIMES;
 	int ret =-1;
 
-	if(buf == NULL || len == 0)
+	if(buf == NULL || len == 0) {
+
+        LOG(LEVEL_ERROR, "mqtt_send X \n");
+        LOG(LEVEL_ERROR, "mqtt_send X\n");
 		return -1;
+    }
 
 repeat:
     ret = vg_tcp_send(mqtt.sockfd, buf, len, CONN_MODE);
@@ -256,6 +261,7 @@ repeat:
         if(ret == 0){
             LOG(LEVEL_ERROR, "<ERR> tcp send length 0\n");
         }
+        LOG(LEVEL_ERROR, "mqtt_send X \n");
         return ret;
     }else if(ret == -100){
         LOG(LEVEL_ERROR, "<ERR> tcp send ret = -100\n");
@@ -263,6 +269,7 @@ repeat:
             msleep(2000);
             goto repeat;
         }else{
+            LOG(LEVEL_ERROR, "mqtt_send X \n");
             return -2;
         }
     }else{
@@ -271,10 +278,12 @@ repeat:
             msleep(2000);
             goto repeat;
         }else{
+            LOG(LEVEL_ERROR, "mqtt_send X \n");
 			return -3;
         }
     }
 
+        LOG(LEVEL_ERROR, "mqtt_send X \n");
 	return -1;
 }
 

@@ -99,7 +99,12 @@ socket_fail:
 }
 
 int udpserver_sendto(struct sockaddr_in *client_addr, char *buf, int length) {
+    
+    LOG(LEVEL_DEBUG, "udpserver_sendto E\n");
+    int r = vg_sendto(udp_fd, buf, length, client_addr);
 
-    return vg_sendto(udp_fd, buf, length, client_addr);
+    LOG(LEVEL_DEBUG, "udpserver_sendto X\n");
+
+    return r;
 }
 

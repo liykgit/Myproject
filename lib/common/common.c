@@ -163,13 +163,14 @@ char* vg_strtok(char * string, const char * control)
         return string;
 }
 
-void vg_print_hex(unsigned char *buf, int len)
+void vg_print_hex(enum log_level level, unsigned char *buf, int len)
 {
 	int			i;
 
 	for (i = 0; i < len; i++)
 	{
-		printf("%02x ", *buf++);
+		LOG(level, "%02x ", *buf++);
 	}
+    LOG(level, "\n");
 }
 

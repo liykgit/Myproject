@@ -84,6 +84,9 @@ int mqtt_publish(char *topic, unsigned char *msg, int msg_len, mqtt_qos_t qos, m
     package->length = msg_len;
     package->used = BUDDLE_USED;
 
+    LOG(LEVEL_DEBUG, "publish to topic %s :\n", topic);
+    vg_print_hex(LEVEL_DEBUG, msg, msg_len);
+
     vg_release_sem(&ctrl_thread_sem);
 
     LOG(LEVEL_DEBUG, "mqtt_publish X\n");

@@ -104,7 +104,7 @@ enum log_level {
 	LEVEL_DEBUG = 0,
 	LEVEL_NORMAL = 1,
 	LEVEL_ERROR = 2
-};
+} ;
 
 #define LOG_LEVEL LEVEL_DEBUG
 

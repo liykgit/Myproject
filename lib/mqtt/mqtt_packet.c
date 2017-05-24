@@ -86,6 +86,7 @@ int mqtt_pack_publish(unsigned char *buf, int buflen, mqtt_package_t *msg)
 
 	writeMQTTString(&ptr, msg->topic);
 
+
 	if (header.bits.qos > 0)
 		writeInt(&ptr, msg->msg_id);
 
@@ -296,15 +297,7 @@ int mqtt_pack_disconnect(unsigned char *buf, int buflen)
 	return rc;
 }
 
-static void print_hex(unsigned char *buf, int len)
-{
-	int			i;
 
-	for (i = 0; i < len; i++)
-	{
-		printf("%02x ", *buf++);
-	}
-}
 
 int mqtt_unpack(unsigned char *buf, int len)
 {
@@ -381,8 +374,10 @@ another:
 			return -4;
 		}
         memcpy(pmsg->payload, p, pmsg->length);
-
-        print_hex(pmsg->payload, pmsg->length);  
+        
+        
+        LOG(LEVEL_DEBUG, "mqtt received : \n");
+        vg_print_hex(LEVEL_DEBUG, pmsg->payload, pmsg->length);  
 
     }else if(pmsg->length < 0){
 		FreeBuddle(pmsg);

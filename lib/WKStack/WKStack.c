@@ -13,7 +13,7 @@ static int WKStack_connect_cb(mqtt_errno_t err);
 
 static void WKStack_connect_ep(void)
 {
-    printf("WKStack_connect_ep E state: %d\n", WKStack.state);
+    LOG(LEVEL_NORMAL,"WKStack_connect_ep E state: %d\n", WKStack.state);
 
     char client_id[24];
     memset(client_id, 0, 24);
@@ -35,23 +35,23 @@ static void WKStack_connect_ep(void)
 
 static int WKStack_connect_cb(mqtt_errno_t err)
 {
-    printf("WKStack_connect_cb E state: %d\n", WKStack.state);
+    LOG(LEVEL_NORMAL,"WKStack_connect_cb E state: %d\n", WKStack.state);
 
     if(WKStack.state == WKSTACK_INIT){
         if(err == MQTT_CONNECT_SUCCEED){
-            printf("We are on entrypoint, state %d\n", WKStack.state);
+            LOG(LEVEL_NORMAL,"We are on entrypoint, state %d\n", WKStack.state);
 
             WKStack_subscribe_welcome();
             WKStack_subscribe_challenge();
             WKStack_publish_knock();
         }else if(err == MQTT_DISCONNECT_SUCCEED){
 
-            printf("We are off, state %d\n", WKStack.state);
+            LOG(LEVEL_NORMAL,"We are off, state %d\n", WKStack.state);
             if(WKStack.state == WKSTACK_WAIT_ONLINE) 
                 WKStack_connect_ep();
 
         } else {
-            printf("mqtt err %d\n", err);
+            LOG(LEVEL_ERROR,"mqtt err %d\n", err);
             //TODO check return error and add sleep then retry
             //go back to init state
             WKStack.state = WKSTACK_INIT;
@@ -62,7 +62,7 @@ static int WKStack_connect_cb(mqtt_errno_t err)
             
             case MQTT_CONNECT_SUCCEED:
                 {
-                    printf("We are on endpoint, state %d\n", WKStack.state);
+                    LOG(LEVEL_NORMAL,"We are on endpoint, state %d\n", WKStack.state);
                     WKStack.state = WKSTACK_ONLINE;
 
                     WKStack_subscribe_control();
@@ -74,7 +74,7 @@ static int WKStack_connect_cb(mqtt_errno_t err)
 
             case MQTT_DISCONNECT_SUCCEED:
                 {
-                    printf("We are off, state %d\n", WKStack.state);
+                    LOG(LEVEL_NORMAL,"We are off, state %d\n", WKStack.state);
                     WKStack.state = WKSTACK_OFFLINE;
                 }
                 break;
@@ -126,7 +126,7 @@ static int WKStack_connect_cb(mqtt_errno_t err)
 // 3. subscribe control topic(for recv cmd and set status)
 static void WKStack_connect(void)
 {
-    printf("WKStack_connect E state: %d\n", WKStack.state);
+    LOG(LEVEL_NORMAL,"WKStack_connect E state: %d\n", WKStack.state);
 
     WKStack_pack_connect(NULL, 0);
     mqtt_start(WKSTACK_FIRST_CONNECT_HOST, WKSTACK_FIRST_CONNECT_PORT, &data, WKStack_connect_cb);
@@ -142,7 +142,7 @@ int WKStack_init(WKStack_params_t *params)
         memcpy(&WKStack.params, params, sizeof(WKStack_params_t));
 
         //TODO get sn in future
-        //sprintf(WKStack.devinfo_topic, WKSTACK_TOPIC_DEVINFO_FMT, WKStack.params.sn);
+        //sLOG(LEVEL_NORMAL,WKStack.devinfo_topic, WKSTACK_TOPIC_DEVINFO_FMT, WKStack.params.sn);
 
         log_init(WKStack.params.mac);
 
@@ -166,14 +166,14 @@ int WKStack_start(WKStack_cb_t connect_cb, WKStack_ota_cb_t ota_cb)
 
     //TODO make sure params is all 0 if not set. 
     //TODO check ep here also.
-    printf("WKSTACK_start E state: %d\n", WKStack.state);
+    LOG(LEVEL_NORMAL,"WKSTACK_start E state: %d\n", WKStack.state);
     if(WKStack.state == WKSTACK_OFFLINE) {
 
         WKStack_params_t *params = &WKStack.params;
 
         if(strlen(params->did) != 0 && strlen(params->host) != 0) { 
-            printf("My did is %s\n", params->did);
-            printf("host is %s\n", params->host);
+            LOG(LEVEL_NORMAL,"My did is %s\n", params->did);
+            LOG(LEVEL_NORMAL,"host is %s\n", params->host);
 
             
             WKStack.state = WKSTACK_WAIT_ONLINE;
@@ -306,6 +306,17 @@ WKStack_state_t WKStack_state()
     return WKStack.state;
 }
 
+int WKStack_did(char *buf, int size)
+{
+    int did_len = strlen(WKStack.params.did);
+    
+    if(did_len + 1 > size)
+        return -1;
+
+    strcpy(buf, WKStack.params.did);
+    return 0;
+}
+
 int WKStack_report_ota_progress(WKStack_ota_target_t target, WKStack_ota_report_t report, WKStack_report_cb_t cb)
 {
 
@@ -334,7 +345,7 @@ int WKStack_report_ota_progress(WKStack_ota_target_t target, WKStack_ota_report_
                 if(item_size >= 0)
                     offset += item_size;
                 else {
-                    printf("ota publish buffer not large enough\n");
+                    LOG(LEVEL_NORMAL,"ota publish buffer not large enough\n");
                     return 0;
                 }
             }
@@ -348,7 +359,7 @@ int WKStack_report_ota_progress(WKStack_ota_target_t target, WKStack_ota_report_
                 if(item_size >= 0)
                     offset += item_size;
                 else {
-                    printf("ota publish buffer not large enough\n");
+                    LOG(LEVEL_NORMAL,"ota publish buffer not large enough\n");
                     return 0;
                 }
 
@@ -361,7 +372,7 @@ int WKStack_report_ota_progress(WKStack_ota_target_t target, WKStack_ota_report_
                     if(item_size >= 0)
                         offset += item_size;
                     else {
-                        printf("ota publish buffer not large enough\n");
+                        LOG(LEVEL_NORMAL,"ota publish buffer not large enough\n");
                         return 0;
                     }
                 }
@@ -377,7 +388,7 @@ int WKStack_report_ota_progress(WKStack_ota_target_t target, WKStack_ota_report_
                 if(item_size >= 0)
                     offset += item_size;
                 else {
-                    printf("ota publish buffer not large enough\n");
+                    LOG(LEVEL_NORMAL,"ota publish buffer not large enough\n");
                     return 0;
                 }
 
@@ -389,7 +400,7 @@ int WKStack_report_ota_progress(WKStack_ota_target_t target, WKStack_ota_report_
                 if(item_size >= 0)
                     offset += item_size;
                 else {
-                    printf("ota publish buffer not large enough\n");
+                    LOG(LEVEL_NORMAL,"ota publish buffer not large enough\n");
                     return 0;
                 }
                 
@@ -404,7 +415,7 @@ int WKStack_report_ota_progress(WKStack_ota_target_t target, WKStack_ota_report_
                if(item_size >= 0)
                    offset += item_size;         
                else {
-                   printf("ota publish buffer not large enough\n");
+                   LOG(LEVEL_NORMAL,"ota publish buffer not large enough\n");
                    return 0;
                }
 
@@ -418,7 +429,7 @@ int WKStack_report_ota_progress(WKStack_ota_target_t target, WKStack_ota_report_
                    if(item_size >= 0)
                        offset += item_size;
                    else {
-                       printf("ota publish buffer not large enough\n");
+                       LOG(LEVEL_NORMAL,"ota publish buffer not large enough\n");
                        return 0;
                    }
                 }
@@ -432,6 +443,6 @@ int WKStack_report_ota_progress(WKStack_ota_target_t target, WKStack_ota_report_
 
 
 void WKStack_rabbit() {
-    printf("WKStack_rabbit\n");
+    LOG(LEVEL_NORMAL,"WKStack_rabbit\n");
     mqtt_unsubscribe(WKStack.ota_sub_topic, NULL);    
 }

@@ -11,5 +11,8 @@ unsigned long get_tick(void);
 
 void aes_ecb(char *aes, unsigned char *session, unsigned char *key);
 
+char* vg_strtok(char * string, const char * control);
+
+void vg_print_hex(enum log_level, unsigned char *buf, int len);
 
 #endif

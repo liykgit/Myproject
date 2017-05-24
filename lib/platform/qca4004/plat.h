@@ -15,8 +15,9 @@
 #define strcat strcat_ext
 #define msleep qcom_thread_msleep
 
-#define vg_malloc mem_alloc
-#define vg_free mem_free
+
+void *vg_malloc(unsigned int sz); 
+void vg_free(void *ptr);
 
 
 #define vg_fd_set q_fd_set

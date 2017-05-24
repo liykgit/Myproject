@@ -24,9 +24,11 @@
 
 #define msleep(ms) usleep(ms * 1000)
 
-#define vg_malloc malloc
-#define vg_free free
+//#define vg_malloc malloc
+//#define vg_free free
 
+void *vg_malloc(size_t sz);
+void vg_free(void *ptr);
 
 unsigned long vg_get_tick(void);
 //-------------------- mutex & sem --------------------------------
@@ -102,9 +104,9 @@ enum log_level {
 	LEVEL_DEBUG = 0,
 	LEVEL_NORMAL = 1,
 	LEVEL_ERROR = 2
-};
+} ;
 
-#define LOG_LEVEL LEVEL_NORMAL
+#define LOG_LEVEL LEVEL_DEBUG
 
 #ifdef LOG_IN_FILE
 extern FILE *log_fp;

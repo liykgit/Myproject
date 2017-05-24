@@ -79,3 +79,13 @@ int vg_select(int nfds, vg_fd_set *readfds, vg_fd_set *writefds, vg_fd_set *exce
     return select(nfds, readfds, writefds, exceptfds, timeout);
 }
 
+
+void *vg_malloc(size_t sz) {
+    return malloc(sz);
+}
+
+void vg_free(void *ptr) {
+    if(!ptr) {
+        free(ptr);
+    }
+}

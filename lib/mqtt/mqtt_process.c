@@ -213,7 +213,6 @@ int mqtt_process_send()
                 }
 
                 ret = mqtt_send(mqtt.send_buf, len);
-
                 if(ret > 0){
                     // Send PUBLISH succeed, move send to flight
                     msg->tick = vg_get_tick();

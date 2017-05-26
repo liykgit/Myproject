@@ -70,11 +70,14 @@ int vg_select(int nfds, vg_fd_set *readfds, vg_fd_set *writefds, vg_fd_set *exce
 }
 
 void *vg_malloc(unsigned int sz) {
-    return mem_alloc(sz);
+    void * p = mem_alloc(sz);
+
+    return p;
 }
 
 void vg_free(void *ptr) {
-    if(!ptr) {
+    if(ptr) {
+
         mem_free(ptr);
     }
 }

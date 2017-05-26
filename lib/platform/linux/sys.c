@@ -85,7 +85,7 @@ void *vg_malloc(size_t sz) {
 }
 
 void vg_free(void *ptr) {
-    if(!ptr) {
+    if(ptr) {
         free(ptr);
     }
 }

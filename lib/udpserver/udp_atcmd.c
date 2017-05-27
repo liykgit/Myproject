@@ -61,7 +61,6 @@ void exec_offline(int argc, char *argv[], struct socketaddr_in *client_addr)
 
 void exec_passthrough(int argc, char *argv[], struct socketaddr_in *client_addr)
 {
-
     LOG(LEVEL_DEBUG, "exec_passthrough E\n");
     if(argc <= 1) {
         udpserver_sendto(client_addr, PARAM_ERROR, strlen(PARAM_ERROR));
@@ -99,10 +98,12 @@ void exec_passthrough(int argc, char *argv[], struct socketaddr_in *client_addr)
 void exec_find(int argc, char *argv[], struct socketaddr_in *client_addr)
 {
     LOG(LEVEL_DEBUG, "exec_find E\n");
-    char buf[128];
-    memset(buf, 0, sizeof(buf));
     
     if(strlen(WKStack.params.did) > 0) {
+
+        char buf[196];
+        memset(buf, 0, sizeof(buf));
+
         sprintf((char *)buf, "VENGAS:FIND:%s#%s#%s#%s:VENGAE", WKStack.params.devtype, WKStack.params.mac, WKStack.params.did, WKStack.params.name);
         udpserver_sendto(client_addr, buf, strlen(buf));
     } 

@@ -4,7 +4,6 @@
 /* Please do not modify this file */
 
 // WKStack (command or datapoint)'s name max length
-#define WKSTACK_NAME_LEN 32
 #define WKSTACK_VALUE_LEN 128
 
 // WKStack max datapoint count
@@ -14,7 +13,8 @@
 
 // WKStack params max length
 #define WKSTACK_SN_LEN 48
-#define WKSTACK_NAME_LEN 64
+//4: padding 128=24*4*8/6, where 24: max allowed characters, 4 : each utf-8 character up to 4 bytes, *8/6 base64 length
+#define WKSTACK_NAME_LEN (128 + 4) 
 #define WKSTACK_KEY_LEN 32
 #define WKSTACK_DEVTYPE_LEN 16
 #define WKSTACK_MAC_LEN 16

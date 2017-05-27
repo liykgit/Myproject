@@ -4,6 +4,7 @@
 #include "WKStack.h"
 
 #define WKSTACK_TOPIC_LEN 64
+#define WKSTACK_TOPIC_LEN 64
 #define TICKET_LEN (32) 
 #define TICKET_LEN_PADDING (4) //4 as padding
 

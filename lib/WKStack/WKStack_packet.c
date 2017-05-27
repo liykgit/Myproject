@@ -399,14 +399,30 @@ static int WKStack_publish_answer(char *answer, int len)
 	return ret;
 }
 
+
 int WKStack_unpack_welcome(unsigned char *payload, int len) {
+
+    LOG(LEVEL_NORMAL, "WKStack_unpack_welcome E\n");
+    LOG(LEVEL_DEBUG, "welcome message %s\n", payload);
 
     int hasDid = 0;
     int hasEndpoint = 0;
     int hasTicket = 0;
-    
-    unsigned char *p1 = strstr(payload, "*");
-    int did_len = p1 - payload;
+    int hasName = 0;
+   
+    char *delimiter = "*";
+
+    char *pdid = payload;
+    int did_len = substr_length(payload, "*");
+  
+    char *purl = pdid + did_len + 1;
+    int url_len = substr_length(purl, delimiter);
+
+    char *pticket = purl + url_len + 1;
+    int ticket_len = substr_length(pticket, delimiter);
+
+    char *pname = pticket + ticket_len + 1;
+    int name_len = substr_length(pname, delimiter);
 
     if(did_len <= 0) {
         printf("Invalid did_len\n");
@@ -414,30 +430,25 @@ int WKStack_unpack_welcome(unsigned char *payload, int len) {
         return 0;
     }
 
-    strncpy((char *)WKStack.params.did, (char *)payload, did_len);
-    LOG(LEVEL_DEBUG, "<LOG> did:%s\n", WKStack.params.did);
-    hasDid = 1;
-
-    p1 += 1;
-    unsigned char *p2 = strstr(p1, "*");
-    int urllen = p2 - p1;
-
-    if(urllen <= 0) {
-        printf("Invalid urllen\n");
+    if(url_len <= 0) {
+        printf("Invalid url_len\n");
         printf("\n");
 
         return 0;
     }
 
-    int ticket_len = len - did_len - urllen - 2*strlen("*");
     if(ticket_len != TICKET_LEN) {
-        printf("Invalid ticket length len %d, %d-%d-%d-2\n", ticket_len, len, did_len, urllen);
+        printf("Invalid ticket length len %d, %d-%d-%d-2\n", ticket_len, len, did_len, url_len);
         return 0;
     }
 
-    char endpoint[urllen + 1];
-    memcpy(endpoint, p1, urllen);
-    endpoint[urllen] = 0;
+    strncpy((char *)WKStack.params.did, (char *)payload, did_len);
+    LOG(LEVEL_DEBUG, "<LOG> did:%s\n", WKStack.params.did);
+    hasDid = 1;
+
+    char endpoint[url_len + 1];
+    memcpy(endpoint, purl, url_len);
+    endpoint[url_len] = 0;
 
     char port[8] = {0,};
 
@@ -447,14 +458,16 @@ int WKStack_unpack_welcome(unsigned char *payload, int len) {
 
     hasEndpoint = 1;
     
-    p2 += 1;
-    
-    memcpy(WKStack.ticket, p2, TICKET_LEN);
-
+    memcpy(WKStack.ticket, pticket, TICKET_LEN);
 
     hasTicket = 1;
 
-    if(hasDid && hasEndpoint && hasTicket) {
+    memcpy(WKStack.params.name, pname, name_len);
+
+    hasName = 1;
+
+
+    if(hasDid && hasEndpoint && hasTicket && hasName) {
 
         WKStack.state = WKSTACK_WAIT_ONLINE;
 
@@ -466,6 +479,8 @@ int WKStack_unpack_welcome(unsigned char *payload, int len) {
 
         sprintf(WKStack.binding_sub_topic, WKSTACK_TOPIC_BINDING_SUB_FMT, WKStack.params.did);
         sprintf(WKStack.binding_pub_topic, WKSTACK_TOPIC_BINDING_PUB_FMT, WKStack.params.did);
+
+        LOG(LEVEL_NORMAL, "device %s is welcomed\n", pname);
     }
 
 	//printf("### MEM FREE : %d.\n", qcom_mem_heap_get_free_size());

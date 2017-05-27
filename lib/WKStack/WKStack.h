@@ -14,6 +14,7 @@
 
 // WKStack params max length
 #define WKSTACK_SN_LEN 48
+#define WKSTACK_NAME_LEN 64
 #define WKSTACK_KEY_LEN 32
 #define WKSTACK_DEVTYPE_LEN 16
 #define WKSTACK_MAC_LEN 16
@@ -94,6 +95,7 @@ typedef struct {
     char devtype[WKSTACK_DEVTYPE_LEN];
     char mac[WKSTACK_MAC_LEN];
 
+    char name[WKSTACK_NAME_LEN];
     char did[WKSTACK_SN_LEN];
     char host[WKSTACK_HOST_LEN];
     unsigned short port;

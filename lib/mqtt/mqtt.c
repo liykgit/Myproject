@@ -400,7 +400,6 @@ static thread_ret_t mqtt_ctrl_thread(thread_params_t args)
             mqtt_process_error();
             break;
         }
-        printf("-->Mem : %d.\n", qcom_mem_heap_get_free_size());
     }
 
 

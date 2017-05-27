@@ -174,3 +174,15 @@ void vg_print_hex(enum log_level level, unsigned char *buf, int len)
     LOG(level, "\n");
 }
 
+int substr_length(char *src, char *delimiter) {
+    
+    char *start = src;
+    
+    char *end = strstr(src, delimiter);    
+
+    if(end) 
+        return end-start;
+    else
+        return strlen(src);
+}
+

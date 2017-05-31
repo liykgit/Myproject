@@ -177,7 +177,7 @@ int vg_tcp_close(int sock, int ssl)
 	return 0;
 }
 
-int vg_tcp_send(int sock, unsigned char *buffer, int length, int ssl)
+int vg_send(int sock, unsigned char *buffer, int length, int ssl)
 {
 	int ret = 0;
 
@@ -197,7 +197,7 @@ int vg_tcp_send(int sock, unsigned char *buffer, int length, int ssl)
  *        		-1 : ÃÃžÃÃ§ÃÃ¬Â³Â£
  * @note
 ************************************************************************/
-int vg_tcp_recv(int sock, unsigned char *buffer, int length, int ssl)
+int vg_recv(int sock, unsigned char *buffer, int length, int ssl)
 {
     q_fd_set fdRead;
 	struct timeval		tm;

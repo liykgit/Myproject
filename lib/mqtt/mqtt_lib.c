@@ -256,7 +256,7 @@ int mqtt_send(unsigned char *buf, int len)
     }
 
 repeat:
-    ret = vg_tcp_send(mqtt.sockfd, buf, len, CONN_MODE);
+    ret = vg_send(mqtt.sockfd, buf, len, CONN_MODE);
     if(ret >= 0){
         if(ret == 0){
             LOG(LEVEL_ERROR, "<ERR> tcp send length 0\n");
@@ -293,7 +293,7 @@ int mqtt_recv(unsigned char *buf, int len)
 	int rdlen = 0;
 
 repeat:
-	rdlen = vg_tcp_recv(mqtt.sockfd, buf, len, CONN_MODE);
+	rdlen = vg_recv(mqtt.sockfd, buf, len, CONN_MODE);
 	if(rdlen >= 0){//read or timeout
 #if 0
 		if(rdlen == 0){

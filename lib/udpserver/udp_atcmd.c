@@ -2,6 +2,7 @@
 #include "WKStack.h"
 #include "WKStack_lib.h"
 #include "udpserver.h"
+#include "tcpserver.h"
 #include "common.h"
 
 
@@ -16,6 +17,9 @@
 #define FORMAT_ERROR        "+ERR=1\r\n" //command format error\r\n"
 #define NONE_COMMAND        "+ERR=2\r\n" //unknow this command\r\n"
 #define PARAM_ERROR         "+ERR=3\r\n" //param error\r\n"
+#define EXEC_ERROR          "FAILED\r\n" //param error\r\n"
+
+#define TCPSERVER_PORT      30321
 
 extern WKStack_t WKStack;
 
@@ -36,12 +40,67 @@ typedef struct {
 #define NETSTAT             "NETSTAT"
 #define ONLINE              "ONLINE"
 #define OFFLINE             "OFFLINE"
+#define BROADCAST           "BROADCAST"
+#define TESTMODE            "TESTMODE"
+#define TCPSEND             "TCPSEND"
+
+void exec_testmode(int argc, char *argv[], struct socketaddr_in *client_addr)
+{
+    LOG(LEVEL_DEBUG, "exec_testmode E\n");
+       
+    int r = tcpserver_start(TCPSERVER_PORT);
+    
+    if(r == 0) {
+
+        udpserver_sendto(client_addr, OK, strlen(OK));
+
+        g_testmode = 1;
+    }
+    else {
+        udpserver_sendto(client_addr, EXEC_ERROR, strlen(EXEC_ERROR));
+    }
+
+    LOG(LEVEL_DEBUG, "exec_testmode X\n");
+}
+
+void exec_tcpsend(int argc, char *argv[], struct socketaddr_in *client_addr)
+{
+    LOG(LEVEL_DEBUG, "exec_tcpsend E\n");
+       
+    if(argc == 2){
+        printf("tcp sending %s\n", argv[1]);
+        tcpserver_send(argv[1], strlen(argv[1]));
+        udpserver_sendto(client_addr, OK, strlen(OK));
+    }
+    else {
+        udpserver_sendto(client_addr, PARAM_ERROR, strlen(PARAM_ERROR));
+    }
+
+    LOG(LEVEL_DEBUG, "exec_tcpsend X\n");
+}
+
+void exec_broadcast(int argc, char *argv[], struct socketaddr_in *client_addr)
+{
+    LOG(LEVEL_DEBUG, "exec_broadcast E\n");
+
+    if(argc == 2){
+        printf("broadcasting %s\n", argv[1]);
+        udpserver_broadcast(argv[1], strlen(argv[1]), 30320);
+        //udpserver_sendto(client_addr, OK, strlen(OK));
+    }
+    else {
+        udpserver_sendto(client_addr, PARAM_ERROR, strlen(PARAM_ERROR));
+    }
+    LOG(LEVEL_DEBUG, "exec_broadcast X\n");
+}
 
 void exec_netstat(int argc, char *argv[], struct socketaddr_in *client_addr)
 {
+    LOG(LEVEL_DEBUG, "exec_netstat E\n");
     char stat = '0' + WKStack_state();
 
     udpserver_sendto(client_addr, &stat, 1);
+    LOG(LEVEL_DEBUG, "exec_netstat X\n");
 
 }
 
@@ -168,6 +227,20 @@ const cmd_handle_t udp_command_handle[]= {
     {
         .command = NETSTAT, 
         .execute = exec_netstat
+    },
+
+    {
+        .command = BROADCAST, 
+        .execute = exec_broadcast
+    },
+
+    {
+        .command = TESTMODE, 
+        .execute = exec_testmode
+    },
+    {
+        .command = TCPSEND, 
+        .execute = exec_tcpsend
     }
 };
 

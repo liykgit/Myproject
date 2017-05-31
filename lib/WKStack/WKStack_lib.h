@@ -38,8 +38,12 @@ typedef struct{
 } WKStack_t;
 
 extern WKStack_t WKStack;
+extern int g_testmode;
 
 #define UDP_SERVER_PORT 30319
 
+#define WKSTACK_ANNOUNCE_PORT 30320
+#define WKSTACK_ANNOUNCE_COUNT 6
+#define WKSTACK_ANNOUNCE_INTERVAL 50
 
 #endif

@@ -330,6 +330,19 @@ static int WKStack_unpack_control(unsigned char *payload, int len)
         }
     }
 
+    if(g_testmode) {
+        
+        char * buf = vg_malloc(len<<1);
+        if(!buf) {
+            LOG(LEVEL_ERROR, "OOM\n");
+            return;
+        }
+
+        bin2hex(payload, len, buf);
+        tcpserver_send(buf, len<<1);
+
+        vg_free(buf);
+    }
 	//printf("### MEM FREE : %d.\n", qcom_mem_heap_get_free_size());
 
 	return 0;
@@ -412,8 +425,13 @@ int WKStack_unpack_welcome(unsigned char *payload, int len) {
    
     char *delimiter = "*";
 
-    char *pdid = payload;
-    int did_len = substr_length(payload, "*");
+    char payload_str[len + 1];
+    memcpy(payload_str, payload, len);
+    payload_str[len] = 0;
+
+    char *pdid = payload_str;
+    
+    int did_len = substr_length(pdid, "*");
   
     char *purl = pdid + did_len + 1;
     int url_len = substr_length(purl, delimiter);
@@ -438,7 +456,7 @@ int WKStack_unpack_welcome(unsigned char *payload, int len) {
     }
 
     if(ticket_len != TICKET_LEN) {
-        printf("Invalid ticket length len %d, %d-%d-%d-2\n", ticket_len, len, did_len, url_len);
+        printf("Invalid ticket length %d\n", ticket_len);
         return 0;
     }
 
@@ -464,12 +482,13 @@ int WKStack_unpack_welcome(unsigned char *payload, int len) {
 
     memcpy(WKStack.params.name, pname, name_len);
 
-    hasName = 1;
+    //hasName = 1;
 
 
-    if(hasDid && hasEndpoint && hasTicket && hasName) {
+    if(hasDid && hasEndpoint && hasTicket /*&& hasName*/) {
 
         WKStack.state = WKSTACK_WAIT_ONLINE;
+
 
         sprintf(WKStack.report_topic, WKSTACK_TOPIC_REPORT_FMT, WKStack.params.devtype, WKStack.params.did);
 

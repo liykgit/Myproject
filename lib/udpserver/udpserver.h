@@ -12,5 +12,6 @@ typedef struct client_info {
 } client_info_t;
 
 int udpserver_sendto(struct sockaddr_in *client_addr, char *buf, int length);
+int udpserver_broadcast(char *buf, int length, int port);
 
 #endif 

@@ -117,3 +117,14 @@ int udpserver_sendto(struct sockaddr_in *client_addr, char *buf, int length) {
     return r;
 }
 
+
+int udpserver_broadcast(char *buf, int length, int port) {
+
+    struct sockaddr_in addrto;  
+    memset(&addrto, 0, sizeof(struct sockaddr_in));
+    addrto.sin_family=AF_INET;  
+    addrto.sin_addr.s_addr=htonl(INADDR_BROADCAST);  
+    addrto.sin_port=htons(port);  
+
+    return vg_sendto(udpserver_sock, buf, length, &addrto);
+}

@@ -120,11 +120,16 @@ int udpserver_sendto(struct sockaddr_in *client_addr, char *buf, int length) {
 
 int udpserver_broadcast(char *buf, int length, int port) {
 
+    //working function on linux, only disabled to make 4004 compiler happy
+    //do not remove unless u know what you are doing
+#if 0  
     struct sockaddr_in addrto;  
     memset(&addrto, 0, sizeof(struct sockaddr_in));
     addrto.sin_family=AF_INET;  
     addrto.sin_addr.s_addr=htonl(INADDR_BROADCAST);  
     addrto.sin_port=htons(port);  
-
     return vg_sendto(udpserver_sock, buf, length, &addrto);
+#endif 
+    return 0;
 }
+

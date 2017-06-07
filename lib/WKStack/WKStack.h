@@ -150,6 +150,10 @@ int WKStack_report_ota_progress(WKStack_ota_target_t target, WKStack_ota_report_
 
 WKStack_state_t WKStack_state(void);
 
+int WKStack_did(char *buf, int size);
+
+int WKStack_name(char *buf, int size);
+
 extern const char *WKStack_version;
 
 #endif

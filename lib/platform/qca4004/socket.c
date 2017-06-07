@@ -367,3 +367,18 @@ again:
 	return 0;
 }
 
+int vg_accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
+{
+	LOG(LEVEL_DEBUG, "vg_accept E\n");
+    int fd = qcom_accept(sockfd, addr, addrlen);
+	LOG(LEVEL_DEBUG, "vg_accept X\n");
+	return fd;
+}
+
+int vg_listen(int sock, int backlog)
+{
+	LOG(LEVEL_DEBUG, "vg_listen E\n");
+    qcom_listen(sock, backlog);
+	LOG(LEVEL_DEBUG, "vg_listen X\n");
+}
+

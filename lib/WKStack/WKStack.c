@@ -340,12 +340,11 @@ int WKStack_did(char *buf, int size)
 int WKStack_report_ota_progress(WKStack_ota_target_t target, WKStack_ota_report_t report, WKStack_report_cb_t cb)
 {
 
-    static char buf[512];
-    int buf_size = 512;
+    static char buf[128];
+    int buf_size = 128;
     int offset = 0;
 
 	memset((void *)buf, 0, sizeof(buf));
-
 
     //put OTA_TYPE
     char tag[4] = {0, 0, WKSTACK_DATAPOINT_TYPE_INT, 0};
@@ -456,7 +455,7 @@ int WKStack_report_ota_progress(WKStack_ota_target_t target, WKStack_ota_report_
             }
             break;
     }
-    mqtt_unsubscribe(WKStack.ota_sub_topic, NULL);    
+    //mqtt_unsubscribe(WKStack.ota_sub_topic, NULL);    
   
     return mqtt_publish(WKStack.ota_pub_topic, (unsigned char*)buf, offset, MQTT_QOS1, MQTT_RETAIN_FALSE, (mqtt_cb_t)cb);
 }

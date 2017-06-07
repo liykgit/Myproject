@@ -88,9 +88,24 @@ int vg_tcp_close(int sock, int ssl)
 	return 0;
 }
 
-int vg_tcp_send(int sock, unsigned char *buffer, int length, int ssl)
+int vg_accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
 {
-	LOG(LEVEL_DEBUG, "<LOG> send :\n");
+	LOG(LEVEL_DEBUG, "vg_accept E\n");
+    int fd = accept(sockfd, addr, addrlen);
+	LOG(LEVEL_DEBUG, "vg_accept X\n");
+	return fd;
+}
+
+int vg_listen(int sock, int backlog)
+{
+	LOG(LEVEL_DEBUG, "vg_listen E\n");
+    listen(sock, backlog);
+	LOG(LEVEL_DEBUG, "vg_listen X\n");
+}
+
+int vg_send(int sock, unsigned char *buffer, int length, int ssl)
+{
+	LOG(LEVEL_DEBUG, "vg_send E\n");
 	log_buffer(LEVEL_DEBUG, (char *)buffer, length);
 
 	if(ssl)
@@ -107,7 +122,7 @@ int vg_tcp_send(int sock, unsigned char *buffer, int length, int ssl)
  *        		-1 : ÃÃžÃÃ§ÃÃ¬Â³Â£
  * @note
 ************************************************************************/
-int vg_tcp_recv(int sock, unsigned char *buffer, int length, int ssl)
+int vg_recv(int sock, unsigned char *buffer, int length, int ssl)
 {
     fd_set fdRead;
 	struct timeval		tm;
@@ -158,7 +173,9 @@ int vg_udp_socket(int *sock)
 		printf( "<ERR> creat socket error");
 		return -1;
 	}
-
+    
+    int broadcastEnable = 1;
+    setsockopt(*sock, SOL_SOCKET, SO_BROADCAST, &broadcastEnable, sizeof(broadcastEnable));
 	printf( "Create sockfd(%d)\n", *sock);
 	return 0;
 }

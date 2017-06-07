@@ -33,6 +33,26 @@ static void WKStack_connect_ep(void)
     return;
 };
 
+
+static void WKStack_announce() {
+
+        int i = 0;
+
+        char buf[192];
+        memset(buf, 0, sizeof(buf));
+
+        sprintf(buf, "VENGAS:ANNOUNCE:%s#%s#%s#%s:VENGAE", WKStack.params.devtype,
+                            WKStack.params.mac,
+                            WKStack.params.did,
+                            WKStack.params.name);
+
+        while (i++ < WKSTACK_ANNOUNCE_COUNT) {
+            udpserver_broadcast(buf, strlen(buf), WKSTACK_ANNOUNCE_PORT);
+            //TODO vg_msleep
+            msleep(WKSTACK_ANNOUNCE_INTERVAL);
+        }
+}
+
 static int WKStack_connect_cb(mqtt_errno_t err)
 {
     LOG(LEVEL_NORMAL,"WKStack_connect_cb E state: %d\n", WKStack.state);

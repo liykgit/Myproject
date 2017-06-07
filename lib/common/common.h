@@ -17,5 +17,8 @@ char* vg_strtok(char * string, const char * control);
 
 void vg_print_hex(enum log_level, unsigned char *buf, int len);
 
+void bin2hex(const char* src, int length, char* target);
+
+int hex2bin(const char* src, char* target);
 
 #endif

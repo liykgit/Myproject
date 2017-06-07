@@ -5,11 +5,12 @@ MQTT:=$(LIBDIR)/mqtt
 COMMON:=$(LIBDIR)/common
 WKSTACK:=$(LIBDIR)/WKStack
 UDPSERVER:=$(LIBDIR)/udpserver
+TCPSERVER:=$(LIBDIR)/tcpserver
 PLATFORM:=$(LIBDIR)/platform
 
 P?=linux
 
-CSRCS := $(wildcard $(COMMON)/*.c $(MQTT)/*.c $(WKSTACK)/*.c $(UDPSERVER)/*.c $(PLATFORM)/$(P)/*.c)
+CSRCS := $(wildcard $(COMMON)/*.c $(MQTT)/*.c $(WKSTACK)/*.c $(UDPSERVER)/*.c $(TCPSERVER)/*.c $(PLATFORM)/$(P)/*.c)
 
 CC = gcc
 
@@ -19,6 +20,7 @@ INCLUDES := \
 	-I$(PLATFORM)  \
 	-I$(WKSTACK)  \
 	-I$(UDPSERVER)  \
+	-I$(TCPSERVER)  \
 	-I$(PLATFORM)/${P}  
 
 

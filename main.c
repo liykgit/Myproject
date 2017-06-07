@@ -9,9 +9,9 @@
 #include "common.h"
 
 
-#define PRODUCTID   "k1fNmNng"
-#define KEY         "JkgzNQ4InxXjhp4g"
-#define MAC         "A1B2C3D4E5F3"
+#define PRODUCTID   "yyOzvi6x"
+#define KEY         "k1xdfwoV6gJtOlAC"
+#define MAC         "A1B2C3D4E911"
 
 
 int connect_cb(WKStack_state_t state)

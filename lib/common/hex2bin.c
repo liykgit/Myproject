@@ -30,3 +30,18 @@ int hex2bin(const char* src, char* target)
 
   return 0;
 }
+
+void bin2hex(const char* src, int length, char* target)
+{
+    int i = 0;
+    while(i < length) {
+        
+        unsigned char lb = src[i] & 0x0f;
+        unsigned char hb = (src[i] & 0xf0) >> 4;
+
+        target[2*i] = (hb>=10) ? (hb - 10) + 'a': (hb + '0');
+        target[2*i + 1] = (lb>=10) ? (lb - 10) + 'a': (lb + '0');
+        i++;
+    }
+}
+

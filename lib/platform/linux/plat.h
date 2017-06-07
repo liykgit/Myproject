@@ -87,6 +87,9 @@ int vg_recv(int sock, unsigned char *buffer, int length, int ssl);
 
 int vg_bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
 
+int vg_listen(int sock, int backlog);
+int vg_accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
+
 int vg_tcp_close(int sock, int ssl);
 //------------ thread ----------------------
 

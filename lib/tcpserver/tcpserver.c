@@ -40,7 +40,10 @@ static thread_ret_t tcpserver_handler_thread() {
 int  tcpserver_start(int port) {
 
     int ret = 0;
-    
+   
+    if(tcpserver_sock >= 0)
+        goto socket_fail;
+
     ret = vg_tcp_socket(&tcpserver_sock);
     if(ret != 0){
 		printf("Create tcp_socket failed\n");
@@ -76,7 +79,7 @@ socket_fail:
 
 int tcpserver_send(char *buf, int length) {
     
-    LOG(LEVEL_DEBUG, "tcpserver_send E");
+    LOG(LEVEL_DEBUG, "tcpserver_send E\n");
     if(client_sock < 0) {
         LOG(LEVEL_ERROR, "client_sock not connected\n");
         return -1;
@@ -88,7 +91,7 @@ int tcpserver_send(char *buf, int length) {
         return -1;
     }
 
-    LOG(LEVEL_DEBUG, "tcpserver_send X");
+    LOG(LEVEL_DEBUG, "tcpserver_send X\n");
 
     return r;
 }

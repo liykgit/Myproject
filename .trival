@@ -1,9 +1,16 @@
 //3.6 test project
-#define PRODUCTID   "yyOzvi6x"
-#define KEY         "k1xdfwoV6gJtOlAC"
-#define MAC         "A1B2C3D4E911"
+define PRODUCTID   "yyOzvi6x"
+define KEY         "k1xdfwoV6gJtOlAC"
+define MAC         "A1B2C3D4E911"
 
 //3.2 greenbit's project
-#define PRODUCTID   "k1fNmNng"
-#define KEY         "JkgzNQ4InxXjhp4g"
-#define MAC         "A1B2C3D4E916"
+define PRODUCTID   "k1fNmNng"
+define KEY         "JkgzNQ4InxXjhp4g"
+define MAC         "A1B2C3D4E916"
+
+//3.3 test project
+define PRODUCTID   "y1eX6Pz-"
+define KEY         "y1leqQavGbjbCM8r"
+define MAC         "A1B2C3D4E5F6"
+
+

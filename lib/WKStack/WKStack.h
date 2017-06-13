@@ -127,6 +127,7 @@ typedef struct{
 
 
 typedef int (*WKStack_cb_t)(WKStack_state_t state);
+typedef int (*WKStack_stop_cb_t)();
 typedef int (*WKStack_report_cb_t)(unsigned short id, WKStack_publish_state_t state);
 typedef int (*WKStack_ota_cb_t)(WKStack_ota_t *info, WKStack_ota_target_t target, WKStack_ota_type_t type);
 typedef void (*WKStack_datapoint_handler_t)(WKStack_datapoint_t *dps, int size);
@@ -140,7 +141,7 @@ int WKStack_start(WKStack_cb_t connect_cb, WKStack_ota_cb_t cb);
 
 int WKStack_report_datapoint(WKStack_datapoint_t *dp_group, unsigned int group_size, WKStack_report_cb_t cb);
 
-int WKStack_stop();
+int WKStack_stop(WKStack_stop_cb_t cb);
 
 
 // -1 no new version available

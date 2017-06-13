@@ -48,7 +48,7 @@ void WK_Start(char *productId, char *mac, char *key)
 
 void WK_Stop() {
 
-    WKStack_stop();
+    WKStack_stop(0);
 }
 
 //----------------------- udp ---------------------------------------

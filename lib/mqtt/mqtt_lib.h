@@ -32,6 +32,7 @@ typedef struct
     mqtt_errno_t error_number;
     mqtt_connect_data_t connect_data;
     mqtt_connect_cb_t connect_cb;
+    mqtt_stop_cb_t stop_cb;
 }mqtt_t;
 
 extern mqtt_t mqtt;

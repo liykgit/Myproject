@@ -224,9 +224,9 @@ int WKStack_start(WKStack_cb_t connect_cb, WKStack_ota_cb_t ota_cb)
     return 0;
 }
 
-int WKStack_stop()
+int WKStack_stop(WKStack_stop_cb_t cb)
 {
-    return mqtt_stop();
+    return mqtt_stop(cb);
 }
 
 int WKStack_report_datapoint(WKStack_datapoint_t *dp_group, unsigned int group_size, WKStack_report_cb_t cb)

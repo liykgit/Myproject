@@ -260,6 +260,10 @@ int mqtt_process_error()
     if(mqtt.connect_cb != NULL)
         mqtt.connect_cb(mqtt.error_number);
 
+    if(mqtt.error_number == MQTT_DISCONNECT_SUCCEED && mqtt.stop_cb ) {
+        mqtt.stop_cb();
+    }
+
     return 0;
 }
 

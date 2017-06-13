@@ -38,11 +38,12 @@ int mqtt_start(char *host, unsigned short port, mqtt_connect_data_t *data, mqtt_
     return 0;
 }
 
-int mqtt_stop(void)
+int mqtt_stop(mqtt_stop_cb_t cb)
 {
     if(mqtt.state == MQTT_STATE_RUNNING){
         mqtt.state = MQTT_STATE_STOP;
-
+        if(cb != 0)
+            mqtt.stop_cb = cb;
         vg_release_sem(&ctrl_thread_sem);
     }else{
         return -1;

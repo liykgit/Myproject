@@ -100,6 +100,8 @@ typedef int (*mqtt_connect_cb_t)(mqtt_errno_t err);
 // receive topic callback
 typedef int (*mqtt_topic_cb_t)(unsigned char *payload, int len);
 
+typedef int (*mqtt_stop_cb_t)();
+
 /**
 * @fn mqtt_state_t mqtt_state(void)
 * @brief get the mqtt state.
@@ -136,7 +138,7 @@ int mqtt_start(char *host, unsigned short port, mqtt_connect_data_t *data, mqtt_
 * @brief disconnect the mqtt.
 * @return 0 stop succeed, -1 mqtt state is not MQTT_STATE_RUNNING
 */
-int mqtt_stop(void);
+int mqtt_stop(mqtt_stop_cb_t cb);
 /**
 * @fn int mqtt_publish(char *topic, unsigned char *msg, int msg_len, mqtt_qos_t qos, mqtt_cb_t cb)
 * @brief Init mqtt client, must do this before all other mqtt function.

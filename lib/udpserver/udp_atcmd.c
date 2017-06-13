@@ -114,7 +114,7 @@ void exec_online(int argc, char *argv[], struct socketaddr_in *client_addr)
 
 void exec_offline(int argc, char *argv[], struct socketaddr_in *client_addr)
 {    
-    WKStack_stop();
+    WKStack_stop(0);
     udpserver_sendto(client_addr, OK, strlen(OK));
 }
 

@@ -15,21 +15,21 @@ static void WKStack_connect_ep(void)
 {
     LOG(LEVEL_NORMAL,"WKStack_connect_ep E state: %d\n", WKStack.state);
 
-    char client_id[24];
-    memset(client_id, 0, 24);
+    char client_id[32];
+    memset(client_id, 0, 32);
 
 
     WKStack_params_t *params = &WKStack.params;
 
-    //use long id
-    sprintf((char *)client_id, "%s%s", params->devtype, params->did);
+    //clientId: {productId}.{did}
+    sprintf((char *)client_id, "%s.%s", params->devtype, WKStack.did);
 
-    WKStack_pack_connect(params->did, 0);
+    WKStack_pack_connect(client_id, 0);
     
     data.username= "VENGA_DEV";
     data.password = WKStack.ticket;
 
-    mqtt_start(WKStack.params.host, WKStack.params.port, &data, WKStack_connect_cb);
+    mqtt_start(WKStack.host, WKStack.port, &data, WKStack_connect_cb);
     return;
 };
 
@@ -43,8 +43,8 @@ static void WKStack_announce() {
 
         sprintf(buf, "VENGAS:ANNOUNCE:%s#%s#%s#%s:VENGAE", WKStack.params.devtype,
                             WKStack.params.mac,
-                            WKStack.params.did,
-                            WKStack.params.name);
+                            WKStack.did,
+                            WKStack.name);
 
         while (i++ < WKSTACK_ANNOUNCE_COUNT) {
             udpserver_broadcast(buf, strlen(buf), WKSTACK_ANNOUNCE_PORT);
@@ -191,17 +191,17 @@ int WKStack_start(WKStack_cb_t connect_cb, WKStack_ota_cb_t ota_cb)
 
         WKStack_params_t *params = &WKStack.params;
 
-        if(strlen(params->did) != 0 && strlen(params->host) != 0) { 
-            LOG(LEVEL_NORMAL,"My did is %s\n", params->did);
-            LOG(LEVEL_NORMAL,"host is %s\n", params->host);
+        if(strlen(WKStack.did) != 0 && strlen(WKStack.host) != 0) { 
+            LOG(LEVEL_NORMAL,"My did is %s\n", WKStack.did);
+            LOG(LEVEL_NORMAL,"host is %s\n", WKStack.host);
 
             
             WKStack.state = WKSTACK_WAIT_ONLINE;
         }
         else {
 
-            memset(params->host, 0, WKSTACK_HOST_LEN);
-            params->port = 0;
+            memset(WKStack.host, 0, WKSTACK_HOST_LEN);
+            WKStack.port = 0;
 
             WKStack.state = WKSTACK_INIT;
         }
@@ -328,23 +328,23 @@ WKStack_state_t WKStack_state()
 
 int WKStack_did(char *buf, int size)
 {
-    int did_len = strlen(WKStack.params.did);
+    int did_len = strlen(WKStack.did);
     
     if(did_len + 1 > size)
         return -1;
 
-    strcpy(buf, WKStack.params.did);
+    strcpy(buf, WKStack.did);
     return 0;
 }
 
 int WKStack_name(char *buf, int size)
 {
-    int name_len = strlen(WKStack.params.name);
+    int name_len = strlen(WKStack.name);
     
     if(name_len + 1 > size)
         return -1;
 
-    strcpy(buf, WKStack.params.name);
+    strcpy(buf, WKStack.name);
     return 0;
 }
 

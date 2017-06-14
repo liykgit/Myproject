@@ -8,7 +8,13 @@
 #define TICKET_LEN_PADDING (4) //4 as padding
 
 typedef struct{
+
+    char name[WKSTACK_NAME_LEN];
+    char did[WKSTACK_SN_LEN];
+    char host[WKSTACK_HOST_LEN];
+    unsigned short port;
     WKStack_state_t state;
+
     WKStack_params_t params;
 
     char ticket[TICKET_LEN + TICKET_LEN_PADDING];

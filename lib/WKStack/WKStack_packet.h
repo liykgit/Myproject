@@ -3,7 +3,7 @@
 
 // First host, connect this host to get endpoint
 //#define WKSTACK_FIRST_CONNECT_HOST "35.165.194.227"
-#define WKSTACK_FIRST_CONNECT_HOST "192.168.3.3"
+#define WKSTACK_FIRST_CONNECT_HOST "192.168.3.2"
 //#define WKSTACK_FIRST_CONNECT_HOST "120.24.216.85"
 #define WKSTACK_FIRST_CONNECT_PORT 1884
 
@@ -20,15 +20,16 @@
 #define WKSTACK_TOPIC_ANSWER_FMT "/iot/netin/%s/answer"
 #define WKSTACK_TOPIC_WELCOME_FMT "/iot/netin/%s/welcome"
 #define WKSTACK_TOPIC_CHALLENGE_FMT "/iot/netin/%s/challenge"
+
 #define WKSTACK_TOPIC_REPORT_FMT "/iot/dm/%s/%s/report"
-#define WKSTACK_TOPIC_CONTROL_FMT "/iot/dm/%s/control"
-#define WKSTACK_TOPIC_OTA_SUB_FMT "/iot/ota/%s/sub" // For both Module and MCU ota (Server -> Device)
-#define WKSTACK_TOPIC_OTA_PUB_FMT "/iot/ota/%s/pub" // For Module ota (Device -> Server)
+#define WKSTACK_TOPIC_CONTROL_FMT "/iot/dm/%s/%s/control"
+#define WKSTACK_TOPIC_OTA_SUB_FMT "/iot/ota/%s/%s/sub" // For both Module and MCU ota (Server -> Device)
+#define WKSTACK_TOPIC_OTA_PUB_FMT "/iot/ota/%s/%s/pub" // For Module ota (Device -> Server)
 
-#define WKSTACK_TOPIC_BINDING_SUB_FMT "/iot/binding/%s/sub" // For both Module and MCU ota (Server -> Device)
-#define WKSTACK_TOPIC_BINDING_PUB_FMT "/iot/binding/%s/pub" // For Module ota (Device -> Server)
+#define WKSTACK_TOPIC_BINDING_SUB_FMT "/iot/binding/%s/%s/sub" // For both Module and MCU ota (Server -> Device)
+#define WKSTACK_TOPIC_BINDING_PUB_FMT "/iot/binding/%s/%s/pub" // For Module ota (Device -> Server)
 
-#define WKSTACK_TOPIC_OTA_MCU_OUT_FMT "/iot/in/mcu/%s/ota" // For MCU ota (Device -> Server)
+#define WKSTACK_TOPIC_OTA_MCU_OUT_FMT "/iot/in/mcu/%s/%s/ota" // For MCU ota (Device -> Server)
 
 // Json field
 #define WKSTACK_FIELD_DEVTYPE "type"

@@ -95,10 +95,7 @@ typedef struct {
     char devtype[WKSTACK_DEVTYPE_LEN];
     char mac[WKSTACK_MAC_LEN];
 
-    char name[WKSTACK_NAME_LEN];
-    char did[WKSTACK_SN_LEN];
-    char host[WKSTACK_HOST_LEN];
-    unsigned short port;
+
 } WKStack_params_t;
 
 typedef struct {

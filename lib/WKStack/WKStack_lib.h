@@ -7,8 +7,24 @@
 #define TICKET_LEN (32) 
 #define TICKET_LEN_PADDING (4) //4 as padding
 
+
+//4: padding 128=24*4*8/6, where 24: max allowed characters, 4 : each utf-8 character up to 4 bytes, *8/6 base64 length
+#define WKSTACK_NAME_LEN (128 + 4) 
+#define WKSTACK_HOST_LEN 64
+#define WKSTACK_DID_LEN 16 
+
+
+// WKStack (command or datapoint)'s name max length
+
+
 typedef struct{
+
+    char name[WKSTACK_NAME_LEN];
+    char did[WKSTACK_SN_LEN];
+    char host[WKSTACK_HOST_LEN];
+    unsigned short port;
     WKStack_state_t state;
+
     WKStack_params_t params;
 
     char ticket[TICKET_LEN + TICKET_LEN_PADDING];
@@ -37,6 +53,7 @@ typedef struct{
     WKStack_datapoint_handler_t dp_handler;
 } WKStack_t;
 
+
 extern WKStack_t WKStack;
 extern int g_testmode;
 
@@ -45,5 +62,8 @@ extern int g_testmode;
 #define WKSTACK_ANNOUNCE_PORT 30320
 #define WKSTACK_ANNOUNCE_COUNT 6
 #define WKSTACK_ANNOUNCE_INTERVAL 50
+
+
+extern const char *WKStack_version;
 
 #endif

@@ -129,9 +129,6 @@ int WKStack_publish_ota_request(char *version)
     return mqtt_publish(WKStack.ota_pub_topic, (unsigned char*)buf, offset, MQTT_QOS1, MQTT_RETAIN_FALSE, (mqtt_cb_t)0);
 }
 
-
-
-
 static int WKStack_unpack_ota(unsigned char *payload, int len)
 {
     LOG(LEVEL_DEBUG, "<LOG> WKStack_unpack_ota E\n");
@@ -358,11 +355,10 @@ int WKStack_pack_connect(char *client_id, int willflag)
 	data.MQTTVersion = 3;
 
     if(client_id) {
-        //TODO strncpy ?? tailing 0 must be asured
         strcpy(_id, client_id);
     }
     else {
-        sprintf((char *)_id, "%s#%s", WKStack.params.devtype, WKStack.params.mac);
+        sprintf((char *)_id, "%s#%s", WKStack.params.product_id, WKStack.params.mac);
     }
 
     data.clientID = _id;
@@ -374,9 +370,8 @@ int WKStack_pack_connect(char *client_id, int willflag)
 	if(willflag == 0){
 		data.willFlag	= 0;
     } else {
-        //TODO obsolete code
         memset(message, 0, sizeof(message));
-	    sprintf(message, "{did:%s}", WKStack.params.did);
+	    sprintf(message, "{did:%s}", WKStack.did);
 		data.willFlag = 1;		// 0 close will message, 1 use will message .
         data.will.topicName = WKSTACK_TOPIC_OFFLINE;
         data.will.message = message;
@@ -396,9 +391,61 @@ int WKStack_publish_knock()
 
     sprintf(WKStack.topic_knock, WKSTACK_TOPIC_KNOCK_FMT, WKStack.params.mac); 
     printf("publish to topic %s\n", WKStack.topic_knock);
-    ret = mqtt_publish(WKStack.topic_knock, (unsigned char *)WKStack_version, strlen(WKStack_version), 0, 0, NULL);
+/*
+    char buf[32];
+    
+    if(strlen(WKStack.params.version) > 0)
+        sprintf(buf, "%s %s", WKStack_version, WKStack.params.version);
+    else
+        sprintf(buf, "%s", WKStack_version);
 
-	return ret;
+    ret = mqtt_publish(WKStack.topic_knock, buf, strlen(buf), 0, 0, NULL);
+*/
+
+    char buf[(WKSTACK_VALUE_LEN << 1 )+ WKSTACK_SN_LEN];
+    memset(buf, 0, sizeof(buf));
+
+    int offset = 0;
+
+    {
+        char tag[4] = {0, 0, WKSTACK_DATAPOINT_TYPE_STRING, 0};
+        *(unsigned short*)tag = WKSTACK_SYNC_INDEX_SDKVER;
+        int item_size = tlv_put_string(buf+offset, tag, WKStack_version, sizeof(buf) - offset);
+        if(item_size >= 0)
+            offset += item_size;
+        else { 
+            LOG(LEVEL_ERROR, "knock publish buffer not large enough\n");
+            return -1;
+        }
+    }
+
+    if(strlen(WKStack.params.version) > 0) {
+
+        char tag[4] = {0, 0, WKSTACK_DATAPOINT_TYPE_STRING, 0};
+        *(unsigned short*)tag = WKSTACK_SYNC_INDEX_VER;
+
+        int item_size = tlv_put_string(buf+offset, tag, WKStack.params.version, sizeof(buf) - offset);
+        if(item_size >= 0)
+            offset += item_size;
+        else { 
+            LOG(LEVEL_ERROR, "knock publish buffer not large enough\n");
+            return -1;
+        }
+    }
+
+    if(strlen(WKStack.params.sn) > 0) {
+
+        char tag[4] = {0, 0, WKSTACK_DATAPOINT_TYPE_STRING, 0};
+        *(unsigned short*)tag = WKSTACK_SYNC_INDEX_SN;
+        int item_size = tlv_put_string(buf+offset, tag, WKStack.params.sn, sizeof(buf) - offset);
+        if(item_size >= 0)
+            offset += item_size;
+        else { 
+            LOG(LEVEL_ERROR, "knock publish buffer not large enough\n");
+            return -1;
+        }
+    }
+    return mqtt_publish(WKStack.topic_knock, (unsigned char*)buf, offset, MQTT_QOS1, MQTT_RETAIN_FALSE, (mqtt_cb_t)NULL);
 }
 
 static int WKStack_publish_answer(char *answer, int len)
@@ -460,8 +507,8 @@ int WKStack_unpack_welcome(unsigned char *payload, int len) {
         return 0;
     }
 
-    strncpy((char *)WKStack.params.did, (char *)payload, did_len);
-    LOG(LEVEL_DEBUG, "<LOG> did:%s\n", WKStack.params.did);
+    strncpy((char *)WKStack.did, (char *)payload, did_len);
+    LOG(LEVEL_DEBUG, "<LOG> did:%s\n", WKStack.did);
     hasDid = 1;
 
     char endpoint[url_len + 1];
@@ -470,9 +517,9 @@ int WKStack_unpack_welcome(unsigned char *payload, int len) {
 
     char port[8] = {0,};
 
-    parse_url((char *)endpoint, WKStack.params.host, port);
-    WKStack.params.port = atoi(port);
-    LOG(LEVEL_DEBUG, "<LOG> host:%s, port:%d\n", WKStack.params.host, WKStack.params.port);
+    parse_url((char *)endpoint, WKStack.host, port);
+    WKStack.port = atoi(port);
+    LOG(LEVEL_DEBUG, "<LOG> host:%s, port:%d\n", WKStack.host, WKStack.port);
 
     hasEndpoint = 1;
     
@@ -480,7 +527,7 @@ int WKStack_unpack_welcome(unsigned char *payload, int len) {
 
     hasTicket = 1;
 
-    memcpy(WKStack.params.name, pname, name_len);
+    memcpy(WKStack.name, pname, name_len);
 
     //hasName = 1;
 
@@ -490,14 +537,14 @@ int WKStack_unpack_welcome(unsigned char *payload, int len) {
         WKStack.state = WKSTACK_WAIT_ONLINE;
 
 
-        sprintf(WKStack.report_topic, WKSTACK_TOPIC_REPORT_FMT, WKStack.params.devtype, WKStack.params.did);
+        sprintf(WKStack.report_topic, WKSTACK_TOPIC_REPORT_FMT, WKStack.params.product_id, WKStack.did);
 
-        sprintf(WKStack.control_topic, WKSTACK_TOPIC_CONTROL_FMT, WKStack.params.did);
-        sprintf(WKStack.ota_sub_topic, WKSTACK_TOPIC_OTA_SUB_FMT, WKStack.params.did);
-        sprintf(WKStack.ota_pub_topic, WKSTACK_TOPIC_OTA_PUB_FMT, WKStack.params.did);
+        sprintf(WKStack.control_topic, WKSTACK_TOPIC_CONTROL_FMT, WKStack.params.product_id, WKStack.did);
+        sprintf(WKStack.ota_sub_topic, WKSTACK_TOPIC_OTA_SUB_FMT, WKStack.params.product_id, WKStack.did);
+        sprintf(WKStack.ota_pub_topic, WKSTACK_TOPIC_OTA_PUB_FMT, WKStack.params.product_id, WKStack.did);
 
-        sprintf(WKStack.binding_sub_topic, WKSTACK_TOPIC_BINDING_SUB_FMT, WKStack.params.did);
-        sprintf(WKStack.binding_pub_topic, WKSTACK_TOPIC_BINDING_PUB_FMT, WKStack.params.did);
+        sprintf(WKStack.binding_sub_topic, WKSTACK_TOPIC_BINDING_SUB_FMT, WKStack.params.product_id, WKStack.did);
+        sprintf(WKStack.binding_pub_topic, WKSTACK_TOPIC_BINDING_PUB_FMT, WKStack.params.product_id, WKStack.did);
 
         LOG(LEVEL_NORMAL, "device %s is welcomed\n", pname);
     }

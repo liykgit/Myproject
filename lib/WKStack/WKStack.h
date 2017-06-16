@@ -1,29 +1,20 @@
 #ifndef _WKSTACK_H_KLSJKLSDJFKLSDJFKLD_
 #define _WKSTACK_H_KLSJKLSDJFKLSDJFKLD_
 
-/* Please do not modify this file */
 
-// WKStack (command or datapoint)'s name max length
 #define WKSTACK_VALUE_LEN 128
 
 // WKStack max datapoint count
 #define WKSTACK_MAX_DP_NUM  64
 // WKStack max command count
-#define WKSTACK_MAX_CMD_NUM  64
 
 // WKStack params max length
+
 #define WKSTACK_SN_LEN 48
-//4: padding 128=24*4*8/6, where 24: max allowed characters, 4 : each utf-8 character up to 4 bytes, *8/6 base64 length
-#define WKSTACK_NAME_LEN (128 + 4) 
 #define WKSTACK_KEY_LEN 32
 #define WKSTACK_DEVTYPE_LEN 16
 #define WKSTACK_MAC_LEN 16
-
-#define WKSTACK_HOST_LEN 64
-#define WKSTACK_DID_LEN 16 
-
-// WKStack ota max length
-#define WKSTACK_OTA_VER_LEN 32
+#define WKSTACK_VER_LEN 20
 #define WKSTACK_OTA_URL_LEN 128
 
 // WKStack datapoint value type
@@ -39,6 +30,10 @@
 #define WKSTACK_DATAPOINT_TYPE_INT  0x02
 #define WKSTACK_DATAPOINT_TYPE_FLOAT 0x03
 #define WKSTACK_DATAPOINT_TYPE_STRING 0x04
+
+#define PADDING (4)
+
+
 
 typedef enum {
     WKSTACK_WAIT_INIT = 0, // Wait init
@@ -90,28 +85,12 @@ typedef enum {
 }WKStack_ota_type_t;
 
 typedef struct {
-    char sn[WKSTACK_SN_LEN];
-    char key[WKSTACK_KEY_LEN];
-    char devtype[WKSTACK_DEVTYPE_LEN];
-    char mac[WKSTACK_MAC_LEN];
-
-    char name[WKSTACK_NAME_LEN];
-    char did[WKSTACK_SN_LEN];
-    char host[WKSTACK_HOST_LEN];
-    unsigned short port;
+    char version[WKSTACK_VER_LEN + PADDING];
+    char sn[WKSTACK_SN_LEN +  PADDING];
+    char key[WKSTACK_KEY_LEN + PADDING];
+    char product_id[WKSTACK_DEVTYPE_LEN + PADDING];
+    char mac[WKSTACK_MAC_LEN + PADDING];
 } WKStack_params_t;
-
-typedef struct {
-
-	char mod_ver[WKSTACK_OTA_VER_LEN];
-	char mod_url[WKSTACK_OTA_URL_LEN];
-	int mod_port;
-
-	char mcu_ver[WKSTACK_OTA_VER_LEN];
-	char mcu_url[WKSTACK_OTA_URL_LEN];
-	int mcu_port;
-}WKStack_ota_t;
-
 //TODO change struct name to include ota
 typedef struct{
 
@@ -124,6 +103,17 @@ typedef struct{
         char *string;
     } value;
 } WKStack_datapoint_t;
+
+typedef struct {
+
+	char mod_ver[WKSTACK_VER_LEN];
+	char mod_url[WKSTACK_OTA_URL_LEN];
+	int mod_port;
+
+	char mcu_ver[WKSTACK_VER_LEN];
+	char mcu_url[WKSTACK_OTA_URL_LEN];
+	int mcu_port;
+}WKStack_ota_t;
 
 
 typedef int (*WKStack_cb_t)(WKStack_state_t state);
@@ -154,7 +144,5 @@ WKStack_state_t WKStack_state(void);
 int WKStack_did(char *buf, int size);
 
 int WKStack_name(char *buf, int size);
-
-extern const char *WKStack_version;
 
 #endif

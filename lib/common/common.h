@@ -3,6 +3,8 @@
 
 #include "plat.h"
 
+int isValidMacAddress(const char* mac);
+
 int is_valid_ip(const char *url);
 
 int parse_url(char *ep, char* www, char *port);

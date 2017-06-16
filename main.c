@@ -24,7 +24,6 @@ int connect_cb(WKStack_state_t state)
 }
 
 
-static WKStack_params_t params;
 
 static void datapoint_handler(WKStack_datapoint_t *dps, int size) {
 
@@ -34,12 +33,20 @@ static void datapoint_handler(WKStack_datapoint_t *dps, int size) {
 
    
 
+
 void WK_Start(char *productId, char *mac, char *key)
 {
+    static WKStack_params_t params;
 
-    memcpy(params.devtype, productId, strlen(productId));
     memcpy(params.key, key, strlen(key));
+
+    memcpy(params.product_id, productId, strlen(productId));
+
     memcpy(params.mac, mac, strlen(mac));
+
+    strcpy(params.version, "0.0.1");
+
+    strcpy(params.sn, "ddssllsffmmrrd");
 
     WKStack_register_datapoint_handler(datapoint_handler);
 
@@ -78,9 +85,9 @@ int main(int argc, char **argv)
 		}
 		fseek(config_fp, 74 * (atoi((const char *)argv[1]) - 1), SEEK_SET);
 
-		fscanf(config_fp, "%s %s %s %s", params.mac, params.sn, params.devtype, params.key);
+		fscanf(config_fp, "%s %s %s %s", params.mac, params.sn, params.product_id, params.key);
 
-		printf("%s %s %s %s\n", params.mac, params.sn, params.devtype, params.key);
+		printf("%s %s %s %s\n", params.mac, params.sn, params.product_id, params.key);
 	}
 */
 

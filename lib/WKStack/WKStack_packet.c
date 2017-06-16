@@ -358,7 +358,7 @@ int WKStack_pack_connect(char *client_id, int willflag)
         strcpy(_id, client_id);
     }
     else {
-        sprintf((char *)_id, "%s#%s", WKStack.params.devtype, WKStack.params.mac);
+        sprintf((char *)_id, "%s#%s", WKStack.params.product_id, WKStack.params.mac);
     }
 
     data.clientID = _id;
@@ -391,9 +391,61 @@ int WKStack_publish_knock()
 
     sprintf(WKStack.topic_knock, WKSTACK_TOPIC_KNOCK_FMT, WKStack.params.mac); 
     printf("publish to topic %s\n", WKStack.topic_knock);
-    ret = mqtt_publish(WKStack.topic_knock, (unsigned char *)WKStack_version, strlen(WKStack_version), 0, 0, NULL);
+/*
+    char buf[32];
+    
+    if(strlen(WKStack.params.version) > 0)
+        sprintf(buf, "%s %s", WKStack_version, WKStack.params.version);
+    else
+        sprintf(buf, "%s", WKStack_version);
 
-	return ret;
+    ret = mqtt_publish(WKStack.topic_knock, buf, strlen(buf), 0, 0, NULL);
+*/
+
+    char buf[(WKSTACK_VALUE_LEN << 1 )+ WKSTACK_SN_LEN];
+    memset(buf, 0, sizeof(buf));
+
+    int offset = 0;
+
+    {
+        char tag[4] = {0, 0, WKSTACK_DATAPOINT_TYPE_STRING, 0};
+        *(unsigned short*)tag = WKSTACK_SYNC_INDEX_SDKVER;
+        int item_size = tlv_put_string(buf+offset, tag, WKStack_version, sizeof(buf) - offset);
+        if(item_size >= 0)
+            offset += item_size;
+        else { 
+            LOG(LEVEL_ERROR, "knock publish buffer not large enough\n");
+            return -1;
+        }
+    }
+
+    if(strlen(WKStack.params.version) > 0) {
+
+        char tag[4] = {0, 0, WKSTACK_DATAPOINT_TYPE_STRING, 0};
+        *(unsigned short*)tag = WKSTACK_SYNC_INDEX_VER;
+
+        int item_size = tlv_put_string(buf+offset, tag, WKStack.params.version, sizeof(buf) - offset);
+        if(item_size >= 0)
+            offset += item_size;
+        else { 
+            LOG(LEVEL_ERROR, "knock publish buffer not large enough\n");
+            return -1;
+        }
+    }
+
+    if(strlen(WKStack.params.sn) > 0) {
+
+        char tag[4] = {0, 0, WKSTACK_DATAPOINT_TYPE_STRING, 0};
+        *(unsigned short*)tag = WKSTACK_SYNC_INDEX_SN;
+        int item_size = tlv_put_string(buf+offset, tag, WKStack.params.sn, sizeof(buf) - offset);
+        if(item_size >= 0)
+            offset += item_size;
+        else { 
+            LOG(LEVEL_ERROR, "knock publish buffer not large enough\n");
+            return -1;
+        }
+    }
+    return mqtt_publish(WKStack.topic_knock, (unsigned char*)buf, offset, MQTT_QOS1, MQTT_RETAIN_FALSE, (mqtt_cb_t)NULL);
 }
 
 static int WKStack_publish_answer(char *answer, int len)
@@ -485,14 +537,14 @@ int WKStack_unpack_welcome(unsigned char *payload, int len) {
         WKStack.state = WKSTACK_WAIT_ONLINE;
 
 
-        sprintf(WKStack.report_topic, WKSTACK_TOPIC_REPORT_FMT, WKStack.params.devtype, WKStack.did);
+        sprintf(WKStack.report_topic, WKSTACK_TOPIC_REPORT_FMT, WKStack.params.product_id, WKStack.did);
 
-        sprintf(WKStack.control_topic, WKSTACK_TOPIC_CONTROL_FMT, WKStack.params.devtype, WKStack.did);
-        sprintf(WKStack.ota_sub_topic, WKSTACK_TOPIC_OTA_SUB_FMT, WKStack.params.devtype, WKStack.did);
-        sprintf(WKStack.ota_pub_topic, WKSTACK_TOPIC_OTA_PUB_FMT, WKStack.params.devtype, WKStack.did);
+        sprintf(WKStack.control_topic, WKSTACK_TOPIC_CONTROL_FMT, WKStack.params.product_id, WKStack.did);
+        sprintf(WKStack.ota_sub_topic, WKSTACK_TOPIC_OTA_SUB_FMT, WKStack.params.product_id, WKStack.did);
+        sprintf(WKStack.ota_pub_topic, WKSTACK_TOPIC_OTA_PUB_FMT, WKStack.params.product_id, WKStack.did);
 
-        sprintf(WKStack.binding_sub_topic, WKSTACK_TOPIC_BINDING_SUB_FMT, WKStack.params.devtype, WKStack.did);
-        sprintf(WKStack.binding_pub_topic, WKSTACK_TOPIC_BINDING_PUB_FMT, WKStack.params.devtype, WKStack.did);
+        sprintf(WKStack.binding_sub_topic, WKSTACK_TOPIC_BINDING_SUB_FMT, WKStack.params.product_id, WKStack.did);
+        sprintf(WKStack.binding_pub_topic, WKSTACK_TOPIC_BINDING_PUB_FMT, WKStack.params.product_id, WKStack.did);
 
         LOG(LEVEL_NORMAL, "device %s is welcomed\n", pname);
     }

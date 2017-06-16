@@ -163,7 +163,7 @@ void exec_find(int argc, char *argv[], struct socketaddr_in *client_addr)
         char buf[196];
         memset(buf, 0, sizeof(buf));
 
-        sprintf((char *)buf, "VENGAS:FIND:%s#%s#%s#%s:VENGAE", WKStack.params.devtype, WKStack.params.mac, WKStack.did, WKStack.name);
+        sprintf((char *)buf, "VENGAS:FIND:%s#%s#%s#%s:VENGAE", WKStack.params.product_id, WKStack.params.mac, WKStack.did, WKStack.name);
         udpserver_sendto(client_addr, buf, strlen(buf));
     } 
     else {

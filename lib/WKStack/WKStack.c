@@ -22,7 +22,7 @@ static void WKStack_connect_ep(void)
     WKStack_params_t *params = &WKStack.params;
 
     //clientId: {productId}.{did}
-    sprintf((char *)client_id, "%s.%s", params->devtype, WKStack.did);
+    sprintf((char *)client_id, "%s.%s", params->product_id, WKStack.did);
 
     WKStack_pack_connect(client_id, 0);
     
@@ -41,7 +41,7 @@ static void WKStack_announce() {
         char buf[192];
         memset(buf, 0, sizeof(buf));
 
-        sprintf(buf, "VENGAS:ANNOUNCE:%s#%s#%s#%s:VENGAE", WKStack.params.devtype,
+        sprintf(buf, "VENGAS:ANNOUNCE:%s#%s#%s#%s:VENGAE", WKStack.params.product_id,
                             WKStack.params.mac,
                             WKStack.did,
                             WKStack.name);
@@ -157,6 +157,31 @@ static void WKStack_connect(void)
 int WKStack_init(WKStack_params_t *params)
 {
 
+    if(strlen(params->key) <= 0 || strlen(params->key) > WKSTACK_KEY_LEN) {
+        LOG(LEVEL_ERROR, "invalid product key %s\n", params->key);
+        return -1;
+    }
+
+    if(strlen(params->product_id) <= 0 || strlen(params->product_id) > WKSTACK_DEVTYPE_LEN) {
+        LOG(LEVEL_ERROR, "invalid product id %s\n", params->product_id);
+        return -1;
+    }
+
+    if(strlen(params->mac) <= 0 || strlen(params->mac) > WKSTACK_MAC_LEN || !isValidMacAddress(params->mac)) {
+        LOG(LEVEL_ERROR, "invalid product mac %s\n", params->mac);
+        return -1;
+    }
+
+    if(strlen(params->sn) > WKSTACK_SN_LEN) {
+        LOG(LEVEL_ERROR, "max allowed sn length %d\n", WKSTACK_SN_LEN);
+        return -1;
+    }
+
+    if(strlen(params->version) > WKSTACK_VER_LEN) {
+        LOG(LEVEL_ERROR, "max allowed version length %d\n", WKSTACK_VER_LEN);
+        return -1;
+    }
+
     if(WKStack.state == WKSTACK_WAIT_INIT){
        
         memcpy(&WKStack.params, params, sizeof(WKStack_params_t));
@@ -167,8 +192,6 @@ int WKStack_init(WKStack_params_t *params)
         log_init(WKStack.params.mac);
 
         mqtt_init(WKSTACK_KEEPALIVE_TIME, 1024);
-        
-
     }
 
     WKStack.state = WKSTACK_OFFLINE;

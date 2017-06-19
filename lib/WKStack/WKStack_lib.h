@@ -68,4 +68,7 @@ extern int g_testmode;
 
 extern const char *WKStack_version;
 
+int doStart();
+
+
 #endif

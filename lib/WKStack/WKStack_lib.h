@@ -63,6 +63,8 @@ extern int g_testmode;
 #define WKSTACK_ANNOUNCE_COUNT 6
 #define WKSTACK_ANNOUNCE_INTERVAL 50
 
+#define REGISTRY_ERR_SYSTEM_FAILURE "500"
+#define REGISTRY_ERR_UNAUTHORIZED   "403"
 
 extern const char *WKStack_version;
 

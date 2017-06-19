@@ -1,6 +1,15 @@
 
 #include "common.h"
 
+static int isxdigit(c)
+{
+        /*
+         *   * Depends on ASCII-like character ordering.
+         *       */
+        return ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) ? 1 : 0;
+}
+
+
 int isValidMacAddress(const char* mac) {
     int i = 0;
     int s = 0;

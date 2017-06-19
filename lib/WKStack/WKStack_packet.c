@@ -465,6 +465,18 @@ int WKStack_unpack_welcome(unsigned char *payload, int len) {
     LOG(LEVEL_NORMAL, "WKStack_unpack_welcome E\n");
     LOG(LEVEL_DEBUG, "welcome message %s\n", payload);
 
+    if(memcmp(payload, REGISTRY_ERR_SYSTEM_FAILURE, strlen(REGISTRY_ERR_SYSTEM_FAILURE)) == 0) {
+        //todo : try later
+        LOG(LEVEL_ERROR, "Failed to register device, cause : "REGISTRY_ERR_SYSTEM_FAILURE"\n");
+        return -1;
+    }
+
+    if(memcmp(payload, REGISTRY_ERR_UNAUTHORIZED, strlen(REGISTRY_ERR_UNAUTHORIZED)) == 0) {
+        //todo : try later
+        LOG(LEVEL_ERROR, "Failed to register device, cause : "REGISTRY_ERR_UNAUTHORIZED"\n");
+        return -1;
+    }
+
     int hasDid = 0;
     int hasEndpoint = 0;
     int hasTicket = 0;
@@ -547,12 +559,12 @@ int WKStack_unpack_welcome(unsigned char *payload, int len) {
         sprintf(WKStack.binding_pub_topic, WKSTACK_TOPIC_BINDING_PUB_FMT, WKStack.params.product_id, WKStack.did);
 
         LOG(LEVEL_NORMAL, "device %s is welcomed\n", pname);
+        return 0;
     }
 
 	//printf("### MEM FREE : %d.\n", qcom_mem_heap_get_free_size());
-    return 0;
+    return -1;
 }
-
 
 int WKStack_subscribe_welcome()
 {
@@ -565,13 +577,20 @@ int WKStack_subscribe_welcome()
 }
 
 int WKStack_unpack_challenge(unsigned char *payload, int len) {
-    
-    char aes[len];
+  
+#define AES_LEN 16
+    char aes[AES_LEN];
+   
+    if(!payload || len != AES_LEN) {
+        LOG(LEVEL_ERROR, "FATAL: empty challenge payload or invalid len %d\n", len);
+        return -1;
+    }
 
+    //aes_ecb(aes, (unsigned char*)payload, (unsigned char*)WKStack.params.key);
     aes_ecb(aes, (unsigned char*)payload, (unsigned char*)WKStack.params.key);
 
-    printf("nonce : ");
-    printf("signed output: ");
+    LOG(LEVEL_NORMAL, "nonce : ");
+    LOG(LEVEL_DEBUG, "signed output: ");
 
     WKStack_publish_answer(aes, len);
    

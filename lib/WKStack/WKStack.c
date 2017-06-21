@@ -14,27 +14,27 @@ int WKStack_init(WKStack_params_t *params)
 {
 
     if(strlen(params->key) <= 0 || strlen(params->key) > WKSTACK_KEY_LEN) {
-        LOG(LEVEL_ERROR, "invalid product key %s\n", params->key);
+        LOG(LEVEL_ERROR, "Error: invalid product key %s\n", params->key);
         return -1;
     }
 
     if(strlen(params->product_id) <= 0 || strlen(params->product_id) > WKSTACK_DEVTYPE_LEN) {
-        LOG(LEVEL_ERROR, "invalid product id %s\n", params->product_id);
+        LOG(LEVEL_ERROR, "Error: invalid product id %s\n", params->product_id);
         return -1;
     }
 
     if(strlen(params->mac) <= 0 || strlen(params->mac) > WKSTACK_MAC_LEN || !isValidMacAddress(params->mac)) {
-        LOG(LEVEL_ERROR, "invalid product mac %s\n", params->mac);
+        LOG(LEVEL_ERROR, "Error: invalid mac %s\n", params->mac);
         return -1;
     }
 
     if(strlen(params->sn) > WKSTACK_SN_LEN) {
-        LOG(LEVEL_ERROR, "max allowed sn length %d\n", WKSTACK_SN_LEN);
+        LOG(LEVEL_ERROR, "Error: max allowed sn length %d\n", WKSTACK_SN_LEN);
         return -1;
     }
 
     if(strlen(params->version) > WKSTACK_VER_LEN) {
-        LOG(LEVEL_ERROR, "max allowed version length %d\n", WKSTACK_VER_LEN);
+        LOG(LEVEL_ERROR, "Error: max allowed version length %d\n", WKSTACK_VER_LEN);
         return -1;
     }
 
@@ -313,7 +313,6 @@ int WKStack_report_ota_progress(WKStack_ota_target_t target, WKStack_ota_report_
   
     return mqtt_publish(WKStack.ota_pub_topic, (unsigned char*)buf, offset, MQTT_QOS1, MQTT_RETAIN_FALSE, (mqtt_cb_t)cb);
 }
-
 
 void WKStack_rabbit() {
     LOG(LEVEL_NORMAL,"WKStack_rabbit\n");

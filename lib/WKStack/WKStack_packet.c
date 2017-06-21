@@ -559,8 +559,9 @@ int WKStack_unpack_welcome(unsigned char *payload, int len) {
 
     if(hasDid && hasEndpoint && hasTicket /*&& hasName*/) {
 
-        WKStack.state = WKSTACK_WAIT_ONLINE;
+        mqtt_stop(0);
 
+        WKStack.state = WKSTACK_WAIT_ONLINE;
 
         sprintf(WKStack.report_topic, WKSTACK_TOPIC_REPORT_FMT, WKStack.params.product_id, WKStack.did);
 

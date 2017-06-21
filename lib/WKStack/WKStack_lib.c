@@ -34,6 +34,7 @@ void WKStack_connect_ep(void)
     
     g_mqtt_data.username= "VENGA_DEV";
     g_mqtt_data.password = WKStack.ticket;
+    //g_mqtt_data.password = "hello";
 
     mqtt_start(WKStack.host, WKStack.port, &g_mqtt_data, WKStack_connect_cb);
     return;
@@ -100,7 +101,9 @@ int WKStack_connect_cb(mqtt_errno_t err)
             case MQTT_DISCONNECT_SUCCEED:
                 {
                     LOG(LEVEL_NORMAL,"We are off, state %d\n", WKStack.state);
-                    WKStack.state = WKSTACK_OFFLINE;
+                    //WKStack.state = WKSTACK_OFFLINE;
+                
+                    WKStack_connect_ep();
                 }
                 break;
 

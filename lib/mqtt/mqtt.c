@@ -483,7 +483,7 @@ int mqtt_init(int keepalive, int window_size)
     vg_create_sem(&recv_thread_sem, "recv_thread");
 
     vg_start_thread(mqtt_ctrl_thread, NULL, 4096 + 1024);
-	vg_start_thread(mqtt_recv_thread, NULL, 2048);
+	vg_start_thread(mqtt_recv_thread, NULL, 2048 + 1024);
 
     return 0;
 }

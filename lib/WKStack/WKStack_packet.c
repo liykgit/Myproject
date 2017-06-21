@@ -466,12 +466,25 @@ int WKStack_unpack_welcome(unsigned char *payload, int len) {
     LOG(LEVEL_DEBUG, "welcome message %s\n", payload);
 
     if(memcmp(payload, REGISTRY_ERR_SYSTEM_FAILURE, strlen(REGISTRY_ERR_SYSTEM_FAILURE)) == 0) {
+
+        msleep(RECONNECT_DELAY_SHORT);
+
+        WKStack.state = WKSTACK_OFFLINE;
+        doStart();
+
         //todo : try later
         LOG(LEVEL_ERROR, "Failed to register device, cause : "REGISTRY_ERR_SYSTEM_FAILURE"\n");
         return -1;
     }
 
     if(memcmp(payload, REGISTRY_ERR_UNAUTHORIZED, strlen(REGISTRY_ERR_UNAUTHORIZED)) == 0) {
+
+         msleep(RECONNECT_DELAY_LONG);
+         
+         WKStack.state = WKSTACK_OFFLINE;
+         doStart();
+ 
+
         //todo : try later
         LOG(LEVEL_ERROR, "Failed to register device, cause : "REGISTRY_ERR_UNAUTHORIZED"\n");
         return -1;

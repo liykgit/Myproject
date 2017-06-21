@@ -66,6 +66,9 @@ extern int g_testmode;
 #define REGISTRY_ERR_SYSTEM_FAILURE "500"
 #define REGISTRY_ERR_UNAUTHORIZED   "403"
 
+#define RECONNECT_DELAY_SHORT 1000 * 10
+#define RECONNECT_DELAY_LONG  1000 * 60
+
 extern const char *WKStack_version;
 
 int doStart();

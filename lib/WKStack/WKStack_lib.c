@@ -167,7 +167,7 @@ int doStart() {
 
         WKStack_params_t *params = &WKStack.params;
 
-        if(strlen(WKStack.did) != 0 && strlen(WKStack.host) != 0) { 
+        if(strlen(WKStack.did) != 0 && strlen(WKStack.host) != 0 && strlen(WKStack.ticket) != 0) { 
             LOG(LEVEL_NORMAL,"My did is %s\n", WKStack.did);
             LOG(LEVEL_NORMAL,"host is %s\n", WKStack.host);
 

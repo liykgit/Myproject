@@ -279,6 +279,7 @@ int mqtt_process_connack()
                 mqtt.state = MQTT_STATE_RUNNING;
             }else{
                 mqtt.state = MQTT_STATE_ERROR;
+                mqtt_process_error();
             }
             if(mqtt.connect_cb != NULL){
                 mqtt.connect_cb(mqtt.error_number);

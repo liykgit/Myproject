@@ -561,8 +561,6 @@ int WKStack_unpack_welcome(unsigned char *payload, int len) {
 
         mqtt_stop(0);
 
-        WKStack.state = WKSTACK_WAIT_ONLINE;
-
         sprintf(WKStack.report_topic, WKSTACK_TOPIC_REPORT_FMT, WKStack.params.product_id, WKStack.did);
 
         sprintf(WKStack.control_topic, WKSTACK_TOPIC_CONTROL_FMT, WKStack.params.product_id, WKStack.did);

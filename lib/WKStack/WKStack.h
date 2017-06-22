@@ -36,15 +36,18 @@
 
 
 typedef enum {
+
     WKSTACK_WAIT_INIT = 0, // Wait init
     WKSTACK_OFFLINE = 1,
 
-    WKSTACK_INIT = 2, // in init
+    WKSTACK_REGISTER = 2, // in init
 
-    WKSTACK_WAIT_ONLINE = 3, // Wait online
+    WKSTACK_CONNECT_ENDPOINT = 3, // Wait online
     WKSTACK_ONLINE = 4,
     WKSTACK_OTA = 5,
     WKSTACK_ERROR = 6,
+    WKSTACK_RECONNECT_ENDPOINT = 7 // Wait online
+
 }WKStack_state_t;
 
 // Must be 6 and 7

@@ -328,6 +328,8 @@ int vg_connect_server(int *sock, char *url, int port, int ssl/*0:nossl, 1:ssl*/)
 
 	unsigned int ipaddr = 0;
 
+    qcom_tcp_conn_timeout(5);
+
 again:
 
 	ip[0] = 0;
@@ -369,6 +371,8 @@ again:
 	else
 		conn = qcom_connect(*sock,(struct sockaddr*)&address, sizeof(struct sockaddr_in));
 
+	LOG(LEVEL_DEBUG, "connect return %d\n", conn);
+/*
 	if(SOCKET_ERROR == conn)
 	{
 		try_times++;
@@ -377,8 +381,8 @@ again:
 		else
 			goto again;
 	}
-
-	return 0;
+*/
+	return conn;
 }
 
 int vg_accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)

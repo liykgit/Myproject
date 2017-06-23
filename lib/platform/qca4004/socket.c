@@ -240,7 +240,7 @@ int vg_recv(int sock, unsigned char *buffer, int length, int ssl)
 				ret = qcom_recv(sock, (char *)(buffer), length, 0);
 			if(ret > 0){
 				LOG(LEVEL_DEBUG, "<LOG> recv: \n");
-				log_buffer(LEVEL_DEBUG, (char *)buffer, ret);
+				vg_print_hex(LEVEL_DEBUG, (char *)buffer, ret);
 
 				return ret;
 			}else if(ret < 0){//recv err

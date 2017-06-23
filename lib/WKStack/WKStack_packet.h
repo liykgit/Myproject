@@ -1,9 +1,11 @@
 #ifndef _WKSTACK_PACKET_H_JSKFJLKSDJFKSDF_
 #define _WKSTACK_PACKET_H_JSKFJLKSDJFKSDF_
 
+#include "mqtt.h"
+
 // First host, connect this host to get endpoint
 //#define WKSTACK_FIRST_CONNECT_HOST "35.165.194.227"
-#define WKSTACK_FIRST_CONNECT_HOST "192.168.3.6"
+#define WKSTACK_FIRST_CONNECT_HOST "192.168.3.2"
 //#define WKSTACK_FIRST_CONNECT_HOST "120.24.216.85"
 #define WKSTACK_FIRST_CONNECT_PORT 1884
 
@@ -95,7 +97,7 @@ typedef enum {
 } WKStack_ota_msg_type_t;
 
 
-extern mqtt_connect_data_t data;
+extern mqtt_connect_data_t g_mqtt_data;
 
 int WKStack_pack_connect(char *client_id, int flag);
 int WKStack_pack_connect_cb(char *client_id, int flag);

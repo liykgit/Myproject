@@ -8,12 +8,9 @@
 
 #include "common.h"
 
-
-#define PRODUCTID   "rDLFXB8d"
-#define KEY         "yyEheWBmbdHdLMTu"
+#define PRODUCTID   "sHpjVtle"
+#define KEY         "y12-42l7WMxUQRn_"
 #define MAC         "A1B2C3D4E916"
-
-
 
 
 int connect_cb(WKStack_state_t state)
@@ -34,7 +31,7 @@ static void datapoint_handler(WKStack_datapoint_t *dps, int size) {
    
 
 
-void WK_Start(char *productId, char *mac, char *key)
+void WK_Init(char *productId, char *mac, char *key)
 {
     static WKStack_params_t params;
 
@@ -51,6 +48,10 @@ void WK_Start(char *productId, char *mac, char *key)
     WKStack_register_datapoint_handler(datapoint_handler);
 
     WKStack_init(&params);
+
+}
+
+void WK_Start() {
 
     WKStack_start(connect_cb, NULL);
 }
@@ -102,15 +103,11 @@ int main(int argc, char **argv)
 	fscanf(tcp_config_fp, "%s %d", sim_tcp_ip, &sim_tcp_port);
 	printf("%s %d\n", sim_tcp_ip, sim_tcp_port);
 */
-    WK_Start(PRODUCTID, MAC, KEY);
-
+    WK_Init(PRODUCTID, MAC, KEY);
 
     while(1){
+        WK_Start();
         msleep(2000);
-        if(WKStack_state() == WKSTACK_ONLINE){
-            //printf("Init succeed\n");
-            //usr_thread(1);
-        }
     }
 
 	return 0;

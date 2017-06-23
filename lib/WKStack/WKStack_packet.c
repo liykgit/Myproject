@@ -9,7 +9,7 @@
 #include "pushlist.h"
 #include "udpserver.h"
 
-mqtt_connect_data_t data = { {'M', 'Q', 'T', 'C'}, 0, 4, 0, 1, 0, { {'M', 'Q', 'T', 'W'}, 0, 0, 0, 0, 0 }, 0, 0 };
+mqtt_connect_data_t g_mqtt_data = { {'M', 'Q', 'T', 'C'}, 0, 4, 0, 1, 0, { {'M', 'Q', 'T', 'W'}, 0, 0, 0, 0, 0 }, 0, 0 };
 
 static WKStack_datapoint_t dps[DP_COUNT_MAX];
 
@@ -352,7 +352,7 @@ int WKStack_pack_connect(char *client_id, int willflag)
     static char message[128];
     static char _id[24]; //mqtt allows 23 bytes at max
 
-	data.MQTTVersion = 3;
+	g_mqtt_data.MQTTVersion = 3;
 
     if(client_id) {
         strcpy(_id, client_id);
@@ -361,26 +361,26 @@ int WKStack_pack_connect(char *client_id, int willflag)
         sprintf((char *)_id, "%s#%s", WKStack.params.product_id, WKStack.params.mac);
     }
 
-    data.clientID = _id;
+    g_mqtt_data.clientID = _id;
 
 	//data.clientID = WKStack.params.mac;
-	data.username = NULL;
+	g_mqtt_data.username = NULL;
 
     // First connect, without last will
 	if(willflag == 0){
-		data.willFlag	= 0;
+		g_mqtt_data.willFlag	= 0;
     } else {
         memset(message, 0, sizeof(message));
 	    sprintf(message, "{did:%s}", WKStack.did);
-		data.willFlag = 1;		// 0 close will message, 1 use will message .
-        data.will.topicName = WKSTACK_TOPIC_OFFLINE;
-        data.will.message = message;
-        data.will.retained = 1;
-        data.will.qos = 1;
+		g_mqtt_data.willFlag = 1;		// 0 close will message, 1 use will message .
+        g_mqtt_data.will.topicName = WKSTACK_TOPIC_OFFLINE;
+        g_mqtt_data.will.message = message;
+        g_mqtt_data.will.retained = 1;
+        g_mqtt_data.will.qos = 1;
     }
 
-	data.password = NULL;
-	data.cleansession = 0;		// 0 will receive outline message.
+	g_mqtt_data.password = NULL;
+	g_mqtt_data.cleansession = 0;		// 0 will receive outline message.
 
 	return 0;
 }
@@ -466,12 +466,25 @@ int WKStack_unpack_welcome(unsigned char *payload, int len) {
     LOG(LEVEL_DEBUG, "welcome message %s\n", payload);
 
     if(memcmp(payload, REGISTRY_ERR_SYSTEM_FAILURE, strlen(REGISTRY_ERR_SYSTEM_FAILURE)) == 0) {
+
+        msleep(RECONNECT_DELAY_SHORT);
+
+        WKStack.state = WKSTACK_OFFLINE;
+        doStart();
+
         //todo : try later
         LOG(LEVEL_ERROR, "Failed to register device, cause : "REGISTRY_ERR_SYSTEM_FAILURE"\n");
         return -1;
     }
 
     if(memcmp(payload, REGISTRY_ERR_UNAUTHORIZED, strlen(REGISTRY_ERR_UNAUTHORIZED)) == 0) {
+
+         msleep(RECONNECT_DELAY_LONG);
+         
+         WKStack.state = WKSTACK_OFFLINE;
+         doStart();
+ 
+
         //todo : try later
         LOG(LEVEL_ERROR, "Failed to register device, cause : "REGISTRY_ERR_UNAUTHORIZED"\n");
         return -1;
@@ -546,8 +559,7 @@ int WKStack_unpack_welcome(unsigned char *payload, int len) {
 
     if(hasDid && hasEndpoint && hasTicket /*&& hasName*/) {
 
-        WKStack.state = WKSTACK_WAIT_ONLINE;
-
+        mqtt_stop(0);
 
         sprintf(WKStack.report_topic, WKSTACK_TOPIC_REPORT_FMT, WKStack.params.product_id, WKStack.did);
 

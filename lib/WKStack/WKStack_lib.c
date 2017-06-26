@@ -1,4 +1,3 @@
-
 #include <string.h>
 
 #include "common.h"
@@ -12,7 +11,7 @@
 WKStack_t WKStack;
 
 int g_testmode = 0;
-const char *WKStack_version = "1.0.0";
+const char *WKStack_version = "1.2.0";
 
 
 int WKStack_connect_cb(mqtt_errno_t err);

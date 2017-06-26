@@ -9,30 +9,57 @@ static int client_sock = -1;
 
 //static unsigned char udpserver_buffer[TCP_RECV_BUFFER_SIZE];
 
+
 static thread_ret_t tcpserver_handler_thread() {
 
-    LOG(LEVEL_DEBUG, "tcp_handler_thread E");
+    LOG(LEVEL_DEBUG, "tcp_handler_thread E\n");
 
     struct sockaddr_in client_addr;
     memset(&client_addr, 0, sizeof(struct sockaddr_in));
+    int addr_len = sizeof(struct sockaddr_in);
+	struct timeval tm;
+	int	ret;
+
+	tm.tv_sec  = 5;
+	tm.tv_usec = 0; 
 
 
     vg_listen(tcpserver_sock, 1);
 
+
     while(1) {
-        
-        int addr_len = sizeof(client_addr);
 
-        client_sock = vg_accept(tcpserver_sock, (struct sockaddr *) &client_addr, &addr_len);
-        if(client_sock < 0) {
-            LOG(LEVEL_ERROR, "Failed to accept socket %d.\n", client_sock);
-            continue;
+        vg_fd_set sockSet;
+        FD_ZERO(&sockSet);
+        FD_SET(tcpserver_sock, &sockSet);
+
+	    ret	= vg_select(tcpserver_sock + 1, &sockSet, 0, 0, &tm);
+
+		if (ret < 0)
+		{
+			LOG(LEVEL_ERROR, "tcp listen socket selece failed %d.\n", ret);
+			break;
+		}
+		else if (ret == 0)
+		{
+			continue;
+		}
+        else {
+
+            ret = FD_ISSET(tcpserver_sock, &sockSet);
+            if (ret == 1)       
+            {
+                //== 5. accept a new socket connect
+                client_sock = vg_accept(tcpserver_sock, (struct sockaddr *)&client_addr, &addr_len);
+                if (client_sock < 0)
+                {
+                    LOG(LEVEL_ERROR, "Failed to accept socket %d.\n", client_sock);
+                }
+                else
+                    LOG(LEVEL_NORMAL, "Accepted tcp socket %d.\n", client_sock);
+
+            }
         }
-        
-        //struct linger ling = { 1, 1 };
-
-        //vg_setsockopt(client_sock, SOL_SOCKET, SO_LINGER, (void *)&ling, sizeof(ling));
-
     }
     LOG(LEVEL_DEBUG, "tcp_handler_thread X");
 }

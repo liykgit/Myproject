@@ -14,3 +14,10 @@ define KEY         "y1leqQavGbjbCM8r"
 define MAC         "A1B2C3D4E5F6"
 
 
+//3.6 test project
+
+#define PRODUCTID   "rDLFXB8d"
+#define KEY         "yyEheWBmbdHdLMTu"
+define MAC         "A1B2C3D4E5F6"
+
+

@@ -8,8 +8,10 @@
 
 #include "common.h"
 
-#define PRODUCTID   "sHpjVtle"
-#define KEY         "y12-42l7WMxUQRn_"
+
+#define PRODUCTID   "rDLFXB8d"
+#define KEY         "yyEheWBmbdHdLMTu"
+
 #define MAC         "A1B2C3D4E916"
 
 

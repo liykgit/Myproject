@@ -24,7 +24,6 @@ static int udp_recv(int sock, unsigned char *buffer, int length, struct sockaddr
 
 	ret	= vg_select(sock + 1, &fdRead, 0, 0, &tm);
 
-
 	if(ret < 0){// error
 		printf( "udp sockfd select error\n");
 		return -1;
@@ -110,9 +109,9 @@ socket_fail:
 
 int udpserver_sendto(struct sockaddr_in *client_addr, char *buf, int length) {
     
-    LOG(LEVEL_DEBUG, "udpserver_sendto E");
+    LOG(LEVEL_DEBUG, "udpserver_sendto E\n");
     int r = vg_sendto(udpserver_sock, buf, length, client_addr);
-    LOG(LEVEL_DEBUG, "udpserver_sendto X");
+    LOG(LEVEL_DEBUG, "udpserver_sendto X\n");
 
     return r;
 }

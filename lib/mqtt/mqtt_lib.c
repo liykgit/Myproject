@@ -185,7 +185,6 @@ int mqtt_register_topic(char *topic, mqtt_topic_cb_t cb)
 
 	for(i = 0; i < MQTT_MAX_TOPIC_NUM; i++){
 		if(mqtt.topic[i].name == NULL){
-		    printf("register topic %s  at %d\n", topic, i);
 			mqtt.topic[i].name = topic;
 			mqtt.topic[i].cb = cb;
 			break;

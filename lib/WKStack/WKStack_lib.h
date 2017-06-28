@@ -3,7 +3,7 @@
 
 #include "WKStack.h"
 
-#define WKSTACK_TOPIC_LEN 64
+#define WKSTACK_TOPIC_LEN 96
 #define TICKET_LEN (32) 
 #define TICKET_LEN_PADDING (4) //4 as padding
 
@@ -11,7 +11,7 @@
 //4: padding 128=24*4*8/6, where 24: max allowed characters, 4 : each utf-8 character up to 4 bytes, *8/6 base64 length
 #define WKSTACK_NAME_LEN (128 + 4) 
 #define WKSTACK_HOST_LEN 64
-#define WKSTACK_DID_LEN 16 
+#define WKSTACK_DID_LEN (36+4)
 
 
 // WKStack (command or datapoint)'s name max length
@@ -20,7 +20,7 @@
 typedef struct{
 
     char name[WKSTACK_NAME_LEN];
-    char did[WKSTACK_SN_LEN];
+    char did[WKSTACK_DID_LEN];
     char host[WKSTACK_HOST_LEN];
     unsigned short port;
     WKStack_state_t state;

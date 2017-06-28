@@ -20,8 +20,8 @@ void WKStack_connect_ep(void)
 {
     LOG(LEVEL_NORMAL,"WKStack_connect_ep E state: %d\n", WKStack.state);
 
-    char client_id[32];
-    memset(client_id, 0, 32);
+    char client_id[72];
+    memset(client_id, 0, 72);
 
     WKStack_params_t *params = &WKStack.params;
 
@@ -42,7 +42,7 @@ void WKStack_announce() {
 
         int i = 0;
 
-        char buf[192];
+        char buf[216];
         memset(buf, 0, sizeof(buf));
 
         sprintf(buf, "VENGAS:ANNOUNCE:%s#%s#%s#%s:VENGAE", WKStack.params.product_id,

@@ -160,7 +160,7 @@ void exec_find(int argc, char *argv[], struct socketaddr_in *client_addr)
     
     if(strlen(WKStack.did) > 0) {
 
-        char buf[196];
+        char buf[216];
         memset(buf, 0, sizeof(buf));
 
         sprintf((char *)buf, "VENGAS:FIND:%s#%s#%s#%s:VENGAE", WKStack.params.product_id, WKStack.params.mac, WKStack.did, WKStack.name);

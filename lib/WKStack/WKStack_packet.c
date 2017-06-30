@@ -533,7 +533,7 @@ int WKStack_unpack_welcome(unsigned char *payload, int len) {
     }
 
     strncpy((char *)WKStack.did, (char *)payload, did_len);
-    LOG(LEVEL_DEBUG, "<LOG> did:%s\n", WKStack.did);
+    LOG(LEVEL_DEBUG, "did:%s\n", WKStack.did);
     hasDid = 1;
 
     char endpoint[url_len + 1];

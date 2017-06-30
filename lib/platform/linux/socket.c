@@ -105,8 +105,11 @@ int vg_listen(int sock, int backlog)
 
 int vg_send(int sock, unsigned char *buffer, int length, int ssl)
 {
-	LOG(LEVEL_DEBUG, "vg_send E\n");
-	vg_print_hex(LEVEL_DEBUG, (char *)buffer, length);
+
+    LOG(LEVEL_DEBUG, "vg_send:\n");
+	vg_print_hex(LEVEL_DEBUG, buffer, length);
+    LOG(LEVEL_DEBUG, "\n");
+
 
 	if(ssl)
 		return SSL_write(ssl_fd, buffer, length);

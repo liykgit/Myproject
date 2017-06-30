@@ -195,7 +195,9 @@ int vg_send(int sock, unsigned char *buffer, int length, int ssl)
 {
 	int ret = 0;
 
-	LOG(LEVEL_DEBUG, "<LOG> send :\n");
+    LOG(LOG_DEBUG, "vg_send:\n");
+	vg_print_hex(LEVEL_DEBUG, buffer, length);
+    LOG(LOG_DEBUG, "\n");
 
 	if(ssl)
 		return qca_ssl_write(buffer, length);

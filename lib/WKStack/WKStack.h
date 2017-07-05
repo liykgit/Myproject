@@ -102,7 +102,7 @@ typedef struct{
 	union VAL{
         int integer;
         float floatpoint;
-        int boolean;
+        char boolean;
         char *string;
     } value;
 } WKStack_datapoint_t;

@@ -22,23 +22,24 @@ static WKStack_datapoint_t *fill_dp_chunk(WKStack_datapoint_t *pdp, TLV_t *ptlv)
 
     switch(ptlv->tag[2]) {
         case 1: {
-                printf("bool index %d, len %d\n", pdp->index, ptlv->len);
-                memcpy(&pdp->value.boolean, ptlv->value, ptlv->len);
+                LOG(LEVEL_DEBUG, "bool index %d, len %d\n", pdp->index, ptlv->len);
+                //memcpy(&pdp->value.boolean, ptlv->value, ptlv->len);
+                pdp->value.boolean = *(char *)ptlv->value;
                 printf("val %d\n", pdp->value.boolean);
         }
         break;
 
         case 2: {
 
-                printf("int index %d, len %d\n", pdp->index, ptlv->len);
+                LOG(LEVEL_DEBUG, "int index %d, len %d\n", pdp->index, ptlv->len);
                 memcpy(&pdp->value.integer, ptlv->value, ptlv->len);
-                printf("val %d\n", pdp->value.integer);
+                LOG(LEVEL_DEBUG, "val %d\n", pdp->value.integer);
         }
         break;
 
         case 3: {
-                printf("float index %d, len %d\n", pdp->index, ptlv->len);
-                printf("type float\n");
+                LOG(LEVEL_DEBUG, "float index %d, len %d\n", pdp->index, ptlv->len);
+                LOG(LEVEL_DEBUG, "type float\n");
                 memcpy(&pdp->value.floatpoint, ptlv->value, ptlv->len);
         }
         break;

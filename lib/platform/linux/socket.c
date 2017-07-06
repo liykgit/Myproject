@@ -144,7 +144,7 @@ int vg_recv(int sock, unsigned char *buffer, int length, int ssl)
         else
             ret = recv(sock, (char*)buffer, length, 0);
         if(ret > 0){
-            LOG(LEVEL_DEBUG, "<LOG> recv: \n");
+            LOG(LEVEL_DEBUG, "vg_recv: \n");
             vg_print_hex(LEVEL_DEBUG, (char *)buffer, ret);
 
             return ret;
@@ -179,14 +179,14 @@ int vg_udp_socket(int *sock)
     
     int broadcastEnable = 1;
     setsockopt(*sock, SOL_SOCKET, SO_BROADCAST, &broadcastEnable, sizeof(broadcastEnable));
-	printf( "Create sockfd(%d)\n", *sock);
+	LOG(LEVEL_DEBUG, "Create sockfd(%d)\n", *sock);
 	return 0;
 }
 
 int vg_udp_close(int sock)
 {
 
-	printf( "Close sockfd(%d)\n", sock);
+	LOG(LEVEL_DEBUG, "Close sockfd(%d)\n", sock);
     close(sock);
 
 	return 0;

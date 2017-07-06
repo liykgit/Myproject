@@ -10,8 +10,6 @@ static unsigned char udpserver_buffer[UDP_RECV_BUFFER_SIZE];
 
 static int udp_recv(int sock, unsigned char *buffer, int length, struct sockaddr *client_addr, unsigned int *client_addr_len)
 {
-    LOG(LEVEL_DEBUG, "udp_recv E\n");
-
     vg_fd_set fdRead;
 	struct timeval tm;
 	int	ret;
@@ -50,14 +48,12 @@ static int udp_recv(int sock, unsigned char *buffer, int length, struct sockaddr
 		}
 	}
 
-    LOG(LEVEL_DEBUG, "udp_recv X");
-
 	return 0;
 }
 
  static thread_ret_t udp_handler_thread() {
 
-    LOG(LEVEL_DEBUG, "udp_handler_thread E");
+    LOG(LEVEL_DEBUG, "udp_handler_thread \E");
 
     struct sockaddr_in client_addr;
     memset(&client_addr, 0, sizeof(struct sockaddr_in));

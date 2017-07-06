@@ -113,7 +113,6 @@ void FreeBuddle(mqtt_package_t *pItem) {
 		break;
 	case ATTR_FLIGHT:
 		flight_count--;
-		LOG(LEVEL_DEBUG,"free flight\n");
 		break;
 	case ATTR_PEND:
 		if(pend_count >= PEND_MAX)

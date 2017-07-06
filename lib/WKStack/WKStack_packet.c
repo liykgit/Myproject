@@ -15,8 +15,6 @@ static WKStack_datapoint_t dps[DP_COUNT_MAX];
 
 static WKStack_datapoint_t *fill_dp_chunk(WKStack_datapoint_t *pdp, TLV_t *ptlv) {
 
-    printf("fill_dp_chunk E\n");
-
     pdp->index = *(unsigned short *)ptlv->tag;
     pdp->type = (int)ptlv->tag[2];
 
@@ -25,7 +23,7 @@ static WKStack_datapoint_t *fill_dp_chunk(WKStack_datapoint_t *pdp, TLV_t *ptlv)
                 LOG(LEVEL_DEBUG, "bool index %d, len %d\n", pdp->index, ptlv->len);
                 //memcpy(&pdp->value.boolean, ptlv->value, ptlv->len);
                 pdp->value.boolean = *(char *)ptlv->value;
-                printf("val %d\n", pdp->value.boolean);
+                LOG(LEVEL_DEBUG, "val %d\n", pdp->value.boolean);
         }
         break;
 
@@ -45,13 +43,13 @@ static WKStack_datapoint_t *fill_dp_chunk(WKStack_datapoint_t *pdp, TLV_t *ptlv)
         break;
 
         case 4: {
-                printf("string index %d, len %d\n", pdp->index, ptlv->len);
+                LOG(LEVEL_DEBUG, "string index %d, len %d\n", pdp->index, ptlv->len);
 
                 pdp->value.string = vg_malloc(ptlv->len + 1);
                 memset(pdp->value.string, 0, ptlv->len + 1);
                 memcpy(pdp->value.string, ptlv->value, ptlv->len);
 
-                printf("%s\n", pdp->value.string);
+                LOG(LEVEL_DEBUG, "%s\n", pdp->value.string);
         }
         break;
     }
@@ -62,7 +60,7 @@ static WKStack_datapoint_t *fill_dp_chunk(WKStack_datapoint_t *pdp, TLV_t *ptlv)
 //return number of tlv items decoded */
 static int decode_payload(char *data, int len) {
 
-    printf("decoding tlv ...  E\n "); 
+    LOG(LEVEL_DEBUG, "decoding tlv ...  E\n "); 
 
     int offset = 0;
     int item_size = 0;
@@ -71,18 +69,18 @@ static int decode_payload(char *data, int len) {
     while(len > 0) {
    
         TLV_t *ptlv = NULL;
-        printf("parse start at offset %d\n", offset);
+        LOG(LEVEL_DEBUG, "parse start at offset %d\n", offset);
         item_size = tlv_next(data+offset, len, &ptlv);
-        printf("item size %d\n", item_size);
+        LOG(LEVEL_DEBUG, "item size %d\n", item_size);
 
         if(item_size >= 0) {
-            printf("len :  %d\n", ptlv->len);
+            LOG(LEVEL_DEBUG, "len :  %d\n", ptlv->len);
             len -= item_size;
 
-            printf("offset %d len-item_size %d\n", offset, len);
-            printf("index %d\n", *(unsigned short *)ptlv->tag);
+            LOG(LEVEL_DEBUG, "offset %d len-item_size %d\n", offset, len);
+            LOG(LEVEL_DEBUG, "index %d\n", *(unsigned short *)ptlv->tag);
 
-            printf("data type %d\n", ptlv->tag[2]);
+            LOG(LEVEL_DEBUG, "data type %d\n", ptlv->tag[2]);
 
             fill_dp_chunk(&dps[i++], ptlv);
 
@@ -94,13 +92,14 @@ static int decode_payload(char *data, int len) {
         }
     }
 
-    printf("decoding...  X\n "); 
+    LOG(LEVEL_DEBUG, "decoding...  X\n "); 
 
     return i;
 }
 
 int WKStack_publish_ota_request(char *version)
 {
+    LOG(LEVEL_DEBUG, "publish_ota_request E\n "); 
     char buf[128];
     int buf_size = 128;
 
@@ -122,17 +121,16 @@ int WKStack_publish_ota_request(char *version)
         offset += item_size;         
     
     else { 
-        printf("ota publish buffer not large enough\n");
+        LOG(LEVEL_ERROR, "ota publish buffer not large enough\n");
         return -1;
     }
 
-    printf("publishing ota request, buf size  %d\n", offset);
     return mqtt_publish(WKStack.ota_pub_topic, (unsigned char*)buf, offset, MQTT_QOS1, MQTT_RETAIN_FALSE, (mqtt_cb_t)0);
 }
 
 static int WKStack_unpack_ota(unsigned char *payload, int len)
 {
-    LOG(LEVEL_DEBUG, "<LOG> WKStack_unpack_ota E\n");
+    LOG(LEVEL_DEBUG, "WKStack_unpack_ota E\n");
 
     int count = decode_payload((char *)payload, len);
     if(count <= 0)  
@@ -172,7 +170,7 @@ static int WKStack_unpack_ota(unsigned char *payload, int len)
     }
 
     if(type == WKSTACK_OTA_TYPE_VER) {
-        LOG(LEVEL_DEBUG, "<LOG> WKStack_unpack_ota received version notification %s E\n", version);
+        LOG(LEVEL_DEBUG, "WKStack_unpack_ota received version notification %s E\n", version);
 
         if(!version)
             return 0;
@@ -180,7 +178,7 @@ static int WKStack_unpack_ota(unsigned char *payload, int len)
         strcpy(WKStack.ota.mod_ver, version);
 
         WKStack_publish_ota_request(version);
-        LOG(LEVEL_DEBUG, "<LOG> WKStack_unpack_ota received version notification %s X\n", version);
+        LOG(LEVEL_DEBUG, "WKStack_unpack_ota received version notification %s X\n", version);
     }
     else if (type == WKSTACK_OTA_TYPE_MSG) {
         
@@ -191,14 +189,14 @@ static int WKStack_unpack_ota(unsigned char *payload, int len)
         strcat(WKStack.ota.mod_url, "?ticket=");
         strcat(WKStack.ota.mod_url, ticket);
 
-        LOG(LEVEL_DEBUG, "<LOG> ota url %s\n", WKStack.ota.mod_url);
-        LOG(LEVEL_DEBUG, "<LOG> unsubscribe %s\n", WKStack.ota_sub_topic);
+        LOG(LEVEL_DEBUG, "ota url %s\n", WKStack.ota.mod_url);
+        LOG(LEVEL_DEBUG, "unsubscribe %s\n", WKStack.ota_sub_topic);
         mqtt_unsubscribe(WKStack.ota_sub_topic, NULL);    
         msleep(800);
     }
     else {
 
-        LOG(LEVEL_DEBUG, "<LOG> WKStack_unpack_ota E\n");
+        LOG(LEVEL_DEBUG, "WKStack_unpack_ota E\n");
     }
 
     for(i = 0; i < count; i++) {
@@ -267,13 +265,9 @@ static int WKStack_unpack_binding(unsigned char *payload, int len)
         }
     }
     
-    if(bind_error) {
-        printf("bind error %s\n", bind_error);
-
-    }
 
     if(user_id && bind_ticket) {
-        printf("%s, %s\n", user_id, bind_ticket);
+        LOG(LEVEL_NORMAL, "user: %s, ticket: %s\n", user_id, bind_ticket);
         
         client_info_t *client_info = 0;
         client_info = (client_info_t *)plist_find(is_client, user_id);
@@ -285,8 +279,12 @@ static int WKStack_unpack_binding(unsigned char *payload, int len)
             udpserver_sendto(&client_info->addr, buf, strlen(buf));
         }
         else {
-            printf("No user for bind ticket, plist too small ? \n");
+            LOG(LEVEL_ERROR, "plist too small ? \n");
         }
+    }
+    else if(bind_error) {
+        //TODO return error msg to client
+        LOG(LEVEL_NORMAL, "bind error %s\n", bind_error);
     }
 
     for(i = 0; i < count; i++) {
@@ -308,7 +306,7 @@ static int WKStack_unpack_binding(unsigned char *payload, int len)
 // store:      |  arg1 | arg2|
 static int WKStack_unpack_control(unsigned char *payload, int len)
 {
-    printf("<LOG> WKStack_unpack_control E\n");
+    LOG(LEVEL_DEBUG, "WKStack_unpack_control E\n");
 
     int count = decode_payload((char *)payload, len);
     if(count <= 0)  
@@ -342,6 +340,7 @@ static int WKStack_unpack_control(unsigned char *payload, int len)
         vg_free(buf);
     }
 	//printf("### MEM FREE : %d.\n", qcom_mem_heap_get_free_size());
+    LOG(LEVEL_DEBUG, "WKStack_unpack_control X\n");
 
 	return 0;
 }
@@ -391,8 +390,10 @@ int WKStack_publish_knock()
     int ret = -1;
 
     sprintf(WKStack.topic_knock, WKSTACK_TOPIC_KNOCK_FMT, WKStack.params.mac); 
-    printf("publish to topic %s\n", WKStack.topic_knock);
+    LOG(LEVEL_NORMAL, "pub knock\n");
+
 /*
+    LOG(LEVEL_DEBUG, "publish to topic %s\n", WKStack.topic_knock);
     char buf[32];
     
     if(strlen(WKStack.params.version) > 0)
@@ -412,6 +413,7 @@ int WKStack_publish_knock()
         char tag[4] = {0, 0, WKSTACK_DATAPOINT_TYPE_STRING, 0};
         *(unsigned short*)tag = WKSTACK_SYNC_INDEX_SDKVER;
         int item_size = tlv_put_string(buf+offset, tag, WKStack_version, sizeof(buf) - offset);
+        LOG(LEVEL_NORMAL, "sdkver %s\n", WKStack_version);
         if(item_size >= 0)
             offset += item_size;
         else { 
@@ -424,6 +426,8 @@ int WKStack_publish_knock()
 
         char tag[4] = {0, 0, WKSTACK_DATAPOINT_TYPE_STRING, 0};
         *(unsigned short*)tag = WKSTACK_SYNC_INDEX_VER;
+
+        LOG(LEVEL_NORMAL, "fwver %s\n", WKStack.params.version);
 
         int item_size = tlv_put_string(buf+offset, tag, WKStack.params.version, sizeof(buf) - offset);
         if(item_size >= 0)
@@ -438,6 +442,7 @@ int WKStack_publish_knock()
 
         char tag[4] = {0, 0, WKSTACK_DATAPOINT_TYPE_STRING, 0};
         *(unsigned short*)tag = WKSTACK_SYNC_INDEX_SN;
+        LOG(LEVEL_NORMAL, "sn %s\n", WKStack.params.sn);
         int item_size = tlv_put_string(buf+offset, tag, WKStack.params.sn, sizeof(buf) - offset);
         if(item_size >= 0)
             offset += item_size;
@@ -453,8 +458,9 @@ static int WKStack_publish_answer(char *answer, int len)
 {
     int ret = -1;
 
+    LOG(LEVEL_NORMAL, "pub answer\n");
+
     sprintf(WKStack.topic_answer, WKSTACK_TOPIC_ANSWER_FMT, WKStack.params.mac); 
-    printf("publish to topic %s\n", WKStack.topic_answer);
     ret = mqtt_publish(WKStack.topic_answer, answer, len, 0, 0, NULL);
 
 	return ret;
@@ -463,8 +469,7 @@ static int WKStack_publish_answer(char *answer, int len)
 
 int WKStack_unpack_welcome(unsigned char *payload, int len) {
 
-    LOG(LEVEL_NORMAL, "WKStack_unpack_welcome E\n");
-    LOG(LEVEL_DEBUG, "welcome message %s\n", payload);
+    LOG(LEVEL_DEBUG, "WKStack_unpack_welcome, %s E\n", payload);
 
     if(memcmp(payload, REGISTRY_ERR_SYSTEM_FAILURE, strlen(REGISTRY_ERR_SYSTEM_FAILURE)) == 0) {
 
@@ -474,7 +479,7 @@ int WKStack_unpack_welcome(unsigned char *payload, int len) {
         doStart();
 
         //todo : try later
-        LOG(LEVEL_ERROR, "Failed to register device, cause : "REGISTRY_ERR_SYSTEM_FAILURE"\n");
+        LOG(LEVEL_ERROR, "Failed to register device: "REGISTRY_ERR_SYSTEM_FAILURE"\n");
         return -1;
     }
 
@@ -487,7 +492,7 @@ int WKStack_unpack_welcome(unsigned char *payload, int len) {
  
 
         //todo : try later
-        LOG(LEVEL_ERROR, "Failed to register device, cause : "REGISTRY_ERR_UNAUTHORIZED"\n");
+        LOG(LEVEL_ERROR, "Failed to register device: "REGISTRY_ERR_UNAUTHORIZED"\n");
         return -1;
     }
 
@@ -515,26 +520,25 @@ int WKStack_unpack_welcome(unsigned char *payload, int len) {
     char *pname = pticket + ticket_len + 1;
     int name_len = substr_length(pname, delimiter);
 
+    //TODO do not return, report the error to server
     if(did_len <= 0) {
-        printf("Invalid did_len\n");
-        printf("\n");
+        LOG(LEVEL_ERROR, "Invalid did_len\n");
         return 0;
     }
 
     if(url_len <= 0) {
-        printf("Invalid url_len\n");
-        printf("\n");
+        LOG(LEVEL_ERROR, "Invalid url_len\n");
 
         return 0;
     }
 
     if(ticket_len != TICKET_LEN) {
-        printf("Invalid ticket length %d\n", ticket_len);
+        LOG(LEVEL_ERROR, "Invalid ticket length %d\n", ticket_len);
         return 0;
     }
 
     strncpy((char *)WKStack.did, (char *)payload, did_len);
-    LOG(LEVEL_DEBUG, "did:%s\n", WKStack.did);
+    LOG(LEVEL_NORMAL, "did:%s\n", WKStack.did);
     hasDid = 1;
 
     char endpoint[url_len + 1];
@@ -545,7 +549,7 @@ int WKStack_unpack_welcome(unsigned char *payload, int len) {
 
     parse_url((char *)endpoint, WKStack.host, port);
     WKStack.port = atoi(port);
-    LOG(LEVEL_DEBUG, "<LOG> host:%s, port:%d\n", WKStack.host, WKStack.port);
+    LOG(LEVEL_NORMAL, "endpoint:%s:%d\n", WKStack.host, WKStack.port);
 
     hasEndpoint = 1;
     
@@ -581,9 +585,7 @@ int WKStack_unpack_welcome(unsigned char *payload, int len) {
 
 int WKStack_subscribe_welcome()
 {
-    printf("We are on\n");
     sprintf(WKStack.topic_welcome, WKSTACK_TOPIC_WELCOME_FMT, WKStack.params.mac); 
-    printf("subscribe to topic %s\n", WKStack.topic_welcome);
     mqtt_subscribe(WKStack.topic_welcome, NULL, WKStack_unpack_welcome);
 
     return 0;
@@ -602,8 +604,10 @@ int WKStack_unpack_challenge(unsigned char *payload, int len) {
     //aes_ecb(aes, (unsigned char*)payload, (unsigned char*)WKStack.params.key);
     aes_ecb(aes, (unsigned char*)payload, (unsigned char*)WKStack.params.key);
 
-    LOG(LEVEL_NORMAL, "nonce : ");
-    LOG(LEVEL_DEBUG, "signed output: ");
+    LOG(LEVEL_DEBUG, "received challenge\n");
+    vg_print_hex(LEVEL_DEBUG, payload, len);
+    LOG(LEVEL_DEBUG, "answer:\n");
+    vg_print_hex(LEVEL_DEBUG, aes, AES_LEN);
 
     WKStack_publish_answer(aes, len);
    
@@ -613,7 +617,6 @@ int WKStack_unpack_challenge(unsigned char *payload, int len) {
 int WKStack_subscribe_challenge()
 {
     sprintf(WKStack.topic_challenge, WKSTACK_TOPIC_CHALLENGE_FMT, WKStack.params.mac); 
-    printf("subscribe to topic %s\n", WKStack.topic_challenge);
     mqtt_subscribe(WKStack.topic_challenge, NULL, WKStack_unpack_challenge);
 
     return 0;
@@ -645,7 +648,7 @@ int WKStack_subscribe_binding()
 
 int WKStack_publish_bind_request(char *userId) 
 {
-    LOG(LEVEL_DEBUG, "WKStack_publish_bind_request, userId %s\n", userId);
+    LOG(LEVEL_DEBUG, "WKStack_publish_bind_request from userId %s E\n", userId);
 
     char buf[32];
     int buf_size = 32;
@@ -662,10 +665,10 @@ int WKStack_publish_bind_request(char *userId)
     if(item_size >= 0)
         offset += item_size;
     else { 
-        printf("ota publish buffer not large enough\n");
+        LOG(LEVEL_ERROR, "ota publish buffer not large enough\n");
         return -1;
     }
-    LOG(LEVEL_DEBUG, "publishing binding request, buf size  %d\n", offset);
+
     return mqtt_publish(WKStack.binding_pub_topic, (unsigned char*)buf, offset, MQTT_QOS1, MQTT_RETAIN_FALSE, (mqtt_cb_t)0);
 }
 

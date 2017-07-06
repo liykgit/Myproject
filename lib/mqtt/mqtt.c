@@ -412,7 +412,7 @@ static thread_ret_t mqtt_recv_thread(thread_params_t args)
     int len = 0;
 start:
     // Wait for connect completed
-    LOG(LEVEL_DEBUG, "<LOG> Recv thread IDLE...\n");
+    LOG(LEVEL_DEBUG, "Recv thread IDLE...\n");
     vg_wait_sem(&recv_thread_sem, -1);
 
     memset(mqtt.recv_buf, 0, mqtt.window_size);

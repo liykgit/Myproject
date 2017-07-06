@@ -228,10 +228,10 @@ int vg_recv(int sock, unsigned char *buffer, int length, int ssl)
 	ret = qcom_select(sock + 1, &fdRead, NULL, NULL, &tm);
 
 	if(ret < 0){// error
-		LOG(LEVEL_ERROR, "<ERR> mqtt sockfd select error\n");
+		LOG(LEVEL_ERROR, "mqtt sockfd select error\n");
 		return -1;
 	}else if(ret == 0){
-		LOG(LEVEL_DEBUG, "<LOG> mqtt sockfd select timeout\n");
+		LOG(LEVEL_DEBUG, "mqtt sockfd select timeout\n");
 		return 0;
 	}else{
 	    if(FD_ISSET(sock, &fdRead)){
@@ -241,7 +241,7 @@ int vg_recv(int sock, unsigned char *buffer, int length, int ssl)
 			else
 				ret = qcom_recv(sock, (char *)(buffer), length, 0);
 			if(ret > 0){
-				LOG(LEVEL_DEBUG, "<LOG> recv: \n");
+				LOG(LEVEL_DEBUG, "vg_recv: \n");
 				vg_print_hex(LEVEL_DEBUG, (char *)buffer, ret);
 
 				return ret;

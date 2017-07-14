@@ -3,15 +3,15 @@ define PRODUCTID   "yyOzvi6x"
 define KEY         "k1xdfwoV6gJtOlAC"
 define MAC         "A1B2C3D4E911"
 
-//3.2 greenbit's project
-define PRODUCTID   "k1fNmNng"
-define KEY         "JkgzNQ4InxXjhp4g"
-define MAC         "A1B2C3D4E916"
+//3.2 Darren's project
+
+#define PRODUCTID "TMioV0SDs9DwVhBa"
+#define KEY     "yJoJ9YgNWIDc2Rcd"
+
 
 //3.3 test project
-define PRODUCTID   "y1eX6Pz-"
-define KEY         "y1leqQavGbjbCM8r"
-define MAC         "A1B2C3D4E5F6"
+#define PRODUCTID "AnRvL00MGtTqWyGt"
+#define KEY     "yJb63Tg4bpRQ8iWE"
 
 
 //3.6 test project

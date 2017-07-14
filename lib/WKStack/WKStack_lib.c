@@ -11,7 +11,7 @@
 WKStack_t WKStack;
 
 int g_testmode = 0;
-const char *WKStack_version = "1.2.0";
+const char *WKStack_version = "1.2.1";
 
 
 int WKStack_connect_cb(mqtt_errno_t err);
@@ -59,23 +59,25 @@ void WKStack_announce() {
 
 int WKStack_connect_cb(mqtt_errno_t err)
 {
-    LOG(LEVEL_NORMAL,"WKStack_connect_cb E state: %d\n", WKStack.state);
+    LOG(LEVEL_DEBUG,"WKStack_connect_cb E state: %d\n", WKStack.state);
 
     if(WKStack.state == WKSTACK_REGISTER){
         if(err == MQTT_CONNECT_SUCCEED){
-            LOG(LEVEL_NORMAL,"We are on entrypoint, state %d\n", WKStack.state);
+            LOG(LEVEL_NORMAL,"Registry connected. Subscribe to topics\n");
 
             WKStack_subscribe_welcome();
             WKStack_subscribe_challenge();
             WKStack_publish_knock();
+
         }else if(err == MQTT_DISCONNECT_SUCCEED){
 
-            LOG(LEVEL_NORMAL,"We are off, state %d\n", WKStack.state);
+            LOG(LEVEL_NORMAL,"Disconnected from registry, state %d\n", WKStack.state);
             WKStack.state = WKSTACK_CONNECT_ENDPOINT;
+            LOG(LEVEL_NORMAL,"Connecting endpoint\n");
             WKStack_connect_ep();
 
         } else {
-            LOG(LEVEL_ERROR,"mqtt err %d\n", err);
+            LOG(LEVEL_ERROR,"mqtt err %d, go offline\n", err);
             WKStack.state = WKSTACK_OFFLINE;
         }
     } else if(WKStack.state == WKSTACK_CONNECT_ENDPOINT) {
@@ -84,9 +86,9 @@ int WKStack_connect_cb(mqtt_errno_t err)
             
             case MQTT_CONNECT_SUCCEED:
                 {
-                    LOG(LEVEL_NORMAL,"We are on endpoint, state %d\n", WKStack.state);
                     WKStack.state = WKSTACK_ONLINE;
 
+                    LOG(LEVEL_NORMAL,"Registry connected\nSubscribe to topics\n");
                     WKStack_subscribe_control();
                     WKStack_subscribe_ota();
                     WKStack_subscribe_binding();
@@ -96,7 +98,7 @@ int WKStack_connect_cb(mqtt_errno_t err)
 
             case MQTT_DISCONNECT_SUCCEED:
                 {
-                    LOG(LEVEL_NORMAL,"We are off, state %d\n", WKStack.state);
+                    LOG(LEVEL_NORMAL,"Disconnected state %d\n", WKStack.state);
                     WKStack.state = WKSTACK_OFFLINE;
                     //WKStack_connect_ep();
                 }
@@ -105,6 +107,7 @@ int WKStack_connect_cb(mqtt_errno_t err)
             case MQTT_SOCKET_ERROR:
             case MQTT_SEVICE_NOT_AVAILABLE:
                 {
+                    LOG(LEVEL_ERROR,"MQTT or socket error, get offline\n");
                     WKStack.state = WKSTACK_OFFLINE;
                     //WKStack_connect_ep();
                 }
@@ -114,6 +117,7 @@ int WKStack_connect_cb(mqtt_errno_t err)
             case MQTT_INVALID_USER: //!< Connection Refused: bad user name or password
             case MQTT_UNAUTHORIZED: //!< Connection Refused: not authorized
                 {
+                    LOG(LEVEL_ERROR,"MQTT auth failed by endpoint\n");
                     memset(WKStack.ticket, 0, sizeof(WKStack.ticket));
                     WKStack.state = WKSTACK_OFFLINE;
                 }
@@ -128,10 +132,12 @@ int WKStack_connect_cb(mqtt_errno_t err)
     }
     else if(WKStack.state == WKSTACK_ONLINE){
         if(err == MQTT_SOCKET_ERROR) {
+            LOG(LEVEL_ERROR,"Socket error, get offline\n");
             WKStack.state = WKSTACK_OFFLINE;
             //WKStack_connect_ep();
         }
         else if(err == MQTT_DISCONNECT_SUCCEED) {
+             LOG(LEVEL_ERROR,"Disconnected from endpoint, get offline\n");
              WKStack.state = WKSTACK_OFFLINE;
         }
     }
@@ -141,7 +147,7 @@ int WKStack_connect_cb(mqtt_errno_t err)
             
             case MQTT_CONNECT_SUCCEED:
                 {
-                    LOG(LEVEL_NORMAL,"We are on endpoint, state %d\n", WKStack.state);
+                    LOG(LEVEL_NORMAL,"Connected to endpoint\n Subscribe topics\n");
                     WKStack.state = WKSTACK_ONLINE;
 
                     WKStack_subscribe_control();
@@ -153,7 +159,7 @@ int WKStack_connect_cb(mqtt_errno_t err)
 
             case MQTT_DISCONNECT_SUCCEED:
                 {
-                    LOG(LEVEL_NORMAL,"We are off, state %d\n", WKStack.state);
+                    LOG(LEVEL_NORMAL,"Disconnected, state %d\n", WKStack.state);
                     WKStack.state = WKSTACK_OFFLINE;
                 
                     //WKStack_connect_ep();
@@ -163,6 +169,7 @@ int WKStack_connect_cb(mqtt_errno_t err)
             case MQTT_SOCKET_ERROR:
             case MQTT_SEVICE_NOT_AVAILABLE:
                 {
+                    LOG(LEVEL_ERROR,"MQTT or socket error during reconnect, get offline\n");
                     WKStack.state = WKSTACK_OFFLINE;
                     //WKStack_connect_ep();
                 }
@@ -172,6 +179,7 @@ int WKStack_connect_cb(mqtt_errno_t err)
             case MQTT_INVALID_USER: //!< Connection Refused: bad user name or password
             case MQTT_UNAUTHORIZED: //!< Connection Refused: not authorized
                 {
+                    LOG(LEVEL_ERROR,"MQTT auth failed during reconnect\n");
                     memset(WKStack.ticket, 0, sizeof(WKStack.ticket));
                     WKStack.state = WKSTACK_OFFLINE;
                 }
@@ -200,7 +208,7 @@ int WKStack_connect_cb(mqtt_errno_t err)
 // 3. subscribe control topic(for recv cmd and set status)
 void WKStack_connect(void)
 {
-    LOG(LEVEL_NORMAL,"WKStack_connect E state: %d\n", WKStack.state);
+    LOG(LEVEL_DEBUG,"WKStack_connect E state: %d\n", WKStack.state);
 
     WKStack_pack_connect(NULL, 0);
     mqtt_start(WKSTACK_FIRST_CONNECT_HOST, WKSTACK_FIRST_CONNECT_PORT, &g_mqtt_data, WKStack_connect_cb);
@@ -210,20 +218,20 @@ void WKStack_connect(void)
 
 int doStart() {
 
-    LOG(LEVEL_NORMAL,"doStart E state: %d\n", WKStack.state);
-
+    LOG(LEVEL_DEBUG, ".. %d\n", WKStack.state); 
     if(WKStack.state == WKSTACK_OFFLINE) {
 
         WKStack_params_t *params = &WKStack.params;
 
         if(strlen(WKStack.did) != 0 && strlen(WKStack.host) != 0 && strlen(WKStack.ticket) != 0) { 
             LOG(LEVEL_NORMAL,"My did is %s\n", WKStack.did);
-            LOG(LEVEL_NORMAL,"host is %s\n", WKStack.host);
+            LOG(LEVEL_NORMAL,"Offline, reconnecting %s\n", WKStack.host);
 
             WKStack.state = WKSTACK_RECONNECT_ENDPOINT;
             WKStack_connect_ep();
         }
         else {
+            LOG(LEVEL_NORMAL,"Offline, connect registry\n");
 
             memset(WKStack.host, 0, WKSTACK_HOST_LEN);
             WKStack.port = 0;

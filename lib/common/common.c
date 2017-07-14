@@ -9,7 +9,6 @@ static int isxdigit(c)
         return ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) ? 1 : 0;
 }
 
-
 int isValidMacAddress(const char* mac) {
     int i = 0;
     int s = 0;
@@ -18,6 +17,11 @@ int isValidMacAddress(const char* mac) {
        if (isxdigit(*mac)) {
           i++;
        }
+       else {
+        s = -1;
+       }
+
+/*
        else if (*mac == ':' || *mac == '-') {
 
           if (i == 0 || i / 2 - 1 != s)
@@ -28,14 +32,13 @@ int isValidMacAddress(const char* mac) {
        else {
            s = -1;
        }
-
+*/
 
        ++mac;
     }
 
     return (i == 12 && (s == 5 || s == 0));
 }
-
 
 int is_valid_ip(const char *url)
 {

@@ -469,16 +469,15 @@ static int WKStack_publish_answer(char *answer, int len)
 
 int WKStack_unpack_welcome(unsigned char *payload, int len) {
 
-    LOG(LEVEL_DEBUG, "WKStack_unpack_welcome, %s E\n", payload);
+    LOG(LEVEL_DEBUG, "WKStack_unpack_welcome E\n");
 
     if(memcmp(payload, REGISTRY_ERR_SYSTEM_FAILURE, strlen(REGISTRY_ERR_SYSTEM_FAILURE)) == 0) {
 
         msleep(RECONNECT_DELAY_SHORT);
 
         WKStack.state = WKSTACK_OFFLINE;
-        doStart();
+        //doStart();
 
-        //todo : try later
         LOG(LEVEL_ERROR, "Failed to register device: "REGISTRY_ERR_SYSTEM_FAILURE"\n");
         return -1;
     }
@@ -488,76 +487,91 @@ int WKStack_unpack_welcome(unsigned char *payload, int len) {
          msleep(RECONNECT_DELAY_LONG);
          
          WKStack.state = WKSTACK_OFFLINE;
-         doStart();
+         //doStart();
  
 
-        //todo : try later
         LOG(LEVEL_ERROR, "Failed to register device: "REGISTRY_ERR_UNAUTHORIZED"\n");
         return -1;
     }
+
+
+    int count = decode_payload((char *)payload, len);
+    if(count <= 0){
+        LOG(LEVEL_ERROR, "Failed to decode welcome msg\n");
+        return -1;
+    }
+
+    int i = 0;
 
     int hasDid = 0;
     int hasEndpoint = 0;
     int hasTicket = 0;
     int hasName = 0;
-   
-    char *delimiter = "*";
 
-    char payload_str[len + 1];
-    memcpy(payload_str, payload, len);
-    payload_str[len] = 0;
+    char *purl = 0;
+    char *pname = 0;
+    char *pdid = 0;
+    char *pticket = 0;
 
-    char *pdid = payload_str;
-    
-    int did_len = substr_length(pdid, "*");
-  
-    char *purl = pdid + did_len + 1;
-    int url_len = substr_length(purl, delimiter);
+    for(i = 0; i < count; i++) {
 
-    char *pticket = purl + url_len + 1;
-    int ticket_len = substr_length(pticket, delimiter);
+        switch(dps[i].index) {
+            
+            case WKSTACK_WELCOME_INDEX_URL: {
 
-    char *pname = pticket + ticket_len + 1;
-    int name_len = substr_length(pname, delimiter);
 
-    //TODO do not return, report the error to server
-    if(did_len <= 0) {
-        LOG(LEVEL_ERROR, "Invalid did_len\n");
-        return 0;
+                purl= dps[i].value.string;
+
+
+                char port[8] = {0,};
+
+                parse_url((char *)purl, WKStack.host, port);
+                WKStack.port = atoi(port);
+                LOG(LEVEL_NORMAL, "endpoint:%s:%d\n", WKStack.host, WKStack.port);
+
+                hasEndpoint = 1;
+
+            }
+            break;
+
+            case WKSTACK_WELCOME_INDEX_DID: {
+                pdid = dps[i].value.string;
+                
+                strncpy((char *)WKStack.did, pdid, WKSTACK_DID_LEN);
+
+                LOG(LEVEL_NORMAL, "did:%s\n", WKStack.did);
+                hasDid = 1;
+            }
+            break;
+            
+            case WKSTACK_WELCOME_INDEX_TICKET: {
+                char *pticket = dps[i].value.string;
+
+
+                strncpy(WKStack.ticket, pticket, sizeof(WKStack.ticket));
+                LOG(LEVEL_NORMAL, "ticket:%s\n", WKStack.ticket);
+                hasTicket = 1;
+            }
+            break;
+
+            case WKSTACK_WELCOME_INDEX_DNAME: {
+
+                pname = dps[i].value.string;
+                strncpy(WKStack.name, pname, sizeof(WKStack.name));
+                LOG(LEVEL_NORMAL, "name:%s\n", WKStack.name);
+                hasName = 1;
+            }
+            break;
+        }
     }
 
-    if(url_len <= 0) {
-        LOG(LEVEL_ERROR, "Invalid url_len\n");
-
-        return 0;
+    for(i = 0; i < count; i++) {
+        //free the string buffer
+        if(dps[i].type == 4) {
+            vg_free(dps[i].value.string);
+            dps[i].value.string = NULL;
+        }
     }
-
-    if(ticket_len != TICKET_LEN) {
-        LOG(LEVEL_ERROR, "Invalid ticket length %d\n", ticket_len);
-        return 0;
-    }
-
-    strncpy((char *)WKStack.did, (char *)payload, did_len);
-    LOG(LEVEL_NORMAL, "did:%s\n", WKStack.did);
-    hasDid = 1;
-
-    char endpoint[url_len + 1];
-    memcpy(endpoint, purl, url_len);
-    endpoint[url_len] = 0;
-
-    char port[8] = {0,};
-
-    parse_url((char *)endpoint, WKStack.host, port);
-    WKStack.port = atoi(port);
-    LOG(LEVEL_NORMAL, "endpoint:%s:%d\n", WKStack.host, WKStack.port);
-
-    hasEndpoint = 1;
-    
-    memcpy(WKStack.ticket, pticket, TICKET_LEN);
-
-    hasTicket = 1;
-
-    memcpy(WKStack.name, pname, name_len);
 
     //hasName = 1;
 
@@ -575,7 +589,6 @@ int WKStack_unpack_welcome(unsigned char *payload, int len) {
         sprintf(WKStack.binding_sub_topic, WKSTACK_TOPIC_BINDING_SUB_FMT, WKStack.params.product_id, WKStack.did);
         sprintf(WKStack.binding_pub_topic, WKSTACK_TOPIC_BINDING_PUB_FMT, WKStack.params.product_id, WKStack.did);
 
-        LOG(LEVEL_NORMAL, "device %s is welcomed\n", pname);
         return 0;
     }
 

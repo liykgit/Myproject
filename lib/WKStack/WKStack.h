@@ -33,7 +33,13 @@
 
 #define PADDING (4)
 
+//4: padding 128=24*4*8/6, where 24: max allowed characters, 4 : each utf-8 character up to 4 bytes, *8/6 base64 length
+#define WKSTACK_NAME_LEN (128 + PADDING) 
+#define WKSTACK_HOST_LEN 64
+#define WKSTACK_DID_LEN (36 + PADDING)
 
+#define TICKET_LEN (32) 
+#define TICKET_LEN_PADDING (4) //4 as padding
 
 typedef enum {
 
@@ -88,12 +94,20 @@ typedef enum {
 }WKStack_ota_type_t;
 
 typedef struct {
+
+    char name[WKSTACK_NAME_LEN];
+    char did[WKSTACK_DID_LEN];
+    char host[WKSTACK_HOST_LEN];
+    char ticket[TICKET_LEN + TICKET_LEN_PADDING];
+    unsigned short port;
+
     char version[WKSTACK_VER_LEN + PADDING];
     char sn[WKSTACK_SN_LEN +  PADDING];
     char key[WKSTACK_KEY_LEN + PADDING];
     char product_id[WKSTACK_DEVTYPE_LEN + PADDING];
     char mac[WKSTACK_MAC_LEN + PADDING];
 } WKStack_params_t;
+
 //TODO change struct name to include ota
 typedef struct{
 

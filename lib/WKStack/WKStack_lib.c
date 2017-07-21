@@ -26,15 +26,15 @@ void WKStack_connect_ep(void)
     WKStack_params_t *params = &WKStack.params;
 
     //clientId: {productId}.{did}
-    sprintf((char *)client_id, "%s.%s", params->product_id, WKStack.did);
+    sprintf((char *)client_id, "%s.%s", params->product_id, WKStack.params.did);
 
     WKStack_pack_connect(client_id, 0);
     
     g_mqtt_data.username= "VENGA_DEV";
-    g_mqtt_data.password = WKStack.ticket;
+    g_mqtt_data.password = WKStack.params.ticket;
     //g_mqtt_data.password = "test";
 
-    mqtt_start(WKStack.host, WKStack.port, &g_mqtt_data, WKStack_connect_cb);
+    mqtt_start(WKStack.params.host, WKStack.params.port, &g_mqtt_data, WKStack_connect_cb);
     return;
 };
 
@@ -47,8 +47,8 @@ void WKStack_announce() {
 
         sprintf(buf, "VENGAS:ANNOUNCE:%s#%s#%s#%s:VENGAE", WKStack.params.product_id,
                             WKStack.params.mac,
-                            WKStack.did,
-                            WKStack.name);
+                            WKStack.params.did,
+                            WKStack.params.name);
 
         while (i++ < WKSTACK_ANNOUNCE_COUNT) {
             udpserver_broadcast(buf, strlen(buf), WKSTACK_ANNOUNCE_PORT);
@@ -118,7 +118,7 @@ int WKStack_connect_cb(mqtt_errno_t err)
             case MQTT_UNAUTHORIZED: //!< Connection Refused: not authorized
                 {
                     LOG(LEVEL_ERROR,"MQTT auth failed by endpoint\n");
-                    memset(WKStack.ticket, 0, sizeof(WKStack.ticket));
+                    memset(WKStack.params.ticket, 0, sizeof(WKStack.params.ticket));
                     WKStack.state = WKSTACK_OFFLINE;
                 }
                 break;
@@ -180,7 +180,7 @@ int WKStack_connect_cb(mqtt_errno_t err)
             case MQTT_UNAUTHORIZED: //!< Connection Refused: not authorized
                 {
                     LOG(LEVEL_ERROR,"MQTT auth failed during reconnect\n");
-                    memset(WKStack.ticket, 0, sizeof(WKStack.ticket));
+                    memset(WKStack.params.ticket, 0, sizeof(WKStack.params.ticket));
                     WKStack.state = WKSTACK_OFFLINE;
                 }
                 break;
@@ -223,9 +223,9 @@ int doStart() {
 
         WKStack_params_t *params = &WKStack.params;
 
-        if(strlen(WKStack.did) != 0 && strlen(WKStack.host) != 0 && strlen(WKStack.ticket) != 0) { 
-            LOG(LEVEL_NORMAL,"My did is %s\n", WKStack.did);
-            LOG(LEVEL_NORMAL,"Offline, reconnecting %s\n", WKStack.host);
+        if(strlen(WKStack.params.did) != 0 && strlen(WKStack.params.host) != 0 && strlen(WKStack.params.ticket) != 0) { 
+            LOG(LEVEL_NORMAL,"My did is %s\n", WKStack.params.did);
+            LOG(LEVEL_NORMAL,"Offline, reconnecting %s\n", WKStack.params.host);
 
             WKStack.state = WKSTACK_RECONNECT_ENDPOINT;
             WKStack_connect_ep();
@@ -233,8 +233,8 @@ int doStart() {
         else {
             LOG(LEVEL_NORMAL,"Offline, connect registry\n");
 
-            memset(WKStack.host, 0, WKSTACK_HOST_LEN);
-            WKStack.port = 0;
+            memset(WKStack.params.host, 0, WKSTACK_HOST_LEN);
+            WKStack.params.port = 0;
 
             WKStack.state = WKSTACK_REGISTER;
             WKStack_connect();

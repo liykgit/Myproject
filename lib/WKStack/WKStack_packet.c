@@ -371,7 +371,7 @@ int WKStack_pack_connect(char *client_id, int willflag)
 		g_mqtt_data.willFlag	= 0;
     } else {
         memset(message, 0, sizeof(message));
-	    sprintf(message, "{did:%s}", WKStack.did);
+	    sprintf(message, "{did:%s}", WKStack.params.did);
 		g_mqtt_data.willFlag = 1;		// 0 close will message, 1 use will message .
         g_mqtt_data.will.topicName = WKSTACK_TOPIC_OFFLINE;
         g_mqtt_data.will.message = message;
@@ -525,9 +525,9 @@ int WKStack_unpack_welcome(unsigned char *payload, int len) {
 
                 char port[8] = {0,};
 
-                parse_url((char *)purl, WKStack.host, port);
-                WKStack.port = atoi(port);
-                LOG(LEVEL_NORMAL, "endpoint:%s:%d\n", WKStack.host, WKStack.port);
+                parse_url((char *)purl, WKStack.params.host, port);
+                WKStack.params.port = atoi(port);
+                LOG(LEVEL_NORMAL, "endpoint:%s:%d\n", WKStack.params.host, WKStack.params.port);
 
                 hasEndpoint = 1;
 
@@ -537,9 +537,9 @@ int WKStack_unpack_welcome(unsigned char *payload, int len) {
             case WKSTACK_WELCOME_INDEX_DID: {
                 pdid = dps[i].value.string;
                 
-                strncpy((char *)WKStack.did, pdid, WKSTACK_DID_LEN);
+                strncpy((char *)WKStack.params.did, pdid, WKSTACK_DID_LEN);
 
-                LOG(LEVEL_NORMAL, "did:%s\n", WKStack.did);
+                LOG(LEVEL_NORMAL, "did:%s\n", WKStack.params.did);
                 hasDid = 1;
             }
             break;
@@ -548,8 +548,8 @@ int WKStack_unpack_welcome(unsigned char *payload, int len) {
                 char *pticket = dps[i].value.string;
 
 
-                strncpy(WKStack.ticket, pticket, sizeof(WKStack.ticket));
-                LOG(LEVEL_NORMAL, "ticket:%s\n", WKStack.ticket);
+                strncpy(WKStack.params.ticket, pticket, sizeof(WKStack.params.ticket));
+                LOG(LEVEL_NORMAL, "ticket:%s\n", WKStack.params.ticket);
                 hasTicket = 1;
             }
             break;
@@ -557,8 +557,8 @@ int WKStack_unpack_welcome(unsigned char *payload, int len) {
             case WKSTACK_WELCOME_INDEX_DNAME: {
 
                 pname = dps[i].value.string;
-                strncpy(WKStack.name, pname, sizeof(WKStack.name));
-                LOG(LEVEL_NORMAL, "name:%s\n", WKStack.name);
+                strncpy(WKStack.params.name, pname, sizeof(WKStack.params.name));
+                LOG(LEVEL_NORMAL, "name:%s\n", WKStack.params.name);
                 hasName = 1;
             }
             break;
@@ -580,14 +580,14 @@ int WKStack_unpack_welcome(unsigned char *payload, int len) {
 
         mqtt_stop(0);
 
-        sprintf(WKStack.report_topic, WKSTACK_TOPIC_REPORT_FMT, WKStack.params.product_id, WKStack.did);
+        sprintf(WKStack.report_topic, WKSTACK_TOPIC_REPORT_FMT, WKStack.params.product_id, WKStack.params.did);
 
-        sprintf(WKStack.control_topic, WKSTACK_TOPIC_CONTROL_FMT, WKStack.params.product_id, WKStack.did);
-        sprintf(WKStack.ota_sub_topic, WKSTACK_TOPIC_OTA_SUB_FMT, WKStack.params.product_id, WKStack.did);
-        sprintf(WKStack.ota_pub_topic, WKSTACK_TOPIC_OTA_PUB_FMT, WKStack.params.product_id, WKStack.did);
+        sprintf(WKStack.control_topic, WKSTACK_TOPIC_CONTROL_FMT, WKStack.params.product_id, WKStack.params.did);
+        sprintf(WKStack.ota_sub_topic, WKSTACK_TOPIC_OTA_SUB_FMT, WKStack.params.product_id, WKStack.params.did);
+        sprintf(WKStack.ota_pub_topic, WKSTACK_TOPIC_OTA_PUB_FMT, WKStack.params.product_id, WKStack.params.did);
 
-        sprintf(WKStack.binding_sub_topic, WKSTACK_TOPIC_BINDING_SUB_FMT, WKStack.params.product_id, WKStack.did);
-        sprintf(WKStack.binding_pub_topic, WKSTACK_TOPIC_BINDING_PUB_FMT, WKStack.params.product_id, WKStack.did);
+        sprintf(WKStack.binding_sub_topic, WKSTACK_TOPIC_BINDING_SUB_FMT, WKStack.params.product_id, WKStack.params.did);
+        sprintf(WKStack.binding_pub_topic, WKSTACK_TOPIC_BINDING_PUB_FMT, WKStack.params.product_id, WKStack.params.did);
 
         return 0;
     }

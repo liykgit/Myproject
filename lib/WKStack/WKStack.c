@@ -172,23 +172,23 @@ WKStack_state_t WKStack_state()
 
 int WKStack_did(char *buf, int size)
 {
-    int did_len = strlen(WKStack.did);
+    int did_len = strlen(WKStack.params.did);
     
     if(did_len + 1 > size)
         return -1;
 
-    strcpy(buf, WKStack.did);
+    strcpy(buf, WKStack.params.did);
     return 0;
 }
 
 int WKStack_name(char *buf, int size)
 {
-    int name_len = strlen(WKStack.name);
+    int name_len = strlen(WKStack.params.name);
     
     if(name_len + 1 > size)
         return -1;
 
-    strcpy(buf, WKStack.name);
+    strcpy(buf, WKStack.params.name);
     return 0;
 }
 

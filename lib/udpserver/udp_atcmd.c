@@ -158,12 +158,12 @@ void exec_find(int argc, char *argv[], struct socketaddr_in *client_addr)
 {
     LOG(LEVEL_DEBUG, "exec_find E\n");
     
-    if(strlen(WKStack.did) > 0) {
+    if(strlen(WKStack.params.did) > 0) {
 
         char buf[216];
         memset(buf, 0, sizeof(buf));
 
-        sprintf((char *)buf, "VENGAS:FIND:%s#%s#%s#%s:VENGAE", WKStack.params.product_id, WKStack.params.mac, WKStack.did, WKStack.name);
+        sprintf((char *)buf, "VENGAS:FIND:%s#%s#%s#%s:VENGAE", WKStack.params.product_id, WKStack.params.mac, WKStack.params.did, WKStack.params.name);
         udpserver_sendto(client_addr, buf, strlen(buf));
     } 
     else {

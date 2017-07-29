@@ -349,7 +349,6 @@ static int WKStack_unpack_control(unsigned char *payload, int len)
 int WKStack_pack_connect(char *client_id, int willflag)
 {
     //NOTE: message must be declared static
-    static char message[128];
     static char _id[24]; //mqtt allows 23 bytes at max
 
 	g_mqtt_data.MQTTVersion = 3;
@@ -370,6 +369,8 @@ int WKStack_pack_connect(char *client_id, int willflag)
 	if(willflag == 0){
 		g_mqtt_data.willFlag	= 0;
     } else {
+        /*
+        static char message[128];
         memset(message, 0, sizeof(message));
 	    sprintf(message, "{did:%s}", WKStack.params.did);
 		g_mqtt_data.willFlag = 1;		// 0 close will message, 1 use will message .
@@ -377,6 +378,7 @@ int WKStack_pack_connect(char *client_id, int willflag)
         g_mqtt_data.will.message = message;
         g_mqtt_data.will.retained = 1;
         g_mqtt_data.will.qos = 1;
+        */
     }
 
 	g_mqtt_data.password = NULL;
@@ -579,15 +581,6 @@ int WKStack_unpack_welcome(unsigned char *payload, int len) {
     if(hasDid && hasEndpoint && hasTicket /*&& hasName*/) {
 
         mqtt_stop(0);
-
-        sprintf(WKStack.report_topic, WKSTACK_TOPIC_REPORT_FMT, WKStack.params.product_id, WKStack.params.did);
-
-        sprintf(WKStack.control_topic, WKSTACK_TOPIC_CONTROL_FMT, WKStack.params.product_id, WKStack.params.did);
-        sprintf(WKStack.ota_sub_topic, WKSTACK_TOPIC_OTA_SUB_FMT, WKStack.params.product_id, WKStack.params.did);
-        sprintf(WKStack.ota_pub_topic, WKSTACK_TOPIC_OTA_PUB_FMT, WKStack.params.product_id, WKStack.params.did);
-
-        sprintf(WKStack.binding_sub_topic, WKSTACK_TOPIC_BINDING_SUB_FMT, WKStack.params.product_id, WKStack.params.did);
-        sprintf(WKStack.binding_pub_topic, WKSTACK_TOPIC_BINDING_PUB_FMT, WKStack.params.product_id, WKStack.params.did);
 
         return 0;
     }

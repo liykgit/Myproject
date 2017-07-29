@@ -162,4 +162,6 @@ int WKStack_did(char *buf, int size);
 
 int WKStack_name(char *buf, int size);
 
+int WKStack_params(char *buf, int size);
+
 #endif

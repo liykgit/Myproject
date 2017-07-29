@@ -230,6 +230,43 @@ predicate_t is_client(void *ele, void *arg) {
         return 0;
 }
 
+
+static int WKStack_unpack_sync(unsigned char *payload, int len)
+{
+
+    LOG(LEVEL_DEBUG, "WKStack_unpack_sync E\n");
+    int count = decode_payload((char *)payload, len);
+    if(count <= 0)  
+        return 0;
+
+    int i = 0;
+    
+    for(; i < count; i++) {
+
+        switch(dps[i].index) {
+            
+            case WKSTACK_WELCOME_INDEX_DNAME: {
+                char *pname = dps[i].value.string;
+                LOG(LEVEL_NORMAL, "update name to %s\n", pname);
+                strncpy(WKStack.params.name, pname, sizeof(WKStack.params.name));
+            }
+            break;
+        }
+    }
+
+    for(i = 0; i < count; i++) {
+        //free the string buffer
+        if(dps[i].type == 4) {
+            vg_free(dps[i].value.string);
+            dps[i].value.string = NULL;
+        }
+    }
+
+	//printf("### MEM FREE : %d.\n", qcom_mem_heap_get_free_size());
+    LOG(LEVEL_DEBUG, "WKStack_unpack_sync X\n");
+}
+
+
 static int WKStack_unpack_binding(unsigned char *payload, int len)
 {
     LOG(LEVEL_DEBUG, "WKStack_unpack_binding E\n");
@@ -385,6 +422,49 @@ int WKStack_pack_connect(char *client_id, int willflag)
 	g_mqtt_data.cleansession = 0;		// 0 will receive outline message.
 
 	return 0;
+}
+
+int WKStack_publish_sync()
+{
+    int ret = -1;
+
+    LOG(LEVEL_NORMAL, "pub sync\n");
+
+    char buf[128];
+    memset(buf, 0, sizeof(buf));
+
+    int offset = 0;
+
+    {
+        char tag[4] = {0, 0, WKSTACK_DATAPOINT_TYPE_STRING, 0};
+        *(unsigned short*)tag = WKSTACK_SYNC_INDEX_SDKVER;
+        int item_size = tlv_put_string(buf+offset, tag, WKStack_version, sizeof(buf) - offset);
+        LOG(LEVEL_NORMAL, "sdkver %s\n", WKStack_version);
+        if(item_size >= 0)
+            offset += item_size;
+        else { 
+            LOG(LEVEL_ERROR, "knock publish buffer not large enough\n");
+            return -1;
+        }
+    }
+
+    if(strlen(WKStack.params.version) > 0) {
+
+        char tag[4] = {0, 0, WKSTACK_DATAPOINT_TYPE_STRING, 0};
+        *(unsigned short*)tag = WKSTACK_SYNC_INDEX_VER;
+
+        LOG(LEVEL_NORMAL, "fwver %s\n", WKStack.params.version);
+
+        int item_size = tlv_put_string(buf+offset, tag, WKStack.params.version, sizeof(buf) - offset);
+        if(item_size >= 0)
+            offset += item_size;
+        else { 
+            LOG(LEVEL_ERROR, "knock publish buffer not large enough\n");
+            return -1;
+        }
+    }
+
+    return mqtt_publish(WKStack.sync_pub_topic, (unsigned char*)buf, offset, MQTT_QOS1, MQTT_RETAIN_FALSE, (mqtt_cb_t)NULL);
 }
 
 int WKStack_publish_knock()
@@ -631,6 +711,13 @@ int WKStack_subscribe_challenge()
 int WKStack_subscribe_control()
 {
     mqtt_subscribe(WKStack.control_topic, NULL, WKStack_unpack_control);
+
+    return 0;
+}
+
+int WKStack_subscribe_sync()
+{
+    mqtt_subscribe(WKStack.sync_sub_topic, NULL, WKStack_unpack_sync);
 
     return 0;
 }

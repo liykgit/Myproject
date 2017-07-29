@@ -31,6 +31,9 @@
 #define WKSTACK_TOPIC_BINDING_SUB_FMT "/iot/binding/%s/%s/sub" // For both Module and MCU ota (Server -> Device)
 #define WKSTACK_TOPIC_BINDING_PUB_FMT "/iot/binding/%s/%s/pub" // For Module ota (Device -> Server)
 
+#define WKSTACK_TOPIC_SYNC_SUB_FMT "/iot/sync/%s/%s/sub" 
+#define WKSTACK_TOPIC_SYNC_PUB_FMT "/iot/sync/%s/%s/pub" // For Module ota (Device -> Server)
+
 #define WKSTACK_TOPIC_OTA_MCU_OUT_FMT "/iot/in/mcu/%s/%s/ota" // For MCU ota (Device -> Server)
 
 // Json field

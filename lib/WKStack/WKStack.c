@@ -42,9 +42,6 @@ int WKStack_init(WKStack_params_t *params)
        
         memcpy(&WKStack.params, params, sizeof(WKStack_params_t));
 
-        //TODO get sn in future
-        //sLOG(LEVEL_NORMAL,WKStack.devinfo_topic, WKSTACK_TOPIC_DEVINFO_FMT, WKStack.params.sn);
-
         log_init(WKStack.params.mac);
 
         mqtt_init(WKSTACK_KEEPALIVE_TIME, 1024);
@@ -192,10 +189,20 @@ int WKStack_name(char *buf, int size)
     return 0;
 }
 
+int WKStack_params(char *buf, int size)
+{
+    int name_len = strlen(WKStack.params.name);
+    
+    if(sizeof(WKStack_params_t) > size)
+        return -1;
+
+    memcpy(buf, &WKStack.params, sizeof(WKStack_params_t));
+    return 0;
+}
+
 int WKStack_report_ota_progress(WKStack_ota_target_t target, WKStack_ota_report_t report, WKStack_report_cb_t cb)
 {
-
-    static char buf[128];
+    char buf[128];
     int buf_size = 128;
     int offset = 0;
 
@@ -313,6 +320,7 @@ int WKStack_report_ota_progress(WKStack_ota_target_t target, WKStack_ota_report_
     //mqtt_unsubscribe(WKStack.ota_sub_topic, NULL);    
   
     return mqtt_publish(WKStack.ota_pub_topic, (unsigned char*)buf, offset, MQTT_QOS1, MQTT_RETAIN_FALSE, (mqtt_cb_t)cb);
+
 }
 
 void WKStack_rabbit() {

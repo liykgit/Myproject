@@ -11,10 +11,33 @@
 WKStack_t WKStack;
 
 int g_testmode = 0;
-const char *WKStack_version = "1.2.1";
+const char *WKStack_version = "1.3.0";
 
 
 int WKStack_connect_cb(mqtt_errno_t err);
+
+static void doPrepare() {
+    sprintf(WKStack.report_topic, WKSTACK_TOPIC_REPORT_FMT, WKStack.params.product_id, WKStack.params.did);
+
+    sprintf(WKStack.control_topic, WKSTACK_TOPIC_CONTROL_FMT, WKStack.params.product_id, WKStack.params.did);
+    sprintf(WKStack.ota_sub_topic, WKSTACK_TOPIC_OTA_SUB_FMT, WKStack.params.product_id, WKStack.params.did);
+    sprintf(WKStack.ota_pub_topic, WKSTACK_TOPIC_OTA_PUB_FMT, WKStack.params.product_id, WKStack.params.did);
+
+    sprintf(WKStack.binding_sub_topic, WKSTACK_TOPIC_BINDING_SUB_FMT, WKStack.params.product_id, WKStack.params.did);
+    sprintf(WKStack.binding_pub_topic, WKSTACK_TOPIC_BINDING_PUB_FMT, WKStack.params.product_id, WKStack.params.did);
+
+
+    sprintf(WKStack.sync_pub_topic, WKSTACK_TOPIC_SYNC_PUB_FMT, WKStack.params.product_id, WKStack.params.did);
+    sprintf(WKStack.sync_sub_topic, WKSTACK_TOPIC_SYNC_SUB_FMT, WKStack.params.product_id, WKStack.params.did);
+
+
+    WKStack_subscribe_ota();
+    WKStack_subscribe_sync();
+    WKStack_subscribe_control();
+    WKStack_subscribe_binding();
+
+    WKStack_publish_sync();
+}
 
 void WKStack_connect_ep(void)
 {
@@ -88,11 +111,8 @@ int WKStack_connect_cb(mqtt_errno_t err)
                 {
                     WKStack.state = WKSTACK_ONLINE;
 
-                    LOG(LEVEL_NORMAL,"Registry connected\nSubscribe to topics\n");
-                    WKStack_subscribe_control();
-                    WKStack_subscribe_ota();
-                    WKStack_subscribe_binding();
-
+                    LOG(LEVEL_NORMAL,"Connected to endpoint\n");
+                    doPrepare();
                 }
                 break;
 
@@ -147,13 +167,12 @@ int WKStack_connect_cb(mqtt_errno_t err)
             
             case MQTT_CONNECT_SUCCEED:
                 {
-                    LOG(LEVEL_NORMAL,"Connected to endpoint\n Subscribe topics\n");
+                    LOG(LEVEL_NORMAL,"Reconnected to ep\n Sub topics\n");
                     WKStack.state = WKSTACK_ONLINE;
 
-                    WKStack_subscribe_control();
-                    WKStack_subscribe_ota();
-                    WKStack_subscribe_binding();
+                    doPrepare();
 
+                    
                 }
                 break;
 
@@ -222,6 +241,8 @@ int doStart() {
     if(WKStack.state == WKSTACK_OFFLINE) {
 
         WKStack_params_t *params = &WKStack.params;
+
+         
 
         if(strlen(WKStack.params.did) != 0 && strlen(WKStack.params.host) != 0 && strlen(WKStack.params.ticket) != 0) { 
             LOG(LEVEL_NORMAL,"My did is %s\n", WKStack.params.did);

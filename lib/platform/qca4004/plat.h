@@ -65,7 +65,7 @@ int vg_sendto(int sock, unsigned char *buffer, int length, struct sockaddr_in *c
 #define CONN_NOSSL 0
 #define CONN_SSL   1
 
-#define CONN_MODE CONN_NOSSL
+#define CONN_MODE CONN_SSL
 
 #define TCP_TIMEOUT_S  			(6)
 #define TCP_TIMEOUT_MS 			(0)

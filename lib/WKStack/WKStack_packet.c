@@ -386,7 +386,9 @@ static int WKStack_unpack_control(unsigned char *payload, int len)
 int WKStack_pack_connect(char *client_id, int willflag)
 {
     //NOTE: message must be declared static
-    static char _id[24]; //mqtt allows 23 bytes at max
+    static char _id[128]; 
+
+    memset(_id, 0, sizeof(_id));
 
 	g_mqtt_data.MQTTVersion = 3;
 

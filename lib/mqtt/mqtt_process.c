@@ -240,7 +240,11 @@ int mqtt_process_send()
 
 int mqtt_process_error()
 {
-    vg_tcp_close(mqtt.sockfd, CONN_MODE);
+    LOG(LEVEL_DEBUG, "mqtt_process_error E\n");
+
+    if(mqtt.sockfd >=0)
+        vg_tcp_close(mqtt.sockfd, CONN_MODE);
+
 
     mqtt_topic_init();
 
@@ -263,6 +267,9 @@ int mqtt_process_error()
     if(mqtt.error_number == MQTT_DISCONNECT_SUCCEED && mqtt.stop_cb ) {
         mqtt.stop_cb();
     }
+
+
+    LOG(LEVEL_DEBUG, "mqtt_process_error X\n");
 
     return 0;
 }

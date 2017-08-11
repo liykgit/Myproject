@@ -72,6 +72,8 @@ int WKStack_stop(WKStack_stop_cb_t cb)
 
 int WKStack_report_datapoint(WKStack_datapoint_t *dp_group, unsigned int group_size, WKStack_report_cb_t cb)
 {
+    if(WKStack.state != WKSTACK_ONLINE)
+        return -1;
 
     char buf[512];
     int buf_size = 512;

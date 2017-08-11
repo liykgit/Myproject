@@ -337,6 +337,10 @@ int mqtt_socket(char *ip, int port)
 
 	ret = vg_connect_server(&(mqtt.sockfd), ip, port, CONN_MODE);
 	if(ret != 0){
+        
+        vg_tcp_close(mqtt.sockfd, CONN_MODE);
+        mqtt.sockfd = -1;
+
 		return -2;
 	}
 	return 0;

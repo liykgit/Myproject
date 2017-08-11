@@ -21,6 +21,7 @@ mqtt_errno_t mqtt_errno(void)
 
 int mqtt_start(char *host, unsigned short port, mqtt_connect_data_t *data, mqtt_connect_cb_t cb)
 {
+    LOG(LEVEL_DEBUG, "mqtt start %dE\n", mqtt.state);
     if(mqtt.state == MQTT_STATE_IDLE || mqtt.state == MQTT_STATE_ERROR){
         strcpy(mqtt.host, host);
         mqtt.port = port;
@@ -367,6 +368,8 @@ static thread_ret_t mqtt_ctrl_thread(thread_params_t args)
         if(ret == -1){ // Timeout
             if(mqtt.ping_times > MQTT_RETRY_TIMES){
                 mqtt.state = MQTT_STATE_ERROR;
+                //consider heartbeat timeout a socket error 
+                mqtt.error_number = MQTT_SOCKET_ERROR;
 
                 LOG(LEVEL_ERROR, "<ERR> Mqtt ping timeout\n");
             }else if(mqtt.state == MQTT_STATE_RUNNING){
@@ -428,6 +431,8 @@ start:
 
         len = mqtt_recv(mqtt.recv_buf, mqtt.window_size);
         if(len < 0) {
+
+            LOG(LEVEL_DEBUG, "mqtt_recv failed, mqtt state %d\n", mqtt.state);
             // If there is not next connect task, then go to error, else goto recv directory
             if (mqtt.state != MQTT_STATE_IDLE
             && mqtt.state != MQTT_STATE_ERROR

@@ -284,12 +284,14 @@ int mqtt_process_connack()
 
             if(mqtt.error_number == MQTT_CONNECT_SUCCEED){
                 mqtt.state = MQTT_STATE_RUNNING;
+
+                if(mqtt.connect_cb != NULL)
+                    mqtt.connect_cb(mqtt.error_number);
+
             }else{
                 mqtt.state = MQTT_STATE_ERROR;
                 mqtt_process_error();
-            }
-            if(mqtt.connect_cb != NULL){
-                mqtt.connect_cb(mqtt.error_number);
+                return;
             }
         }
     }

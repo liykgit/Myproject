@@ -11,7 +11,7 @@
 WKStack_t WKStack;
 
 int g_testmode = 0;
-const char *WKStack_version = "1.4.0";
+const char *WKStack_version = "1.4.1";
 
 
 int WKStack_connect_cb(mqtt_errno_t err);
@@ -82,7 +82,7 @@ void WKStack_announce() {
 
 int WKStack_connect_cb(mqtt_errno_t err)
 {
-    LOG(LEVEL_DEBUG,"WKStack_connect_cb E state: %d\n", WKStack.state);
+    LOG(LEVEL_DEBUG, "WKStack_connect_cb E state: %d\n", WKStack.state);
 
     if(WKStack.state == WKSTACK_REGISTER){
         if(err == MQTT_CONNECT_SUCCEED){

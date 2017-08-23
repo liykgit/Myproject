@@ -242,9 +242,14 @@ int mqtt_process_error()
 {
     LOG(LEVEL_DEBUG, "mqtt_process_error E\n");
 
-    if(mqtt.sockfd >=0)
+    if(mqtt.sockfd >=0) {
         vg_tcp_close(mqtt.sockfd, CONN_MODE);
 
+        //hack for unauthorize error. sleep to wait for the socket is fully closed
+        //Otherwise the server may close the connection, causing the socket for reconnecting to be closed.
+        if (mqtt.error_number == MQTT_UNAUTHORIZED)
+            msleep(2000);
+    }
 
     mqtt_topic_init();
 
@@ -255,7 +260,7 @@ int mqtt_process_error()
 
     memset(mqtt.host, 0, MAX_HOST_NAME);
     mqtt.port = 0;
-    mqtt.sockfd = 0;
+    mqtt.sockfd = -1;
     mqtt.ping_times = 0;
     memset(&(mqtt.connect_data), 0, sizeof(mqtt_connect_data_t));
 

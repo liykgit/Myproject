@@ -45,12 +45,13 @@ int WKStack_init(WKStack_params_t *params)
         log_init(WKStack.params.mac);
 
         mqtt_init(WKSTACK_KEEPALIVE_TIME, 1024);
+
+        UDPServer_start(UDP_SERVER_PORT); 
+
     }
 
     LOG(LEVEL_NORMAL, "WKStack inited \n");
     WKStack.state = WKSTACK_OFFLINE;
-    
-    UDPServer_start(UDP_SERVER_PORT); 
 
     return 0;
 }

@@ -767,3 +767,5 @@ int WKStack_publish_bind_request(char *userId)
     return mqtt_publish(WKStack.binding_pub_topic, (unsigned char*)buf, offset, MQTT_QOS1, MQTT_RETAIN_FALSE, (mqtt_cb_t)0);
 }
 
+
+

@@ -96,7 +96,8 @@ int WKStack_connect_cb(mqtt_errno_t err)
 
             LOG(LEVEL_NORMAL,"Disconnected from registry, state %d\n", WKStack.state);
             WKStack.state = WKSTACK_CONNECT_ENDPOINT;
-            LOG(LEVEL_NORMAL,"Connecting endpoint\n");
+            LOG(LEVEL_NORMAL,"Immediate connect to ep\n");
+
             WKStack_connect_ep();
 
         } else {

@@ -228,10 +228,10 @@ int vg_recv(int sock, unsigned char *buffer, int length, int ssl)
 	ret = qcom_select(sock + 1, &fdRead, NULL, NULL, &tm);
 
 	if(ret < 0){// error
-		LOG(LEVEL_ERROR, "mqtt sockfd select error\n");
+		LOG(LEVEL_ERROR, "vg_recv select error\n");
 		return -1;
 	}else if(ret == 0){
-		LOG(LEVEL_DEBUG, "mqtt sockfd select timeout\n");
+		LOG(LEVEL_DEBUG, "vg_recv select timeout\n");
 		return 0;
 	}else{
 	    if(FD_ISSET(sock, &fdRead)){
@@ -366,6 +366,7 @@ again:
 		conn = qca_ssl_client_start((A_UINT8 *)calist_cert, sizeof(calist_cert));
 		if(conn == A_ERROR)
 		{
+	        LOG(LEVEL_NORMAL, "start ssl client failed\n");
 			return conn;
 		}
 		conn = qca_ssl_connect(sock, ipaddr, port);

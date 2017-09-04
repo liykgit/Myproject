@@ -138,7 +138,7 @@ typedef int (*WKStack_stop_cb_t)();
 typedef int (*WKStack_report_cb_t)(unsigned short id, WKStack_publish_state_t state);
 typedef int (*WKStack_ota_cb_t)(WKStack_ota_t *info, WKStack_ota_target_t target, WKStack_ota_type_t type);
 typedef void (*WKStack_datapoint_handler_t)(WKStack_datapoint_t *dps, int size);
-
+typedef int (*WKStack_restore_cb_t)(WKStack_publish_state_t state);
 
 int WKStack_init(WKStack_params_t *params);
 
@@ -163,5 +163,7 @@ int WKStack_did(char *buf, int size);
 int WKStack_name(char *buf, int size);
 
 int WKStack_params(char *buf, int size);
+
+int WKStack_restore_all(WKStack_restore_cb_t restore_cb);
 
 #endif

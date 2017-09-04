@@ -245,10 +245,8 @@ int mqtt_process_error()
     if(mqtt.sockfd >=0) {
         vg_tcp_close(mqtt.sockfd, CONN_MODE);
 
-        //hack for unauthorize error. sleep to wait for the socket is fully closed
-        //Otherwise the server may close the connection, causing the socket for reconnecting to be closed.
-        if (mqtt.error_number == MQTT_UNAUTHORIZED)
-            msleep(2000);
+        //do a short sleep to wait for possible platform socket release latency
+        msleep(200);
     }
 
     mqtt_topic_init();
@@ -266,21 +264,14 @@ int mqtt_process_error()
 
     mqtt.state = MQTT_STATE_IDLE;
 
-    if(mqtt.connect_cb != NULL)
-        mqtt.connect_cb(mqtt.error_number);
-
-    if(mqtt.error_number == MQTT_DISCONNECT_SUCCEED && mqtt.stop_cb ) {
-        mqtt.stop_cb();
-    }
-
-
     LOG(LEVEL_DEBUG, "mqtt_process_error X\n");
 
-    return 0;
+    return mqtt.error_number;
 }
 
 int mqtt_process_connack()
 {
+    LOG(LEVEL_DEBUG, "mqtt_process_connack E\n");
     mqtt_package_t *pMsg = NULL;
 
     if((pMsg = GetLastPendingBuddle()) != NULL){
@@ -296,10 +287,10 @@ int mqtt_process_connack()
             }else{
                 mqtt.state = MQTT_STATE_ERROR;
                 mqtt_process_error();
-                return;
             }
         }
     }
+    LOG(LEVEL_DEBUG, "mqtt_process_connack X\n");
 
     return 0;
 }

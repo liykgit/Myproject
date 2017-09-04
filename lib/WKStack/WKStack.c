@@ -155,6 +155,41 @@ int WKStack_report_raw(unsigned char *buf, unsigned int size) {
     return mqtt_publish(WKStack.report_topic, buf, size, MQTT_QOS1, MQTT_RETAIN_FALSE, (mqtt_cb_t)0);
 }
 
+
+static WKStack_restore_cb_t _restore_cb = 0;
+
+static int restore_cb_wrapper(unsigned short msg_id, mqtt_errno_t err) {
+
+    if(_restore_cb) {
+        _restore_cb(err);
+
+        _restore_cb = 0;
+    }
+}
+
+int WKStack_restore_all(WKStack_restore_cb_t restore_cb)
+{
+    LOG(LEVEL_NORMAL, "WKStack_restore_all E\n");
+
+    if(WKStack.state != WKSTACK_ONLINE)
+        return -1;
+
+    if(restore_cb)
+        _restore_cb = restore_cb;
+
+    int ret = -1;
+
+
+    char buf[32];
+    memset(buf, 0, sizeof(buf));
+
+    char tag[4] = {0, 0, WKSTACK_DATAPOINT_TYPE_INT, 0};
+    *(unsigned short*)tag = WKSTACK_SYNC_INDEX_RESTORE;
+    int offset = tlv_put_int(buf, tag, 1, sizeof(buf));
+
+    return mqtt_publish(WKStack.sync_pub_topic, (unsigned char*)buf, offset, MQTT_QOS1, MQTT_RETAIN_FALSE, (mqtt_cb_t)restore_cb_wrapper);
+}
+
 int WKStack_register_datapoint_handler(WKStack_datapoint_handler_t handler)
 {
     if(handler == NULL)
@@ -205,6 +240,10 @@ int WKStack_params(char *buf, int size)
 
 int WKStack_report_ota_progress(WKStack_ota_target_t target, WKStack_ota_report_t report, WKStack_report_cb_t cb)
 {
+
+    if(WKStack.state != WKSTACK_ONLINE)
+        return -1;
+
     char buf[128];
     int buf_size = 128;
     int offset = 0;
@@ -330,3 +369,8 @@ void WKStack_rabbit() {
     LOG(LEVEL_NORMAL,"WKStack_rabbit\n");
     mqtt_unsubscribe(WKStack.ota_sub_topic, NULL);    
 }
+
+
+
+
+

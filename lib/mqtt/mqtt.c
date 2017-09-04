@@ -21,7 +21,7 @@ mqtt_errno_t mqtt_errno(void)
 
 int mqtt_start(char *host, unsigned short port, mqtt_connect_data_t *data, mqtt_connect_cb_t cb)
 {
-    LOG(LEVEL_DEBUG, "mqtt start %dE\n", mqtt.state);
+    LOG(LEVEL_DEBUG, "mqtt start E\n");
     if(mqtt.state == MQTT_STATE_IDLE || mqtt.state == MQTT_STATE_ERROR){
         strcpy(mqtt.host, host);
         mqtt.port = port;
@@ -362,7 +362,7 @@ static thread_ret_t mqtt_ctrl_thread(thread_params_t args)
     int ret = 0;
 
     while(1){
-        LOG(LEVEL_DEBUG, "<LOG> Ctrl thread wait...(%d)\n", mqtt.keepalive);
+        LOG(LEVEL_DEBUG, "mqtt ctrl thread wait...(%d)\n", mqtt.keepalive);
         ret = vg_wait_sem(&ctrl_thread_sem, mqtt.keepalive);
 
         if(ret == -1){ // Timeout
@@ -375,6 +375,11 @@ static thread_ret_t mqtt_ctrl_thread(thread_params_t args)
             }else if(mqtt.state == MQTT_STATE_RUNNING){
                 mqtt_pingreq();
                 continue;
+            }
+            else if(mqtt.state == MQTT_STATE_START){ 
+                LOG(LEVEL_ERROR, "Mqtt start timeout\n");
+                mqtt.state = MQTT_STATE_ERROR;  
+                mqtt.error_number = MQTT_SYSTEM_ERROR ;
             }
         }
 
@@ -400,9 +405,18 @@ static thread_ret_t mqtt_ctrl_thread(thread_params_t args)
             
             mqtt_process_send();
             break;
-        case MQTT_STATE_ERROR:
-            mqtt_process_error();
-            break;
+
+        case MQTT_STATE_ERROR: {
+
+                int error_number = mqtt_process_error();
+
+                if(mqtt.connect_cb != NULL)
+                    mqtt.connect_cb(error_number);
+
+                if(mqtt.error_number == MQTT_DISCONNECT_SUCCEED && mqtt.stop_cb ) 
+                    mqtt.stop_cb();
+           }
+           break;
         }
     }
 

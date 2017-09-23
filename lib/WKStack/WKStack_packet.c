@@ -310,7 +310,8 @@ static int WKStack_unpack_binding(unsigned char *payload, int len)
         client_info = (client_info_t *)plist_find(is_client, user_id);
         
         char buf[128];
-        sprintf(buf, "VENGAS:BIND:%s:VENGAE", bind_ticket);
+        memset(buf, 0, sizeof(buf));
+        sprintf(buf, "VENGAS:BIND:%s#%s:VENGAE", WKStack.params.did, bind_ticket);
 
         if(client_info) {
             udpserver_sendto(&client_info->addr, buf, strlen(buf));
@@ -555,14 +556,16 @@ int WKStack_unpack_welcome(unsigned char *payload, int len) {
 
     LOG(LEVEL_DEBUG, "WKStack_unpack_welcome E\n");
 
+
     if(memcmp(payload, REGISTRY_ERR_SYSTEM_FAILURE, strlen(REGISTRY_ERR_SYSTEM_FAILURE)) == 0) {
 
+        LOG(LEVEL_ERROR, "Failed to register device: "REGISTRY_ERR_SYSTEM_FAILURE"\n");
+
         msleep(RECONNECT_DELAY_SHORT);
-
+
         WKStack.state = WKSTACK_OFFLINE;
         //doStart();
 
-        LOG(LEVEL_ERROR, "Failed to register device: "REGISTRY_ERR_SYSTEM_FAILURE"\n");
         return -1;
     }
 

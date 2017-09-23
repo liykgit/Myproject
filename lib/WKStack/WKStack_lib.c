@@ -67,7 +67,6 @@ void WKStack_announce() {
 
         char buf[216];
         memset(buf, 0, sizeof(buf));
-
         sprintf(buf, "VENGAS:ANNOUNCE:%s#%s#%s#%s:VENGAE", WKStack.params.product_id,
                             WKStack.params.mac,
                             WKStack.params.did,

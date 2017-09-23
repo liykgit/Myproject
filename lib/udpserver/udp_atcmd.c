@@ -17,6 +17,7 @@
 #define FORMAT_ERROR        "+ERR=1\r\n" //command format error\r\n"
 #define NONE_COMMAND        "+ERR=2\r\n" //unknow this command\r\n"
 #define PARAM_ERROR         "+ERR=3\r\n" //param error\r\n"
+#define TARGET_ERROR         "+ERR=4\r\n" //param error\r\n"
 #define EXEC_ERROR          "FAILED\r\n" //param error\r\n"
 
 #define TCPSERVER_PORT      30321
@@ -162,7 +163,6 @@ void exec_find(int argc, char *argv[], struct socketaddr_in *client_addr)
 
         char buf[216];
         memset(buf, 0, sizeof(buf));
-
         sprintf((char *)buf, "VENGAS:FIND:%s#%s#%s#%s:VENGAE", WKStack.params.product_id, WKStack.params.mac, WKStack.params.did, WKStack.params.name);
         udpserver_sendto(client_addr, buf, strlen(buf));
     } 
@@ -182,14 +182,28 @@ void exec_bind(int argc, char *argv[], struct socketaddr_in *client_addr)
         udpserver_sendto(client_addr, PARAM_ERROR, strlen(PARAM_ERROR));
     }
     else if(argc == 2){
-        
-        printf("bind request from user %s\n", argv[1]);
-        WKStack_publish_bind_request(argv[1]);
+
+        if(memcmp(argv[1], WKStack.params.did, strlen(WKStack.params.did))) {
+            udpserver_sendto(client_addr, TARGET_ERROR, strlen(TARGET_ERROR));
+            return;
+        }
+       
+        char *p = strstr(argv[1], "#");
+            
+        if(!p || !(p+1)) {
+            udpserver_sendto(client_addr, PARAM_ERROR, strlen(PARAM_ERROR));
+            return;
+        }
+
+        p++;
+
+        LOG(LEVEL_NORMAL, "bind request from user %s\n", p);
+        WKStack_publish_bind_request(p);
 
         client_info_t *cinfo = vg_malloc(sizeof(client_info_t));
         memcpy(&cinfo->addr, client_addr, sizeof(struct sockaddr_in));
 
-        strncpy(cinfo->user_id, argv[1], 16);
+        strncpy(cinfo->user_id, p, 16);
         void *victim = plist_push(cinfo);
         if(victim)
             vg_free(victim);

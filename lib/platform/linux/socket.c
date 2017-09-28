@@ -149,17 +149,17 @@ int vg_recv(int sock, unsigned char *buffer, int length, int ssl)
 
             return ret;
         }else if(ret < 0){//recv err
-            LOG(LEVEL_ERROR, "<ERR> mqtt recv error(errno:%d)\n", errno);
+            LOG(LEVEL_ERROR, "<ERR> vg recv error(errno:%d)\n", errno);
             if(errno == 104 || errno == 9)
                 return -4;
             else
                 return -2;
         }else{// == 0 //socket close
-            LOG(LEVEL_ERROR, "<ERR> mqtt close socket\n");
+            LOG(LEVEL_ERROR, "mqtt close socket\n");
             return -3;// careful : sometime select =1 ,but read 0 byte data
         }
     }else{
-        LOG(LEVEL_ERROR, "<ERR> mqtt sockfd is not set\n");
+        LOG(LEVEL_ERROR, "mqtt sockfd is not set\n");
     }
 
 	return 0;

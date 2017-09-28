@@ -216,6 +216,71 @@ int WKStack_connect_cb(mqtt_errno_t err)
     return 0;
 }
 
+static int is_ip_address(char *str) {
+
+    int segs = 0;   /* Segment count. */
+    int chcnt = 0;  /* Character count within segment. */
+    int accum = 0;  /* Accumulator for segment. */
+
+    /* Catch NULL pointer. */
+
+    if (str == NULL)
+        return 0;
+
+    /* Process every character in string. */
+
+    while (*str != '\0') {
+        /* Segment changeover. */
+
+        if (*str == '.') {
+            /* Must have some digits in segment. */
+
+            if (chcnt == 0)
+                return 0;
+
+            /* Limit number of segments. */
+
+            if (++segs == 4)
+                return 0;
+
+            /* Reset segment values and restart loop. */
+
+            chcnt = accum = 0;
+            str++;
+            continue;
+        }
+ 
+
+        /* Check numeric. */
+
+        if ((*str < '0') || (*str > '9'))
+            return 0;
+
+        /* Accumulate and check segment. */
+
+        if ((accum = accum * 10 + *str - '0') > 255)
+            return 0;
+
+        /* Advance other segment specific stuff and continue loop. */
+
+        chcnt++;
+        str++;
+    }
+
+    /* Check enough segments and enough characters in last segment. */
+
+    if (segs != 3)
+        return 0;
+
+    if (chcnt == 0)
+        return 0;
+
+    /* Address okay. */
+
+    return 1;
+}
+
+
 // First step:
 // 1. connect to broker
 // 2. subsribe a online topic for getting endpoint and wait msg from broker
@@ -230,7 +295,29 @@ void WKStack_connect(void)
     LOG(LEVEL_DEBUG,"WKStack_connect E state: %d\n", WKStack.state);
 
     WKStack_pack_connect(NULL, 0);
-    mqtt_start(WKSTACK_FIRST_CONNECT_HOST, WKSTACK_FIRST_CONNECT_PORT, &g_mqtt_data, WKStack_connect_cb);
+
+    if(is_ip_address(WKSTACK_FIRST_CONNECT_HOST)) {
+        LOG(LEVEL_DEBUG, "connect to ip %s\n", WKSTACK_FIRST_CONNECT_HOST);
+        mqtt_start(WKSTACK_FIRST_CONNECT_HOST, WKSTACK_FIRST_CONNECT_PORT, &g_mqtt_data, WKStack_connect_cb);
+    }
+    else {
+        LOG(LEVEL_DEBUG, "connect to domain %s\n", WKSTACK_FIRST_CONNECT_HOST);
+       
+        unsigned int ip = vg_dns_get_ip_by_domain_name(WKSTACK_FIRST_CONNECT_HOST); 
+        
+        if(ip == 0) {
+            LOG(LEVEL_ERROR, "Cannot resolve the given domain name\n");
+        }
+        else {
+            char ip_str[16];
+            memset(ip_str, 0, sizeof(ip_str));
+            sprintf(ip_str, "%d.%d.%d.%d", (ip>>24) & 0xff, (ip >> 16) & 0xFF, (ip >> 8) & 0xFF, ip  & 0xFF);
+
+            LOG(LEVEL_DEBUG, "resolved domain to %s\n", ip_str);
+            mqtt_start(ip_str, WKSTACK_FIRST_CONNECT_PORT, &g_mqtt_data, WKStack_connect_cb);
+        }
+         
+    }
 
     return;
 }
@@ -241,7 +328,6 @@ int doStart() {
     if(WKStack.state == WKSTACK_OFFLINE) {
 
         WKStack_params_t *params = &WKStack.params;
-
          
 
         if(strlen(WKStack.params.did) != 0 && strlen(WKStack.params.host) != 0 && strlen(WKStack.params.ticket) != 0) { 

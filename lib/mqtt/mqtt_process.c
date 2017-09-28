@@ -274,6 +274,8 @@ int mqtt_process_connack()
     LOG(LEVEL_DEBUG, "mqtt_process_connack E\n");
     mqtt_package_t *pMsg = NULL;
 
+    int ret = 0;
+
     if((pMsg = GetLastPendingBuddle()) != NULL){
         if(pMsg->type == MQTT_CONNACK){
             mqtt.error_number = pMsg->payload[1];
@@ -285,12 +287,15 @@ int mqtt_process_connack()
                     mqtt.connect_cb(mqtt.error_number);
 
             }else{
+
+                LOG(LEVEL_NORMAL, "connack with error %d\n", mqtt.error_number);
                 mqtt.state = MQTT_STATE_ERROR;
-                mqtt_process_error();
+                //mqtt_process_error();
+                ret = -1;
             }
         }
     }
     LOG(LEVEL_DEBUG, "mqtt_process_connack X\n");
 
-    return 0;
+    return ret;
 }

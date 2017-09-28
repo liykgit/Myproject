@@ -225,12 +225,32 @@ int vg_recv(int sock, unsigned char *buffer, int length, int ssl)
 	FD_ZERO(&fdRead);
 	FD_SET(sock, &fdRead);
 
+    //deal with 4004 select error: select may sometimes return timeout immediately if the other side closes the connection
+    unsigned int selectStart = time_ms();
+
 	ret = qcom_select(sock + 1, &fdRead, NULL, NULL, &tm);
 
 	if(ret < 0){// error
 		LOG(LEVEL_ERROR, "vg_recv select error\n");
 		return -1;
 	}else if(ret == 0){
+
+        unsigned int selectEnd = time_ms();
+        unsigned timeval;
+
+        if(selectEnd < selectStart) {
+            timeval =  (unsigned int)0xFFFFFFFF - (selectStart - selectEnd);
+        }
+        else {
+            timeval = selectEnd - selectStart;
+        }
+        
+        if(timeval <= ((TCP_TIMEOUT_S * 1000 + TCP_TIMEOUT_MS) >> 1)) {
+		    LOG(LEVEL_ERROR, "qca4004 select failure, reboot ... \n");
+
+            system_restart();
+        }
+
 		LOG(LEVEL_DEBUG, "vg_recv select timeout\n");
 		return 0;
 	}else{
@@ -402,4 +422,17 @@ int vg_listen(int sock, int backlog)
     qcom_listen(sock, backlog);
 	LOG(LEVEL_DEBUG, "vg_listen X\n");
 }
+
+unsigned int vg_dns_get_ip_by_domain_name(char *domain_name) {
+    
+    unsigned int ip = 0;
+    int ret = qcom_dnsc_get_host_by_name(domain_name, &ip);
+    if(ret != A_OK)
+    {
+        LOG(LEVEL_ERROR, "DNS failed\n");
+    }
+
+    return ip;
+}
+
 

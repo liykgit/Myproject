@@ -90,6 +90,7 @@ typedef void * thread_params_t;
 typedef thread_ret_t (*thread_fun_t)(thread_params_t args);
 int vg_start_thread(thread_fun_t fun, void **stk_addr, int stk_size);
 
+unsigned int vg_dns_get_ip_by_domain_name(char *domain_name);
 
 //------------- log -----------------------
 

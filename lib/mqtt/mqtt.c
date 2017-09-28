@@ -398,6 +398,8 @@ static thread_ret_t mqtt_ctrl_thread(thread_params_t args)
             break;
         case MQTT_STATE_WAIT_CONNACK:
             mqtt_process_connack();
+
+
             break;
         case MQTT_STATE_RUNNING:
             mqtt_process_pend();
@@ -406,7 +408,9 @@ static thread_ret_t mqtt_ctrl_thread(thread_params_t args)
             mqtt_process_send();
             break;
 
-        case MQTT_STATE_ERROR: {
+        }
+
+        if(mqtt.state == MQTT_STATE_ERROR) {
 
                 int error_number = mqtt_process_error();
 
@@ -415,11 +419,9 @@ static thread_ret_t mqtt_ctrl_thread(thread_params_t args)
 
                 if(mqtt.error_number == MQTT_DISCONNECT_SUCCEED && mqtt.stop_cb ) 
                     mqtt.stop_cb();
-           }
-           break;
         }
-    }
 
+    }
 
     return (thread_ret_t)0;
 }

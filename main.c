@@ -10,8 +10,10 @@
 
 
 
-#define PRODUCTID "AnRvL00MGtTqWyGt"
-#define KEY     "yJb63Tg4bpRQ8iWE"
+
+#define PRODUCTID   "E3GF3s6feqLDznr5"
+#define KEY         "yJODSSiB-QrW-dnq"
+
 
 
 #define MAC         "A1B2C3D4E916"

@@ -91,6 +91,7 @@ int vg_listen(int sock, int backlog);
 int vg_accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
 
 int vg_tcp_close(int sock, int ssl);
+
 //------------ thread ----------------------
 
 typedef void * thread_ret_t;
@@ -100,8 +101,7 @@ typedef void * thread_params_t;
 typedef thread_ret_t (*thread_fun_t)(thread_params_t args);
 int vg_start_thread(thread_fun_t fun, void **stk_addr, int stk_size);
 
-
-//------------- log -----------------------
+int vg_resolve_domain_name(char *domain_name, char *ip_buf, int ip_buf_length);
 
 enum log_level {
 	LEVEL_DEBUG = 0,

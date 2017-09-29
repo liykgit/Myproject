@@ -423,16 +423,23 @@ int vg_listen(int sock, int backlog)
 	LOG(LEVEL_DEBUG, "vg_listen X\n");
 }
 
-unsigned int vg_dns_get_ip_by_domain_name(char *domain_name) {
-    
+int vg_resolve_domain_name(char *domain_name, char *output, int output_max) {
+
     unsigned int ip = 0;
+
+    if(outpu_max < 16)
+        return -1;
+
     int ret = qcom_dnsc_get_host_by_name(domain_name, &ip);
     if(ret != A_OK)
     {
         LOG(LEVEL_ERROR, "DNS failed\n");
+        return -1;
     }
 
-    return ip;
-}
+    memset(output, 0, output_max);
+    sprintf(output, "%d.%d.%d.%d", (ip>>24) & 0xff, (ip >> 16) & 0xFF, (ip >> 8) & 0xFF, ip  & 0xFF);
 
+    return 0;
+}
 

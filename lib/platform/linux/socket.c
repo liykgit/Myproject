@@ -280,3 +280,42 @@ again:
 	return 0;
 }
 
+int vg_resolve_domain_name(char *domain_name, char *output, int output_max) {
+
+    struct addrinfo* result;
+    struct addrinfo* res;
+    int error;
+    int ret = -1;
+    /* resolve the domain name into a list of addresses */
+    error = getaddrinfo(domain_name, NULL, NULL, &result);
+    if (error != 0) {   
+        if (error == EAI_SYSTEM) {
+            perror("getaddrinfo");
+        } else {
+            LOG(LEVEL_ERROR, "error in getaddrinfo: %s\n", gai_strerror(error));
+        }   
+        exit(EXIT_FAILURE);
+    }   
+
+    /* loop over all returned results and do inverse lookup */
+    for (res = result; res != NULL; res = res->ai_next) {   
+        char hostname[NI_MAXHOST];
+        error = getnameinfo(res->ai_addr, res->ai_addrlen, hostname, NI_MAXHOST, NULL, 0, 0); 
+        if (error != 0) {
+            fprintf(stderr, "error in getnameinfo: %s\n", gai_strerror(error));
+            continue;
+        }
+
+        int l = strlen(hostname);
+        if(l>0 && (l+1) < output_max) {
+            LOG(LEVEL_DEBUG, "hostname: %s\n", hostname);
+            strcpy(output, hostname);
+            ret = 0;
+            //break;
+        }
+    }   
+
+    freeaddrinfo(result);
+    return ret;
+}
+

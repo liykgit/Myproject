@@ -4,8 +4,12 @@
 #include "WKStack.h"
 
 #define WKSTACK_TOPIC_LEN 96
+#define WKSTACK_SUBSCRIPTION_MAX sizeof(int)
 
-
+#define SUBSCRIPTION_CONTROL    (1 << 0)
+#define SUBSCRIPTION_BINDING    (1 << 1) 
+#define SUBSCRIPTION_OTA        (1 << 2) 
+#define SUBSCRIPTION_SYNC       (1 << 3) 
 
 // WKStack (command or datapoint)'s name max length
 
@@ -16,6 +20,8 @@ typedef struct{
     WKStack_state_t state;
 
     WKStack_params_t params;
+
+    unsigned int subscription_map;
 
     char topic_knock[WKSTACK_TOPIC_LEN];
     char topic_answer[WKSTACK_TOPIC_LEN];
@@ -63,6 +69,13 @@ extern int g_testmode;
 extern const char *WKStack_version;
 
 int doStart();
+
+
+void subscrption_map_set(int id);
+
+void subscrption_map_unset(int id);
+
+int subscrption_map_check(int ids);
 
 
 #endif

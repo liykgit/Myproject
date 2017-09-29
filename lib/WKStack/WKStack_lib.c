@@ -13,8 +13,112 @@ WKStack_t WKStack;
 int g_testmode = 0;
 const char *WKStack_version = "1.6.0";
 
-
 int WKStack_connect_cb(mqtt_errno_t err);
+
+void subscrption_map_set(int id) {
+
+    LOG(LEVEL_DEBUG, "subscription map set %d\n", id);
+    WKStack.subscription_map |= id;
+    LOG(LEVEL_DEBUG, "subscription map %d\n", WKStack.subscription_map);
+}
+
+void subscrption_map_unset(int id) {
+
+    WKStack.subscription_map &= ~id;
+}
+
+int subscription_map_check(int bits) {
+
+    return (WKStack.subscription_map & bits) >= bits;
+}
+
+void subscription_map_clear() {
+
+    WKStack.subscription_map = 0;
+}
+
+
+static void check_subscrptions(){
+    if(subscription_map_check(SUBSCRIPTION_BINDING | SUBSCRIPTION_OTA | SUBSCRIPTION_CONTROL)) {
+        
+        if(WKStack.state == WKSTACK_ONLINE) { 
+
+            LOG(LEVEL_NORMAL, "subscription check passed, ready to fly\n");
+
+            WKStack.state = WKSTACK_READY;
+            if(WKStack.connect_cb != NULL)
+                WKStack.connect_cb(WKStack.state);
+        }
+    }
+    else {
+        LOG(LEVEL_DEBUG, "subscription check failed\n");
+    }
+}
+
+static int subscribe_control_cb(unsigned short msg_id, mqtt_errno_t err) {
+    
+    if(err != MQTT_SUBSCRIBE_FAILED) {
+        subscrption_map_set(SUBSCRIPTION_CONTROL);
+    }
+    else {
+        LOG(LEVEL_ERROR, "mqtt sub failure: %d\n", err);
+    }
+
+    check_subscrptions();
+
+    return 0;
+}
+
+static int subscribe_sync_cb(unsigned short msg_id, mqtt_errno_t err) {
+    
+    if(err != MQTT_SUBSCRIBE_FAILED) {
+        subscrption_map_set(SUBSCRIPTION_SYNC);
+    }
+    //check_subscrptions();
+    return 0;
+}
+
+
+
+static int subscribe_ota_cb(unsigned short msg_id, mqtt_errno_t err) {
+    
+    if(err != MQTT_SUBSCRIBE_FAILED) {
+        subscrption_map_set(SUBSCRIPTION_OTA);
+    }
+
+    check_subscrptions();
+    return 0;
+}
+
+static int subscribe_binding_cb(unsigned short msg_id, mqtt_errno_t err) {
+    
+    if(err != MQTT_SUBSCRIBE_FAILED) {
+        subscrption_map_set(SUBSCRIPTION_BINDING);
+    }
+    check_subscrptions();
+
+    return 0;
+}
+
+
+static void subscribe_topics() {
+    
+    if(!subscription_map_check(SUBSCRIPTION_CONTROL)) {
+        WKStack_subscribe_control(subscribe_control_cb);
+    }
+
+    if(!subscription_map_check(SUBSCRIPTION_BINDING)) {
+        WKStack_subscribe_binding(subscribe_binding_cb);
+    }
+
+    if(!subscription_map_check(SUBSCRIPTION_OTA)) {
+        WKStack_subscribe_ota(subscribe_ota_cb);
+    }
+
+    if(!subscription_map_check(SUBSCRIPTION_SYNC)) {
+        WKStack_subscribe_sync(subscribe_sync_cb);
+    }
+}
 
 static void doPrepare() {
     sprintf(WKStack.report_topic, WKSTACK_TOPIC_REPORT_FMT, WKStack.params.product_id, WKStack.params.did);
@@ -29,13 +133,8 @@ static void doPrepare() {
 
     sprintf(WKStack.sync_pub_topic, WKSTACK_TOPIC_SYNC_PUB_FMT, WKStack.params.product_id, WKStack.params.did);
     sprintf(WKStack.sync_sub_topic, WKSTACK_TOPIC_SYNC_SUB_FMT, WKStack.params.product_id, WKStack.params.did);
-
-
-    WKStack_subscribe_ota();
-    WKStack_subscribe_sync();
-    WKStack_subscribe_control();
-    WKStack_subscribe_binding();
-
+    
+    subscribe_topics();
     WKStack_publish_sync();
 }
 
@@ -79,6 +178,61 @@ void WKStack_announce() {
         }
 }
 
+static void handle_connect_endpoint_result(mqtt_errno_t result) {
+
+    switch(result) {
+        
+        case MQTT_CONNECT_SUCCEED:
+            {
+                LOG(LEVEL_NORMAL,"Reconnected to ep\n Sub topics\n");
+                WKStack.state = WKSTACK_ONLINE;
+
+                doPrepare();
+            }
+            break;
+
+        case MQTT_DISCONNECT_SUCCEED:
+            {
+                LOG(LEVEL_NORMAL,"Disconnected, state %d\n", WKStack.state);
+                WKStack.state = WKSTACK_OFFLINE;
+            
+                //WKStack_connect_ep();
+            }
+            break;
+
+        case MQTT_SOCKET_ERROR:
+        case MQTT_SEVICE_NOT_AVAILABLE:
+            {
+                LOG(LEVEL_ERROR,"MQTT or socket error during reconnect, get offline\n");
+                WKStack.state = WKSTACK_OFFLINE;
+                //WKStack_connect_ep();
+            }
+            break;
+
+        case MQTT_CLIENT_ID_ERROR:
+        case MQTT_INVALID_USER: //!< Connection Refused: bad user name or password
+        case MQTT_UNAUTHORIZED: //!< Connection Refused: not authorized
+            {
+                LOG(LEVEL_ERROR,"MQTT auth failed during reconnect\n");
+                memset(WKStack.params.ticket, 0, sizeof(WKStack.params.ticket));
+                WKStack.state = WKSTACK_OFFLINE;
+            }
+            break;
+
+        default: {
+            WKStack.state = WKSTACK_OFFLINE;
+        }
+    }
+
+    if(WKStack.state == WKSTACK_OFFLINE) {
+        
+        subscription_map_clear();
+        if(WKStack.connect_cb != NULL)
+            WKStack.connect_cb(WKStack.state);
+    }
+}
+
+
 int WKStack_connect_cb(mqtt_errno_t err)
 {
     LOG(LEVEL_DEBUG, "WKStack_connect_cb E state: %d\n", WKStack.state);
@@ -104,53 +258,10 @@ int WKStack_connect_cb(mqtt_errno_t err)
             WKStack.state = WKSTACK_OFFLINE;
         }
     } else if(WKStack.state == WKSTACK_CONNECT_ENDPOINT) {
+        handle_connect_endpoint_result(err);
 
-        switch(err) {
-            
-            case MQTT_CONNECT_SUCCEED:
-                {
-                    WKStack.state = WKSTACK_ONLINE;
-
-                    LOG(LEVEL_NORMAL,"Connected to endpoint\n");
-                    doPrepare();
-                }
-                break;
-
-            case MQTT_DISCONNECT_SUCCEED:
-                {
-                    LOG(LEVEL_NORMAL,"Disconnected state %d\n", WKStack.state);
-                    WKStack.state = WKSTACK_OFFLINE;
-                    //WKStack_connect_ep();
-                }
-                break;
-
-            case MQTT_SOCKET_ERROR:
-            case MQTT_SEVICE_NOT_AVAILABLE:
-                {
-                    LOG(LEVEL_ERROR,"MQTT or socket error, get offline\n");
-                    WKStack.state = WKSTACK_OFFLINE;
-                    //WKStack_connect_ep();
-                }
-                break;
-
-            case MQTT_CLIENT_ID_ERROR:
-            case MQTT_INVALID_USER: //!< Connection Refused: bad user name or password
-            case MQTT_UNAUTHORIZED: //!< Connection Refused: not authorized
-                {
-                    LOG(LEVEL_ERROR,"MQTT auth failed by endpoint\n");
-                    memset(WKStack.params.ticket, 0, sizeof(WKStack.params.ticket));
-                    WKStack.state = WKSTACK_OFFLINE;
-                }
-                break;
-
-            default:
-                WKStack.state = WKSTACK_OFFLINE;
-        }
-
-        if(WKStack.connect_cb != NULL)
-            WKStack.connect_cb(WKStack.state);
     }
-    else if(WKStack.state == WKSTACK_ONLINE){
+    else if(WKStack.state == WKSTACK_ONLINE || WKStack.state == WKSTACK_READY){
         if(err == MQTT_SOCKET_ERROR) {
             LOG(LEVEL_ERROR,"Socket error, get offline\n");
             WKStack.state = WKSTACK_OFFLINE;
@@ -162,54 +273,7 @@ int WKStack_connect_cb(mqtt_errno_t err)
         }
     }
     else if(WKStack.state == WKSTACK_RECONNECT_ENDPOINT) {
-
-        switch(err) {
-            
-            case MQTT_CONNECT_SUCCEED:
-                {
-                    LOG(LEVEL_NORMAL,"Reconnected to ep\n Sub topics\n");
-                    WKStack.state = WKSTACK_ONLINE;
-
-                    doPrepare();
-
-                    
-                }
-                break;
-
-            case MQTT_DISCONNECT_SUCCEED:
-                {
-                    LOG(LEVEL_NORMAL,"Disconnected, state %d\n", WKStack.state);
-                    WKStack.state = WKSTACK_OFFLINE;
-                
-                    //WKStack_connect_ep();
-                }
-                break;
-
-            case MQTT_SOCKET_ERROR:
-            case MQTT_SEVICE_NOT_AVAILABLE:
-                {
-                    LOG(LEVEL_ERROR,"MQTT or socket error during reconnect, get offline\n");
-                    WKStack.state = WKSTACK_OFFLINE;
-                    //WKStack_connect_ep();
-                }
-                break;
-
-            case MQTT_CLIENT_ID_ERROR:
-            case MQTT_INVALID_USER: //!< Connection Refused: bad user name or password
-            case MQTT_UNAUTHORIZED: //!< Connection Refused: not authorized
-                {
-                    LOG(LEVEL_ERROR,"MQTT auth failed during reconnect\n");
-                    memset(WKStack.params.ticket, 0, sizeof(WKStack.params.ticket));
-                    WKStack.state = WKSTACK_OFFLINE;
-                }
-                break;
-
-            default:
-                WKStack.state = WKSTACK_OFFLINE;
-        }
-
-        if(WKStack.connect_cb != NULL)
-            WKStack.connect_cb(WKStack.state);
+        handle_connect_endpoint_result(err);
     }
 
 
@@ -296,28 +360,7 @@ void WKStack_connect(void)
 
     WKStack_pack_connect(NULL, 0);
 
-    if(is_ip_address(WKSTACK_FIRST_CONNECT_HOST)) {
-        LOG(LEVEL_DEBUG, "connect to ip %s\n", WKSTACK_FIRST_CONNECT_HOST);
-        mqtt_start(WKSTACK_FIRST_CONNECT_HOST, WKSTACK_FIRST_CONNECT_PORT, &g_mqtt_data, WKStack_connect_cb);
-    }
-    else {
-        LOG(LEVEL_DEBUG, "connect to domain %s\n", WKSTACK_FIRST_CONNECT_HOST);
-       
-        unsigned int ip = vg_dns_get_ip_by_domain_name(WKSTACK_FIRST_CONNECT_HOST); 
-        
-        if(ip == 0) {
-            LOG(LEVEL_ERROR, "Cannot resolve the given domain name\n");
-        }
-        else {
-            char ip_str[16];
-            memset(ip_str, 0, sizeof(ip_str));
-            sprintf(ip_str, "%d.%d.%d.%d", (ip>>24) & 0xff, (ip >> 16) & 0xFF, (ip >> 8) & 0xFF, ip  & 0xFF);
-
-            LOG(LEVEL_DEBUG, "resolved domain to %s\n", ip_str);
-            mqtt_start(ip_str, WKSTACK_FIRST_CONNECT_PORT, &g_mqtt_data, WKStack_connect_cb);
-        }
-         
-    }
+    mqtt_start(WKSTACK_FIRST_CONNECT_HOST, WKSTACK_FIRST_CONNECT_PORT, &g_mqtt_data, WKStack_connect_cb);
 
     return;
 }
@@ -347,7 +390,12 @@ int doStart() {
             WKStack_connect();
         }
     }
-
+    /*
+     * disable this feature since repeating subscription will blcck sending queue
+    else if(WKStack.state == WKSTACK_ONLINE) {
+         subscribe_topics();       
+    }
+    */
     return 0;
 }
 

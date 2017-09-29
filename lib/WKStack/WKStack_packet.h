@@ -5,9 +5,9 @@
 
 // First host, connect this host to get endpoint
 //#define WKSTACK_FIRST_CONNECT_HOST "35.165.194.227"
-//#define WKSTACK_FIRST_CONNECT_HOST "192.168.3.3"
-#define WKSTACK_FIRST_CONNECT_HOST "www.vengasz.com"
-#define WKSTACK_FIRST_CONNECT_PORT 3884
+#define WKSTACK_FIRST_CONNECT_HOST "192.168.3.6"
+//#define WKSTACK_FIRST_CONNECT_HOST "www.vengasz.com"
+#define WKSTACK_FIRST_CONNECT_PORT 1884
 
 #define DP_COUNT_MAX 32
 // 10 s for keepalive time
@@ -114,8 +114,9 @@ int WKStack_subscribe_welcome();
 int WKStack_publish_knock();
 
 int WKStack_publish_realonline();
-int WKStack_subscribe_control();
-int WKStack_subscribe_ota();
-int WKStack_subscribe_binding();
+int WKStack_subscribe_control(mqtt_cb_t cb);
+int WKStack_subscribe_ota(mqtt_cb_t cb);
+int WKStack_subscribe_binding(mqtt_cb_t cb);
+int WKStack_subscribe_sync(mqtt_cb_t cb);
 
 #endif

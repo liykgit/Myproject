@@ -713,32 +713,32 @@ int WKStack_subscribe_challenge()
     return 0;
 }
 
-int WKStack_subscribe_control()
+int WKStack_subscribe_control(mqtt_cb_t cb)
 {
-    mqtt_subscribe(WKStack.control_topic, NULL, WKStack_unpack_control);
-
-    return 0;
-}
-
-int WKStack_subscribe_sync()
-{
-    mqtt_subscribe(WKStack.sync_sub_topic, NULL, WKStack_unpack_sync);
+    mqtt_subscribe(WKStack.control_topic, cb, WKStack_unpack_control);
 
     return 0;
 }
 
 
-int WKStack_subscribe_ota()
+int WKStack_subscribe_sync(mqtt_cb_t cb)
 {
-	mqtt_subscribe(WKStack.ota_sub_topic, NULL, WKStack_unpack_ota);
+    mqtt_subscribe(WKStack.sync_sub_topic, cb, WKStack_unpack_sync);
 
     return 0;
 }
 
 
-int WKStack_subscribe_binding()
+int WKStack_subscribe_ota(mqtt_cb_t cb)
 {
-	mqtt_subscribe(WKStack.binding_sub_topic, NULL, WKStack_unpack_binding);
+	mqtt_subscribe(WKStack.ota_sub_topic, cb, WKStack_unpack_ota);
+
+    return 0;
+}
+
+int WKStack_subscribe_binding(mqtt_cb_t cb)
+{
+	mqtt_subscribe(WKStack.binding_sub_topic, cb, WKStack_unpack_binding);
 
     return 0;
 }

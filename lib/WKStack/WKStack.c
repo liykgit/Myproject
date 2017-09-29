@@ -73,7 +73,7 @@ int WKStack_stop(WKStack_stop_cb_t cb)
 
 int WKStack_report_datapoint(WKStack_datapoint_t *dp_group, unsigned int group_size, WKStack_report_cb_t cb)
 {
-    if(WKStack.state != WKSTACK_ONLINE)
+    if(WKStack.state != WKSTACK_READY)
         return -1;
 
     char buf[512];
@@ -171,7 +171,7 @@ int WKStack_restore_all(WKStack_restore_cb_t restore_cb)
 {
     LOG(LEVEL_NORMAL, "WKStack_restore_all E\n");
 
-    if(WKStack.state != WKSTACK_ONLINE)
+    if(WKStack.state != WKSTACK_READY)
         return -1;
 
     if(restore_cb)
@@ -241,7 +241,7 @@ int WKStack_params(char *buf, int size)
 int WKStack_report_ota_progress(WKStack_ota_target_t target, WKStack_ota_report_t report, WKStack_report_cb_t cb)
 {
 
-    if(WKStack.state != WKSTACK_ONLINE)
+    if(WKStack.state != WKSTACK_READY)
         return -1;
 
     char buf[128];

@@ -423,11 +423,13 @@ int vg_listen(int sock, int backlog)
 	LOG(LEVEL_DEBUG, "vg_listen X\n");
 }
 
-int vg_resolve_domain_name(char *domain_name, char *output, int output_max) {
+
+int vg_resolve_domain_name(char *domain_name, char *ip_buf, int buf_sz) {
+
 
     unsigned int ip = 0;
 
-    if(outpu_max < 16)
+    if(buf_sz < 16)
         return -1;
 
     int ret = qcom_dnsc_get_host_by_name(domain_name, &ip);
@@ -437,8 +439,8 @@ int vg_resolve_domain_name(char *domain_name, char *output, int output_max) {
         return -1;
     }
 
-    memset(output, 0, output_max);
-    sprintf(output, "%d.%d.%d.%d", (ip>>24) & 0xff, (ip >> 16) & 0xFF, (ip >> 8) & 0xFF, ip  & 0xFF);
+    memset(ip_buf, 0, buf_sz);
+    sprintf(ip_buf, "%d.%d.%d.%d", (ip>>24) & 0xff, (ip >> 16) & 0xFF, (ip >> 8) & 0xFF, ip  & 0xFF);
 
     return 0;
 }

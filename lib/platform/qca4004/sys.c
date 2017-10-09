@@ -79,3 +79,9 @@ void vg_free(void *ptr) {
         mem_free(ptr);
     }
 }
+
+unsigned long vg_time_ms() {
+    
+    return time_ms();
+}
+

@@ -326,9 +326,9 @@ static int mqtt_connect()
     return 0;
 err:
     if(flag == 1)
-        mqtt.error_number = MQTT_SYSTEM_ERROR;
-    else
         mqtt.error_number = MQTT_SOCKET_ERROR;
+    else
+        mqtt.error_number = MQTT_SEVICE_NOT_AVAILABLE;
 
     mqtt.state = MQTT_STATE_ERROR;
 	vg_release_sem(&ctrl_thread_sem);
@@ -377,8 +377,8 @@ static thread_ret_t mqtt_ctrl_thread(thread_params_t args)
                 mqtt_pingreq();
                 continue;
             }
-            else if(mqtt.state == MQTT_STATE_START){ 
-                LOG(LEVEL_ERROR, "Mqtt start timeout\n");
+            else if(mqtt.state == MQTT_STATE_START || mqtt.state == MQTT_STATE_WAIT_CONNACK){ 
+                LOG(LEVEL_ERROR, "Mqtt start or wait_connack timeout\n");
                 mqtt.state = MQTT_STATE_ERROR;  
                 mqtt.error_number = MQTT_SYSTEM_ERROR ;
             }
@@ -400,7 +400,6 @@ static thread_ret_t mqtt_ctrl_thread(thread_params_t args)
         case MQTT_STATE_WAIT_CONNACK:
             mqtt_process_connack();
 
-
             break;
         case MQTT_STATE_RUNNING:
             mqtt_process_pend();
@@ -421,7 +420,6 @@ static thread_ret_t mqtt_ctrl_thread(thread_params_t args)
                 if(mqtt.error_number == MQTT_DISCONNECT_SUCCEED && mqtt.stop_cb ) 
                     mqtt.stop_cb();
         }
-
     }
 
     return (thread_ret_t)0;

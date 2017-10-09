@@ -87,3 +87,14 @@ void vg_free(void *ptr) {
         free(ptr);
     }
 }
+
+
+unsigned long vg_time_ms() {
+
+	struct timeval tv;
+
+    gettimeofday(&tv, NULL);
+
+    
+    return tv.tv_sec*1000 + tv.tv_usec;
+}

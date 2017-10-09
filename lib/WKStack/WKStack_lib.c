@@ -200,10 +200,20 @@ static void handle_connect_endpoint_result(mqtt_errno_t result) {
             }
             break;
 
-        case MQTT_SOCKET_ERROR:
+        case MQTT_SOCKET_ERROR: {
+                LOG(LEVEL_ERROR,"MQTT socket error during reconnect, get offline\n");
+
+                WKStack.state = WKSTACK_OFFLINE;
+            }
+
+            break;
+
         case MQTT_SEVICE_NOT_AVAILABLE:
             {
-                LOG(LEVEL_ERROR,"MQTT or socket error during reconnect, get offline\n");
+                LOG(LEVEL_ERROR,"MQTT service error during reconnect, sleep then get offline\n");
+
+                msleep(RECONNECT_DELAY_MEDIUM);
+
                 WKStack.state = WKSTACK_OFFLINE;
                 //WKStack_connect_ep();
             }
@@ -271,6 +281,9 @@ int WKStack_connect_cb(mqtt_errno_t err)
              LOG(LEVEL_ERROR,"Disconnected from endpoint, get offline\n");
              WKStack.state = WKSTACK_OFFLINE;
         }
+
+        if(WKStack.state == WKSTACK_OFFLINE)
+            subscription_map_clear();
     }
     else if(WKStack.state == WKSTACK_RECONNECT_ENDPOINT) {
         handle_connect_endpoint_result(err);

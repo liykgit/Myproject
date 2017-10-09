@@ -212,7 +212,14 @@ static void handle_connect_endpoint_result(mqtt_errno_t result) {
             {
                 LOG(LEVEL_ERROR,"MQTT service error during reconnect, sleep then get offline\n");
 
-                msleep(RECONNECT_DELAY_MEDIUM);
+                unsigned long time = vg_time_ms();
+                unsigned long random = (time% 30);
+
+
+                unsigned long sleep = random*1000 + RECONNECT_DELAY_SHORT ;
+                LOG(LEVEL_DEBUG,"sleep %u ms\n", sleep);
+                msleep(sleep);
+
 
                 WKStack.state = WKSTACK_OFFLINE;
                 //WKStack_connect_ep();

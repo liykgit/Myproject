@@ -431,7 +431,7 @@ int WKStack_publish_sync()
 {
     int ret = -1;
 
-    LOG(LEVEL_NORMAL, "pub sync\n");
+    LOG(LEVEL_NORMAL, "syncing to cloud\n");
 
     char buf[128];
     memset(buf, 0, sizeof(buf));
@@ -475,7 +475,7 @@ int WKStack_publish_knock()
     int ret = -1;
 
     sprintf(WKStack.topic_knock, WKSTACK_TOPIC_KNOCK_FMT, WKStack.params.mac); 
-    LOG(LEVEL_NORMAL, "pub knock\n");
+    LOG(LEVEL_NORMAL, "knocking\n");
 
 /*
     LOG(LEVEL_DEBUG, "publish to topic %s\n", WKStack.topic_knock);
@@ -636,7 +636,8 @@ int WKStack_unpack_welcome(unsigned char *payload, int len) {
 
 
                 strncpy(WKStack.params.ticket, pticket, sizeof(WKStack.params.ticket));
-                LOG(LEVEL_NORMAL, "ticket:%s\n", WKStack.params.ticket);
+                LOG(LEVEL_NORMAL, "register completed\n");
+                LOG(LEVEL_DEBUG, "ticket:%s\n", WKStack.params.ticket);
                 hasTicket = 1;
             }
             break;

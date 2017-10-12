@@ -58,7 +58,6 @@ int mqtt_process_pend()
                 }
                 offset = 2;
             }
-            printf("offset: %d, length: %d\n", offset, pMsg->length);
             // TODO: If it's a qos2 message, than do not tell user in this time,tell user the message when recv the PUBREL
             topic = mqtt_topic_find(pMsg->topic);
             if(topic != NULL){
@@ -165,7 +164,6 @@ int mqtt_process_timeout()
 
         mqtt.state = MQTT_STATE_ERROR;
 
-        LOG(LEVEL_ERROR, "<ERR> Mqtt timeout\n");
     }
 
     return 0;
@@ -254,7 +252,7 @@ int mqtt_process_error()
     ResetBuddle();
 
     if (mqtt.error_number != MQTT_DISCONNECT_SUCCEED)
-        LOG(LEVEL_ERROR, "<ERR> Mqtt error(%d)\n", mqtt.error_number);
+        LOG(LEVEL_ERROR, "connection error(%d)\n", mqtt.error_number);
 
     memset(mqtt.host, 0, MAX_HOST_NAME);
     mqtt.port = 0;

@@ -266,14 +266,14 @@ int vg_recv(int sock, unsigned char *buffer, int length, int ssl)
 
 				return ret;
 			}else if(ret < 0){//recv err
-				LOG(LEVEL_ERROR, "<ERR> mqtt recv error(errno:%d)\n", ret);
+				LOG(LEVEL_ERROR, "mqtt recv error(errno:%d)\n", ret);
 				return -1;
 			}else{// == 0 //socket close
-				LOG(LEVEL_ERROR, "<ERR> mqtt close socket\n");
+				LOG(LEVEL_ERROR, "mqtt close socket\n");
 				return -3;// careful : sometime select =1 ,but read 0 byte data
 			}
 	    }else{
-			LOG(LEVEL_ERROR, "<ERR> mqtt sockfd is not set\n");
+			LOG(LEVEL_ERROR, "mqtt sockfd is not set\n");
 		}
 	}
 	return 0;

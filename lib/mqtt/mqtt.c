@@ -59,19 +59,19 @@ int mqtt_publish(char *topic, unsigned char *msg, int msg_len, mqtt_qos_t qos, m
     mqtt_package_t *package;
 
     if (mqtt.state != MQTT_STATE_RUNNING){
-        LOG(LEVEL_ERROR, "<ERR> mqtt cann't connect to cloudy\n");
+        LOG(LEVEL_ERROR, "Not connected to cloud\n");
         return -2;
     }
 
     package = GetFree2Send();
     if(package == NULL) {
-        LOG(LEVEL_ERROR, "<ERR> mqtt send buddle not free\n");
+        LOG(LEVEL_ERROR, "send buddle not free\n");
 		return -1;
 	}
 
     package->payload = (unsigned char *)vg_malloc(msg_len);
     if(package->payload == NULL){
-        LOG(LEVEL_ERROR, "<ERR> mqtt malloc error\n");
+        LOG(LEVEL_ERROR, "FATAL: OOM!!!\n");
         FreeBuddle(package);
         return -3;
     }
@@ -102,13 +102,13 @@ int mqtt_subscribe(char *topic, mqtt_cb_t result_cb, mqtt_topic_cb_t topic_cb)
     int ret = 0;
 
     if (mqtt.state != MQTT_STATE_RUNNING){
-        LOG(LEVEL_ERROR, "<ERR> mqtt cann't connect to cloudy\n");
+        LOG(LEVEL_ERROR, "Not connected\n");
         return -2;
     }
 
 	msg	= GetFree2Send();
 	if(msg == NULL) {
-        LOG(LEVEL_ERROR, "<ERR> mqtt send buddle not free\n");
+        LOG(LEVEL_ERROR, "send buddle not free\n");
 		return -1;
 	}
 
@@ -121,7 +121,7 @@ int mqtt_subscribe(char *topic, mqtt_cb_t result_cb, mqtt_topic_cb_t topic_cb)
 
     ret = mqtt_register_topic(topic, topic_cb);
     if(ret != 0){
-        LOG(LEVEL_ERROR, "<ERR> mqtt topic too much\n");
+        LOG(LEVEL_ERROR, "too many topics\n");
         FreeBuddle(msg);
         return -3;
     }
@@ -139,13 +139,13 @@ int mqtt_unsubscribe(char *topic, mqtt_cb_t result_cb)
     int ret = 0;
 
     if (mqtt.state != MQTT_STATE_RUNNING){
-        LOG(LEVEL_ERROR, "<ERR> mqtt cann't connect to cloudy\n");
+        LOG(LEVEL_ERROR, "Not connected to unsub\n");
         return -2;
     }
 
 	msg	= GetFree2Send();
 	if(msg == NULL) {
-        LOG(LEVEL_ERROR, "<ERR> mqtt send buddle not free\n");
+        LOG(LEVEL_ERROR, "send buddle not free\n");
 		return -1;
 	}
 
@@ -158,7 +158,7 @@ int mqtt_unsubscribe(char *topic, mqtt_cb_t result_cb)
 
     ret = mqtt_unregister_topic(topic);
     if(ret != 0){
-        LOG(LEVEL_ERROR, "<ERR> topic %s not found\n", topic);
+        LOG(LEVEL_ERROR, "topic %s not found\n", topic);
         FreeBuddle(msg);
         return -3;
     }
@@ -179,7 +179,7 @@ static int mqtt_pingreq()
 
     ret = mqtt_send(mqtt.send_buf, len);
     if(ret <= 0){
-        LOG(LEVEL_DEBUG, "<LOG> Mqtt send ping error\n");
+        LOG(LEVEL_ERROR, "send ping error\n");
         mqtt.error_number = MQTT_SOCKET_ERROR;
         mqtt.state = MQTT_STATE_ERROR;
     }
@@ -194,13 +194,13 @@ int mqtt_puback(unsigned short msg_id)
     mqtt_package_t *pmsg;
 
     if (mqtt.state != MQTT_STATE_RUNNING){
-        LOG(LEVEL_ERROR, "<ERR> mqtt cann't connect to cloudy\n");
+        LOG(LEVEL_ERROR, "No connection to cloud\n");
         return -2;
     }
 
     pmsg = GetFree2Send();
     if (pmsg == 0){
-        LOG(LEVEL_ERROR, "<ERR> mqtt send buddle not free\n");
+        LOG(LEVEL_ERROR, "send buddle not free\n");
         return -1;
     }
 
@@ -221,13 +221,13 @@ int mqtt_pubrec(unsigned short msg_id)
     mqtt_package_t *pmsg;
 
     if (mqtt.state != MQTT_STATE_RUNNING){
-        LOG(LEVEL_ERROR, "<ERR> mqtt cann't connect to cloudy\n");
+        LOG(LEVEL_ERROR, "Not connected to cloud\n");
         return -2;
     }
 
     pmsg = GetFree2Send();
     if (pmsg == 0){
-        LOG(LEVEL_ERROR, "<ERR> mqtt send buddle not free\n");
+        LOG(LEVEL_ERROR, "send buddle not free\n");
         return -1;
     }
 
@@ -247,13 +247,13 @@ int mqtt_pubrel(unsigned short msg_id)
     mqtt_package_t *pmsg;
 
     if (mqtt.state != MQTT_STATE_RUNNING){
-        LOG(LEVEL_ERROR, "<ERR> mqtt cann't connect to cloudy\n");
+        LOG(LEVEL_ERROR, "Not connected to cloud\n");
         return -2;
     }
 
     pmsg = GetFree2Send();
     if (pmsg == 0){
-        LOG(LEVEL_ERROR, "<ERR> mqtt send buddle not free\n");
+        LOG(LEVEL_ERROR, "send buddle not free\n");
         return -1;
     }
 
@@ -273,13 +273,13 @@ int mqtt_pubcomp(unsigned short msg_id)
     mqtt_package_t *pmsg;
 
     if (mqtt.state != MQTT_STATE_RUNNING){
-        LOG(LEVEL_ERROR, "<ERR> mqtt cann't connect to cloudy\n");
+        LOG(LEVEL_ERROR, "Not connected to cloud\n");
         return -2;
     }
 
     pmsg = GetFree2Send();
     if (pmsg == 0){
-        LOG(LEVEL_ERROR, "<ERR> mqtt send buddle not free\n");
+        LOG(LEVEL_ERROR, "send buddle not free\n");
         return -1;
     }
 
@@ -301,10 +301,10 @@ static int mqtt_connect()
     int ret = 0;
     int flag = 0;
 
-    LOG(LEVEL_NORMAL, "<LOG> mqtt_connect E\n");
+    LOG(LEVEL_DEBUG, "mqtt_connect E\n");
     ret = mqtt_socket(mqtt.host, mqtt.port);
     if(ret < 0){
-        LOG(LEVEL_ERROR, "<ERR> Mqtt connect server failed\n");
+        LOG(LEVEL_ERROR, "create socket failure\n");
         if(ret == -1)
             flag = 1;
         goto err;
@@ -319,7 +319,7 @@ static int mqtt_connect()
         mqtt.state = MQTT_STATE_WAIT_CONNACK;
         vg_release_sem(&recv_thread_sem);
     }else{
-        LOG(LEVEL_ERROR, "<ERR> Mqtt send connect failed\n");
+        LOG(LEVEL_ERROR, "send _connect_ failed\n");
         goto err;
     }
 
@@ -372,13 +372,13 @@ static thread_ret_t mqtt_ctrl_thread(thread_params_t args)
                 //consider heartbeat timeout a socket error 
                 mqtt.error_number = MQTT_SOCKET_ERROR;
 
-                LOG(LEVEL_ERROR, "<ERR> Mqtt ping timeout\n");
+                LOG(LEVEL_ERROR, "ping timeout\n");
             }else if(mqtt.state == MQTT_STATE_RUNNING){
                 mqtt_pingreq();
                 continue;
             }
             else if(mqtt.state == MQTT_STATE_START || mqtt.state == MQTT_STATE_WAIT_CONNACK){ 
-                LOG(LEVEL_ERROR, "Mqtt start or wait_connack timeout\n");
+                LOG(LEVEL_ERROR, "state start or wait_connack timeout\n");
                 mqtt.state = MQTT_STATE_ERROR;  
                 mqtt.error_number = MQTT_SYSTEM_ERROR ;
             }

@@ -140,7 +140,7 @@ static void doPrepare() {
 
 void WKStack_connect_ep(void)
 {
-    LOG(LEVEL_NORMAL,"WKStack_connect_ep E state: %d\n", WKStack.state);
+    LOG(LEVEL_DEBUG,"WKStack_connect_ep E state: %d\n", WKStack.state);
 
     char client_id[72];
     memset(client_id, 0, 72);
@@ -210,7 +210,7 @@ static void handle_connect_endpoint_result(mqtt_errno_t result) {
 
         case MQTT_SEVICE_NOT_AVAILABLE:
             {
-                LOG(LEVEL_ERROR,"MQTT service error during reconnect, sleep then get offline\n");
+                LOG(LEVEL_ERROR,"Cloud service unavaiable when reconnect, sleep then get offline\n");
 
                 unsigned long time = vg_time_ms();
                 unsigned long random = (time% 30);
@@ -387,7 +387,7 @@ void WKStack_connect(void)
 
 int doStart() {
 
-    LOG(LEVEL_DEBUG, ".. %d\n", WKStack.state); 
+    LOG(LEVEL_NORMAL, ".. %d\n", WKStack.state); 
     if(WKStack.state == WKSTACK_OFFLINE) {
 
         WKStack_params_t *params = &WKStack.params;

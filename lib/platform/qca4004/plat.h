@@ -11,6 +11,7 @@
 #include "qcom_ssl.h"
 #include "qca_ssl_client.h"
 #include "tx_api.h"
+#include "http.h"
 
 #define strcat strcat_ext
 #define msleep qcom_thread_msleep

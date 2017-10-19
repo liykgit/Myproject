@@ -17,6 +17,9 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+
+#include "http.h"
+
 //----------------------- sys ---------------------------------
 
 
@@ -109,7 +112,7 @@ enum log_level {
 	LEVEL_ERROR = 2
 } ;
 
-#define LOG_LEVEL LEVEL_NORMAL
+#define LOG_LEVEL LEVEL_DEBUG
 
 #ifdef LOG_IN_FILE
 extern FILE *log_fp;

@@ -8,6 +8,8 @@
 #define WKSTACK_FIRST_CONNECT_HOST "192.168.3.6"
 //#define WKSTACK_FIRST_CONNECT_HOST "www.vengasz.com"
 #define WKSTACK_FIRST_CONNECT_PORT 1884
+#define WKSTACK_ENDPOINT_INQUIRY_PORT 80
+#define WKSTACK_ENDPOINT_INQUIRY_PATH "/endpoint"
 
 #define DP_COUNT_MAX 32
 // 10 s for keepalive time

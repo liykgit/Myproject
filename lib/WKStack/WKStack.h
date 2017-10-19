@@ -54,9 +54,10 @@ typedef enum {
     WKSTACK_ERROR = 6,
     WKSTACK_RECONNECT_ENDPOINT = 7, // Wait online
 
-    WKSTACK_READY = 8
+    WKSTACK_READY = 8,
+    WKSTACK_QUERY_ENDPOINT = 9
 
-}WKStack_state_t;
+} WKStack_state_t;
 
 // Must be 6 and 7
 typedef enum{

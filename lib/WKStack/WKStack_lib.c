@@ -220,8 +220,9 @@ static void handle_connect_endpoint_result(mqtt_errno_t result) {
                 LOG(LEVEL_DEBUG,"sleep %u ms\n", sleep);
                 msleep(sleep);
 
+                //memset(WKStack.params.host, 0, sizeof(WKStack.params.host));
 
-                WKStack.state = WKSTACK_OFFLINE;
+                WKStack.state = WKSTACK_QUERY_ENDPOINT;
                 //WKStack_connect_ep();
             }
             break;
@@ -385,9 +386,76 @@ void WKStack_connect(void)
     return;
 }
 
+
+static void sleepOffline()
+{
+    msleep(10000);        
+    WKStack.state = WKSTACK_OFFLINE;
+
+}
+
+static void get_cb(unsigned char *buf, unsigned int len)
+{
+    unsigned int i;
+
+    LOG(LEVEL_DEBUG, "http get result: \n");
+    for(i = 0; i < len; i++){
+        LOG(LEVEL_DEBUG, "%c");
+    }
+    LOG(LEVEL_DEBUG, "\n");
+
+    char port[8] = {0,};
+
+    int ret = parse_url((char *)buf, WKStack.params.host, port);
+    if(ret == 0) {
+        WKStack.params.port = atoi(port);
+        LOG(LEVEL_NORMAL, "endpoint:%s:%d\n", WKStack.params.host, WKStack.params.port);
+
+    }
+    else {
+        LOG(LEVEL_DEBUG, "received wrong endpoint %s\n", buf);
+        sleepOffline();
+    }
+}
+
+
 int doStart() {
 
     LOG(LEVEL_NORMAL, ".. %d\n", WKStack.state); 
+    
+    if(WKStack.state == WKSTACK_QUERY_ENDPOINT) {
+        LOG(LEVEL_NORMAL,"ep unavaiable\n");
+
+        char ep[] = WKSTACK_FIRST_CONNECT_HOST;
+        int ret = http_client_startup((unsigned char *)ep, WKSTACK_ENDPOINT_INQUIRY_PORT);
+        if(ret != 0)
+        {     
+            sleepOffline();
+        }
+        else
+        {
+            LOG(LEVEL_DEBUG, "Http client started\n");
+
+            ret = http_client_get(WKSTACK_ENDPOINT_INQUIRY_PATH, get_cb);
+            if(ret == 0)
+            {
+                LOG(LEVEL_DEBUG, "Http client GET success\n");
+
+                WKStack.state = WKSTACK_RECONNECT_ENDPOINT;
+                WKStack_connect_ep();
+                
+                return;
+            }
+            else
+            {
+                LOG(LEVEL_ERROR, "Http client GET failed\n");
+
+                sleepOffline();
+            }
+        }
+    }
+
+
     if(WKStack.state == WKSTACK_OFFLINE) {
 
         WKStack_params_t *params = &WKStack.params;
@@ -396,6 +464,7 @@ int doStart() {
         if(strlen(WKStack.params.did) != 0 && strlen(WKStack.params.host) != 0 && strlen(WKStack.params.ticket) != 0) { 
             LOG(LEVEL_NORMAL,"My did is %s\n", WKStack.params.did);
             LOG(LEVEL_NORMAL,"Offline, reconnecting %s\n", WKStack.params.host);
+
 
             WKStack.state = WKSTACK_RECONNECT_ENDPOINT;
             WKStack_connect_ep();

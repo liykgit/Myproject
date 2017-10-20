@@ -289,7 +289,7 @@ static int get_response(get_callback_t get_cb)
 }
 
 
-int http_client_startup(unsigned char *domain, unsigned short port)
+int vg_http_client_startup(unsigned char *domain, unsigned short port)
 {
     unsigned int		server_ip;
     int					ret = 0;
@@ -387,7 +387,7 @@ out:
     return -1;
 }
 
-int http_client_post(char *url, unsigned int content_length, post_callback_t post_cb, get_callback_t get_cb)
+int vg_http_client_post(char *url, unsigned int content_length, post_callback_t post_cb, get_callback_t get_cb)
 {
     unsigned char *send_buf = NULL;
     unsigned int buf_len = 0;
@@ -425,7 +425,7 @@ int http_client_post(char *url, unsigned int content_length, post_callback_t pos
     return 0;
 }
 
-int http_client_get(char *url, get_callback_t get_cb)
+int vg_http_client_get(char *url, get_callback_t get_cb)
 {
     int ret = 0;
 
@@ -441,7 +441,7 @@ int http_client_get(char *url, get_callback_t get_cb)
     return get_response(get_cb);
 }
 
-int http_client_stop(void)
+int vg_http_client_stop(void)
 {
 
 	if (http_socket_fd > 0)

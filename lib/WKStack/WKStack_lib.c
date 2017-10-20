@@ -398,12 +398,6 @@ static void get_cb(unsigned char *buf, unsigned int len)
 {
     unsigned int i;
 
-    LOG(LEVEL_DEBUG, "http get result: \n");
-    for(i = 0; i < len; i++){
-        LOG(LEVEL_DEBUG, "%c");
-    }
-    LOG(LEVEL_DEBUG, "\n");
-
     char port[8] = {0,};
 
     int ret = parse_url((char *)buf, WKStack.params.host, port);
@@ -426,8 +420,16 @@ int doStart() {
     if(WKStack.state == WKSTACK_QUERY_ENDPOINT) {
         LOG(LEVEL_NORMAL,"ep unavaiable\n");
 
-        char ep[] = WKSTACK_FIRST_CONNECT_HOST;
-        int ret = http_client_startup((unsigned char *)ep, WKSTACK_ENDPOINT_INQUIRY_PORT);
+        
+        char ep[64];
+        memset(ep, 0, 64);
+
+        sprintf(ep, "http://%s", WKSTACK_FIRST_CONNECT_HOST);
+
+        LOG(LEVEL_DEBUG, "inquiry host %s\n", ep);
+
+        int ret = vg_http_client_startup((unsigned char *)ep, WKSTACK_ENDPOINT_INQUIRY_PORT);
+
         if(ret != 0)
         {     
             sleepOffline();
@@ -436,7 +438,16 @@ int doStart() {
         {
             LOG(LEVEL_DEBUG, "Http client started\n");
 
-            ret = http_client_get(WKSTACK_ENDPOINT_INQUIRY_PATH, get_cb);
+            char *url = vg_malloc(256);
+            memset(url, 0, 256);
+
+            sprintf(url, "%s?productId=%s&did=%s", WKSTACK_ENDPOINT_INQUIRY_PATH, WKStack.params.product_id, WKStack.params.did);
+            ret = vg_http_client_get(url, get_cb);
+
+            vg_http_client_stop();
+
+            vg_free(url);
+
             if(ret == 0)
             {
                 LOG(LEVEL_DEBUG, "Http client GET success\n");
@@ -454,7 +465,6 @@ int doStart() {
             }
         }
     }
-
 
     if(WKStack.state == WKSTACK_OFFLINE) {
 

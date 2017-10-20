@@ -33,7 +33,7 @@ typedef void (*post_callback_t)(unsigned char **send_buf, unsigned int *buf_len)
 * @param port port number of the http server.
 * @return 0 success, -1 failed
 */
-int http_client_startup(unsigned char *domain, unsigned short port);
+int vg_http_client_startup(unsigned char *domain, unsigned short port);
 
 /**
 * @fn int http_client_post(char *url, unsigned int content_length, post_callback_t post_cb, get_callback_t get_cb)
@@ -44,7 +44,7 @@ int http_client_startup(unsigned char *domain, unsigned short port);
 * @param get_cb response data get callback function, user can get the response data in this function
 * @return 0 success, -1 failed
 */
-int http_client_post(char *url, unsigned int content_length, post_callback_t post_cb, get_callback_t respond_cb);
+int vg_http_client_post(char *url, unsigned int content_length, post_callback_t post_cb, get_callback_t respond_cb);
 
 /**
 * @fn int http_client_get(char *url, get_callback_t get_cb)
@@ -53,7 +53,7 @@ int http_client_post(char *url, unsigned int content_length, post_callback_t pos
 * @param get_cb response data get callback function, user can get the response data in this function.
 * @return 0 success, -1 failed
 */
-int http_client_get(char *url, get_callback_t get_cb);
+int vg_http_client_get(char *url, get_callback_t get_cb);
 
 /**
 * @fn int http_client_stop(void)
@@ -61,6 +61,6 @@ int http_client_get(char *url, get_callback_t get_cb);
 * @param none.
 * @return 0 success, -1 failed
 */
-int http_client_stop(void);
+int vg_http_client_stop(void);
 
 #endif

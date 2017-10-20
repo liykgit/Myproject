@@ -11,7 +11,7 @@
 WKStack_t WKStack;
 
 int g_testmode = 0;
-const char *WKStack_version = "1.6.4";
+const char *WKStack_version = "1.6.5";
 
 int WKStack_connect_cb(mqtt_errno_t err);
 
@@ -208,10 +208,11 @@ static void handle_connect_endpoint_result(mqtt_errno_t result) {
 
             break;
 
+        case MQTT_SYSTEM_ERROR:
         case MQTT_SEVICE_NOT_AVAILABLE:
             {
                 LOG(LEVEL_ERROR,"Cloud service unavaiable when reconnect, sleep then get offline\n");
-
+/*
                 unsigned long time = vg_time_ms();
                 unsigned long random = (time% 30);
 
@@ -219,7 +220,7 @@ static void handle_connect_endpoint_result(mqtt_errno_t result) {
                 unsigned long sleep = random*1000 + RECONNECT_DELAY_SHORT ;
                 LOG(LEVEL_DEBUG,"sleep %u ms\n", sleep);
                 msleep(sleep);
-
+*/
                 //memset(WKStack.params.host, 0, sizeof(WKStack.params.host));
 
                 WKStack.state = WKSTACK_QUERY_ENDPOINT;
@@ -398,15 +399,22 @@ static void get_cb(unsigned char *buf, unsigned int len)
 {
     unsigned int i;
 
-    LOG(LEVEL_DEBUG, "http get result: \n");
-    for(i = 0; i < len; i++){
-        LOG(LEVEL_DEBUG, "%c");
+    char *body = vg_malloc(len + 1);
+    if(!body) {
+        LOG(LEVEL_ERROR, "FATAL: OOM\n");
+        sleepOffline();
+        return;
     }
-    LOG(LEVEL_DEBUG, "\n");
+
+    memcpy(body, buf, len);
+    body[len] = 0;
 
     char port[8] = {0,};
 
-    int ret = parse_url((char *)buf, WKStack.params.host, port);
+    int ret = parse_url(body, WKStack.params.host, port);
+
+    vg_free(body);
+
     if(ret == 0) {
         WKStack.params.port = atoi(port);
         LOG(LEVEL_NORMAL, "endpoint:%s:%d\n", WKStack.params.host, WKStack.params.port);
@@ -426,8 +434,16 @@ int doStart() {
     if(WKStack.state == WKSTACK_QUERY_ENDPOINT) {
         LOG(LEVEL_NORMAL,"ep unavaiable\n");
 
-        char ep[] = WKSTACK_FIRST_CONNECT_HOST;
-        int ret = http_client_startup((unsigned char *)ep, WKSTACK_ENDPOINT_INQUIRY_PORT);
+        
+        char ep[64];
+        memset(ep, 0, 64);
+
+        sprintf(ep, "http://%s", WKSTACK_FIRST_CONNECT_HOST);
+
+        LOG(LEVEL_DEBUG, "inquiry host %s\n", ep);
+
+        int ret = vg_http_client_startup((unsigned char *)ep, WKSTACK_ENDPOINT_INQUIRY_PORT);
+
         if(ret != 0)
         {     
             sleepOffline();
@@ -436,7 +452,16 @@ int doStart() {
         {
             LOG(LEVEL_DEBUG, "Http client started\n");
 
-            ret = http_client_get(WKSTACK_ENDPOINT_INQUIRY_PATH, get_cb);
+            char *url = vg_malloc(256);
+            memset(url, 0, 256);
+
+            sprintf(url, "%s?productId=%s&did=%s", WKSTACK_ENDPOINT_INQUIRY_PATH, WKStack.params.product_id, WKStack.params.did);
+            ret = vg_http_client_get(url, get_cb);
+
+            vg_http_client_stop();
+
+            vg_free(url);
+
             if(ret == 0)
             {
                 LOG(LEVEL_DEBUG, "Http client GET success\n");
@@ -454,7 +479,6 @@ int doStart() {
             }
         }
     }
-
 
     if(WKStack.state == WKSTACK_OFFLINE) {
 

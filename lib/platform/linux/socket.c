@@ -146,7 +146,6 @@ int vg_recv(int sock, unsigned char *buffer, int length, int ssl)
         if(ret > 0){
             LOG(LEVEL_DEBUG, "vg_recv: \n");
             vg_print_hex(LEVEL_DEBUG, (char *)buffer, ret);
-
             return ret;
         }else if(ret < 0){//recv err
             LOG(LEVEL_ERROR, "tcp recv error(errno:%d)\n", errno);

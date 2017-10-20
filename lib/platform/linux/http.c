@@ -274,7 +274,6 @@ static int get_response(get_callback_t get_cb)
 	//		printf("content len:%d, recvbyte:%d\n", content_length, recvBytes);
 
             get_cb((unsigned char *)content, recvBytes);
-
             if(content_length == 0){
                 break;
             }

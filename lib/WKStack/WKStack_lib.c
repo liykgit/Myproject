@@ -446,6 +446,7 @@ int doStart() {
 
         if(ret != 0)
         {     
+            vg_http_client_stop();
             sleepOffline();
         }
         else

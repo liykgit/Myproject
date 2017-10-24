@@ -413,7 +413,6 @@ static void get_cb(unsigned char *buf, unsigned int len)
 
     int ret = parse_url(body, WKStack.params.host, port);
 
-    vg_free(body);
 
     if(ret == 0) {
         WKStack.params.port = atoi(port);
@@ -421,9 +420,11 @@ static void get_cb(unsigned char *buf, unsigned int len)
 
     }
     else {
-        LOG(LEVEL_DEBUG, "received wrong endpoint %s\n", buf);
+        LOG(LEVEL_DEBUG, "received wrong endpoint %s\n", body);
         sleepOffline();
     }
+
+    vg_free(body);
 }
 
 

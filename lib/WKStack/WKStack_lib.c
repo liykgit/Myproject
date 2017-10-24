@@ -11,7 +11,7 @@
 WKStack_t WKStack;
 
 int g_testmode = 0;
-const char *WKStack_version = "1.6.6";
+const char *WKStack_version = "1.6.7";
 
 int WKStack_connect_cb(mqtt_errno_t err);
 

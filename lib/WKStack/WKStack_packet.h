@@ -13,7 +13,7 @@
 
 #define DP_COUNT_MAX 32
 // 10 s for keepalive time
-#define WKSTACK_KEEPALIVE_TIME 10
+#define WKSTACK_KEEPALIVE_TIME 20
 
 // Topic
 #define WKSTACK_TOPIC_ONLINE "/iot/dm/online"

@@ -11,7 +11,7 @@
 WKStack_t WKStack;
 
 int g_testmode = 0;
-const char *WKStack_version = "1.6.5";
+const char *WKStack_version = "1.6.6";
 
 int WKStack_connect_cb(mqtt_errno_t err);
 
@@ -446,6 +446,7 @@ int doStart() {
 
         if(ret != 0)
         {     
+            vg_http_client_stop();
             sleepOffline();
         }
         else

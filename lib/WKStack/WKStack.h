@@ -169,4 +169,10 @@ int WKStack_params(char *buf, int size);
 
 int WKStack_restore_all(WKStack_restore_cb_t restore_cb);
 
+
+typedef void (*lan_cmd_hook_t)(int argc, char *argv[], struct socketaddr_in *client_addr);
+
+int WKStack_register_lan_hook(char *cmd, lan_cmd_hook_t hook);
+int WKStack_lan_sendto(struct sockaddr_in *client_addr, char *buf, int length);
+
 #endif

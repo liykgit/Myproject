@@ -14,9 +14,21 @@
 #define PRODUCTID   "E3GF3s6feqLDznr5"
 #define KEY         "yJODSSiB-QrW-dnq"
 
-
-
 #define MAC         "A1B2C3D4E916"
+
+
+
+//------------- for at command ----------------------
+//
+#define OK                  "+OK\r\n"
+
+#define FORMAT_ERROR        "+ERR=1\r\n" //command format error\r\n"
+#define NONE_COMMAND        "+ERR=2\r\n" //unknow this command\r\n"
+#define PARAM_ERROR         "+ERR=3\r\n" //param error\r\n"
+#define TARGET_ERROR         "+ERR=4\r\n" //param error\r\n"
+#define EXEC_ERROR          "FAILED\r\n" //param error\r\n"
+
+
 
 
 int connect_cb(WKStack_state_t state)
@@ -68,8 +80,22 @@ void WK_Stop() {
 }
 
 //----------------------- udp ---------------------------------------
+void handle_hsl(int argc, char *argv[], struct socketaddr_in *client_addr)
+{
+    LOG(LEVEL_DEBUG, "hanle_hsl E\n");
 
-
+    if(argc <= 1) {
+        WKStack_lan_sendto(client_addr, PARAM_ERROR, strlen(PARAM_ERROR));
+    }
+    else if(argc == 2){
+        
+        WKStack_lan_sendto(client_addr, OK, strlen(OK));
+    }
+    else {
+        WKStack_lan_sendto(client_addr, PARAM_ERROR, strlen(PARAM_ERROR));
+    }
+    LOG(LEVEL_DEBUG, "handle_hsl X\n");
+}
 
 int main(int argc, char **argv)
 {
@@ -109,6 +135,13 @@ int main(int argc, char **argv)
 	fscanf(tcp_config_fp, "%s %d", sim_tcp_ip, &sim_tcp_port);
 	printf("%s %d\n", sim_tcp_ip, sim_tcp_port);
 */
+
+
+
+    char cmd[] = "HSL";
+    WKStack_register_lan_hook(cmd, handle_hsl);
+
+
     WK_Init(PRODUCTID, MAC, KEY);
 
     while(1){

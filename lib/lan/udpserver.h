@@ -5,7 +5,6 @@
 
 #define UDP_RECV_BUFFER_SIZE 512
 
-
 typedef struct client_info {
     struct sockaddr_in addr;
     char user_id[16];

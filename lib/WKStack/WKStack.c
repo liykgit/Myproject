@@ -370,7 +370,9 @@ void WKStack_rabbit() {
     mqtt_unsubscribe(WKStack.ota_sub_topic, NULL);    
 }
 
-
+int WKStack_lan_sendto(struct sockaddr_in *client_addr, char *buf, int length) {
+    udpserver_sendto(client_addr, buf, length);
+}
 
 
 

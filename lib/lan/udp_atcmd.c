@@ -2,33 +2,26 @@
 #include "WKStack.h"
 #include "WKStack_lib.h"
 #include "udpserver.h"
+#include "udp_atcmd.h"
 #include "tcpserver.h"
 #include "common.h"
 
 
+#define HANDLER_MAX 32
 #define PARAM_MAX 10
 #define CMD_BUF_SIZE 2048
 #define SHELL_BUF_SIZE 1024
 #define CMD_PREFIX_SIZE 3
 
-#define AT                  "AT+"
-#define OK                  "+OK\r\n"
-
-#define FORMAT_ERROR        "+ERR=1\r\n" //command format error\r\n"
-#define NONE_COMMAND        "+ERR=2\r\n" //unknow this command\r\n"
-#define PARAM_ERROR         "+ERR=3\r\n" //param error\r\n"
-#define TARGET_ERROR         "+ERR=4\r\n" //param error\r\n"
-#define EXEC_ERROR          "FAILED\r\n" //param error\r\n"
-
 #define TCPSERVER_PORT      30321
 
 extern WKStack_t WKStack;
 
-typedef enum{
+typedef enum {
     AT_COMMAND = 0,
     NONE_AT_COMMAND,
     AT_COMMAND_ERROR,
-}user_command_t;
+} user_command_t;
 
 typedef struct {
     char *command;
@@ -214,7 +207,7 @@ void exec_bind(int argc, char *argv[], struct socketaddr_in *client_addr)
     LOG(LEVEL_DEBUG, "exec_bind X\n");
 }
 
-const cmd_handle_t udp_command_handle[]= {
+static cmd_handle_t at_command_handler[HANDLER_MAX] = {
     {
         .command = FIND, //!< restart system
         .execute = exec_find
@@ -258,7 +251,8 @@ const cmd_handle_t udp_command_handle[]= {
     }
 };
 
-#define COMMAND_COUNT (sizeof(udp_command_handle) / sizeof(cmd_handle_t))
+static int handler_nr = 9;
+
 
 int udp_user_cmd_handle(unsigned char *cmd, int len, struct sockaddr_in *client_addr)
 {
@@ -330,9 +324,9 @@ REPEATED_PARSING:
                 return AT_COMMAND_ERROR;
             }
 
-            while (i < COMMAND_COUNT)
+            while (i < handler_nr)
             {
-                if (strcmp(cmd, udp_command_handle[i].command) == 0)
+                if (strcmp(cmd, at_command_handler[i].command) == 0)
                 {
                     do
                     {
@@ -379,7 +373,7 @@ REPEATED_PARSING:
                     }
 
                     //调用命令handle
-                    udp_command_handle[i].execute(argc, argv, client_addr);
+                    at_command_handler[i].execute(argc, argv, client_addr);
 
                     break;
                 }
@@ -387,7 +381,7 @@ REPEATED_PARSING:
                 i++;
             }
 
-            if (i >= COMMAND_COUNT)
+            if (i >= handler_nr)
             {
                 printf(NONE_COMMAND);
             }
@@ -412,3 +406,18 @@ REPEATED_PARSING:
 
     return NONE_AT_COMMAND;
 }
+
+
+int WKStack_register_lan_hook(char *cmd, lan_cmd_hook_t hook) {
+    
+    if(!cmd || !hook)
+        return -1;
+
+    at_command_handler[handler_nr].command = cmd;
+    at_command_handler[handler_nr].execute = hook;
+
+    handler_nr++;
+
+    return 0;
+}
+

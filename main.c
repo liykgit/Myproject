@@ -9,110 +9,60 @@
 #include "common.h"
 
 
-
-
-#define PRODUCTID   "E3GF3s6feqLDznr5"
-#define KEY         "yJODSSiB-QrW-dnq"
-
+#define PRODUCTID   "yEOBNYFxfyNfbm0P"
+#define MAC         "A1B2C3D4E916"
+#define VERSION     "0.1"
 
 
 #define MAC         "A1B2C3D4E916"
 
 
-int connect_cb(WKStack_state_t state)
+int connect_cb()
 {
+    printf("connected\n");
+    return 0;
+}
+//----------------------- udp ---------------------------------------
 
-    printf("connect_cb state %d\n", state);
+int disconnect_cb()
+{
+    printf("disconnected \n");
     return 0;
 }
 
-
-
-static void datapoint_handler(WKStack_datapoint_t *dps, int size) {
-
-    printf("reporting status ...  \n "); 
-    WKStack_report_datapoint(dps, size, 0);
+int raw_data_handler(char *raw_data, int len) {
+    
+    printf("received raw data %s\n", raw_data);
+    return 0;
 }
 
-   
-
-
-void WK_Init(char *productId, char *mac, char *key)
-{
-    static WKStack_params_t params;
-
-    memcpy(params.key, key, strlen(key));
-
-    memcpy(params.product_id, productId, strlen(productId));
-
-    memcpy(params.mac, mac, strlen(mac));
-
-    strcpy(params.version, "0.0.1");
-
-    strcpy(params.sn, "ddssllsffmmrrd");
-
-    WKStack_register_datapoint_handler(datapoint_handler);
-
-    WKStack_init(&params);
-
+int load_params(void *buf, int size) {
+    
+    printf("loading params \n");
+    return 0;
 }
 
-void WK_Start() {
-
-    WKStack_start(connect_cb, NULL);
+int save_params(void *buf, int size) {
+    
+    printf("saving params\n");
+    return 0;
 }
-
-void WK_Stop() {
-
-    WKStack_stop(0);
-}
-
-//----------------------- udp ---------------------------------------
-
-
 
 int main(int argc, char **argv)
 {
-/*
-	FILE *config_fp = NULL;
-	FILE *tcp_config_fp = NULL;
 
-	if(argv[1] == NULL){
-		printf("usage:\nWKdevice [device number]\n");
-		getchar();
-		return -1;
-	}
+    WKStack_init(MAC, PRODUCTID, VERSION, 0, 0);
 
-	if (argv[1] != NULL) {
-		config_fp = fopen("devices.config", "r");
-		if (config_fp == NULL) {
-			printf("Open config file error\n");
-			while (1) { msleep(1000); }
-			return 1;
-		}
-		fseek(config_fp, 74 * (atoi((const char *)argv[1]) - 1), SEEK_SET);
+    WKStack_register_callback(CALLBACK_CONNECTED, connect_cb);
+    WKStack_register_callback(CALLBACK_DISCONNECTED, disconnect_cb);
 
-		fscanf(config_fp, "%s %s %s %s", params.mac, params.sn, params.product_id, params.key);
+    WKStack_register_callback(CALLBACK_SAVE_PARAMS, save_params);
+    WKStack_register_callback(CALLBACK_LOAD_PARAMS, load_params);
 
-		printf("%s %s %s %s\n", params.mac, params.sn, params.product_id, params.key);
-	}
-*/
-
-/*
-	tcp_config_fp = fopen("Ctrlserver.config", "r");
-	if (tcp_config_fp == NULL) {
-		printf("Open QTPserver config file error\n");
-		while (1) { msleep(1000); }
-		return 1;
-	}
-
-	fscanf(tcp_config_fp, "%s %d", sim_tcp_ip, &sim_tcp_port);
-	printf("%s %d\n", sim_tcp_ip, sim_tcp_port);
-*/
-    WK_Init(PRODUCTID, MAC, KEY);
+    WKStack_register_callback(CALLBACK_RAW_DATA, raw_data_handler);
 
     while(1){
-        WK_Start();
+        WKStack_start();
         msleep(2000);
     }
 

@@ -103,10 +103,10 @@ typedef struct {
     char host[WKSTACK_HOST_LEN];
     char ticket[TICKET_LEN + TICKET_LEN_PADDING];
     unsigned short port;
+    char key[WKSTACK_KEY_LEN + PADDING];
 
     char version[WKSTACK_VER_LEN + PADDING];
     char sn[WKSTACK_SN_LEN +  PADDING];
-    char key[WKSTACK_KEY_LEN + PADDING];
     char product_id[WKSTACK_DEVTYPE_LEN + PADDING];
     char mac[WKSTACK_MAC_LEN + PADDING];
 } WKStack_params_t;
@@ -143,15 +143,10 @@ typedef int (*WKStack_ota_cb_t)(WKStack_ota_t *info, WKStack_ota_target_t target
 typedef void (*WKStack_datapoint_handler_t)(WKStack_datapoint_t *dps, int size);
 typedef int (*WKStack_restore_cb_t)(WKStack_publish_state_t state);
 
-int WKStack_init(WKStack_params_t *params);
 
 int WKStack_register_datapoint_handler(WKStack_datapoint_handler_t cb);
 
-int WKStack_start(WKStack_cb_t connect_cb, WKStack_ota_cb_t cb);
-
 int WKStack_report_datapoint(WKStack_datapoint_t *dp_group, unsigned int group_size, WKStack_report_cb_t cb);
-
-int WKStack_stop(WKStack_stop_cb_t cb);
 
 
 // -1 no new version available
@@ -168,5 +163,33 @@ int WKStack_name(char *buf, int size);
 int WKStack_params(char *buf, int size);
 
 int WKStack_restore_all(WKStack_restore_cb_t restore_cb);
+
+//---------------------------  new for passthrough project
+
+typedef enum {
+    CALLBACK_CONNECTED, 
+    CALLBACK_DISCONNECTED,
+    CALLBACK_RAW_DATA,
+    CALLBACK_DP_DATA,
+    CALLBACK_STOPPED,
+    CALLBACK_SAVE_PARAMS,
+    CALLBACK_LOAD_PARAMS,
+
+    CALLBACK_NR_MAX 
+} callback_index_t;
+
+
+typedef int (*generic_callback_fp)(void);
+
+typedef void (*WKStack_raw_data_handler_t)(char *buf, int size);
+typedef int (*WKStack_save_params_fn_t)(void *buf, int size);
+typedef int (*WKStack_load_params_fn_t)(char *buf, int size);
+
+int WKStack_init(const char *mac, const char *product_id, const char *version, const char *sn,  const char *key);
+
+int WKStack_start();
+int WKStack_stop();
+int WKStack_register_callback(callback_index_t id, generic_callback_fp fp);
+
 
 #endif

@@ -36,6 +36,10 @@
 #define WKSTACK_TOPIC_SYNC_SUB_FMT "/iot/sync/%s/%s/sub" 
 #define WKSTACK_TOPIC_SYNC_PUB_FMT "/iot/sync/%s/%s/pub" // For Module ota (Device -> Server)
 
+#define WKSTACK_TOPIC_PASSTHROUGH_SUB_FMT "/iot/pass/%s/%s/sub" 
+#define WKSTACK_TOPIC_PASSTHROUGH_PUB_FMT "/iot/pass/%s/%s/pub" // For Module ota (Device -> Server)
+
+
 #define WKSTACK_TOPIC_OTA_MCU_OUT_FMT "/iot/in/mcu/%s/%s/ota" // For MCU ota (Device -> Server)
 
 // Json field
@@ -95,6 +99,9 @@
 
 #define WKSTACK_PASSTHROUGH_TARGET_PRODUCT_ID     65085
 #define WKSTACK_PASSTHROUGH_TARGET_PRODUCT_SECRET     65086
+#define WKSTACK_PASSTHROUGH_INDEX_RAW_DATA      65087
+
+
 
 #define INDEX_SZ (4)
 #define TYPE_SZ (4)

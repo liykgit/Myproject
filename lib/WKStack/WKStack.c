@@ -9,45 +9,57 @@
 
 #include "mqtt.h"
 
-
-int WKStack_init(WKStack_params_t *params)
+int WKStack_init(const char *mac, const char *product_id, const char *version, const char *sn,  const char *key)
 {
 
-    if(strlen(params->key) <= 0 || strlen(params->key) > WKSTACK_KEY_LEN) {
-        LOG(LEVEL_ERROR, "Error: invalid product key %s\n", params->key);
-        return -1;
-    }
-
-    if(strlen(params->product_id) <= 0 || strlen(params->product_id) > WKSTACK_DEVTYPE_LEN) {
-        LOG(LEVEL_ERROR, "Error: invalid product id %s\n", params->product_id);
-        return -1;
-    }
-
-    if(strlen(params->mac) <= 0 || strlen(params->mac) > WKSTACK_MAC_LEN || !isValidMacAddress(params->mac)) {
-        LOG(LEVEL_ERROR, "Error: invalid mac %s\n", params->mac);
-        return -1;
-    }
-
-    if(strlen(params->sn) > WKSTACK_SN_LEN) {
-        LOG(LEVEL_ERROR, "Error: max allowed sn length %d\n", WKSTACK_SN_LEN);
-        return -1;
-    }
-
-    if(strlen(params->version) > WKSTACK_VER_LEN) {
-        LOG(LEVEL_ERROR, "Error: max allowed version length %d\n", WKSTACK_VER_LEN);
-        return -1;
-    }
-
     if(WKStack.state == WKSTACK_WAIT_INIT){
-       
-        memcpy(&WKStack.params, params, sizeof(WKStack_params_t));
+
+        if(key && strlen(key) != WKSTACK_KEY_LEN) {
+            LOG(LEVEL_ERROR, "Error: invalid product key %s\n", key);
+            return -1;
+        }
+
+        if(!product_id || strlen(product_id) > WKSTACK_DEVTYPE_LEN) {
+            LOG(LEVEL_ERROR, "Error: invalid product id %s\n", product_id);
+            return -1;
+        }
+
+        if(!mac || strlen(mac) <= 0 || strlen(mac) > WKSTACK_MAC_LEN || !isValidMacAddress(mac)) {
+            LOG(LEVEL_ERROR, "Error: invalid mac %s\n", mac);
+            return -1;
+        }
+
+        if(sn && strlen(sn) > WKSTACK_SN_LEN) {
+            LOG(LEVEL_ERROR, "Error: max allowed sn length %d\n", WKSTACK_SN_LEN);
+            return -1;
+        }
+
+        if(!version || strlen(version) > WKSTACK_VER_LEN) {
+            LOG(LEVEL_ERROR, "Error: max allowed version length %d\n", WKSTACK_VER_LEN);
+            return -1;
+        }
+
+        memcpy(WKStack.params.product_id, product_id, strlen(product_id));
+
+        memcpy(WKStack.params.mac, mac, strlen(mac));
+
+        strcpy(WKStack.params.version, version);
+
+        if(key)
+            memcpy(WKStack.params.key, key, strlen(key));
+        else
+            memset(WKStack.params.key, 0, sizeof(WKStack.params.key));
+
+        if(sn)
+            strcpy(WKStack.params.sn, sn);
+        else
+            memset(WKStack.params.sn, 0, sizeof(WKStack.params.sn));
 
         log_init(WKStack.params.mac);
 
         mqtt_init(WKSTACK_KEEPALIVE_TIME, 1024);
 
         UDPServer_start(UDP_SERVER_PORT); 
-
     }
 
     LOG(LEVEL_NORMAL, "WKStack inited \n");
@@ -58,17 +70,68 @@ int WKStack_init(WKStack_params_t *params)
 
 //-1 WKStack is online
 //-2 WKStack not init, please call WKStack_init() first
-int WKStack_start(WKStack_cb_t connect_cb, WKStack_ota_cb_t ota_cb)
+int WKStack_start()
 {
-    WKStack.connect_cb = connect_cb;
-    WKStack.ota_cb = ota_cb;
-
-    return doStart();
+    if(WKStack.state == WKSTACK_WAIT_INIT)
+        return -1;
+    else
+        return doStart();
 }
 
-int WKStack_stop(WKStack_stop_cb_t cb)
+int WKStack_stop()
 {
-    return mqtt_stop(cb);
+    return mqtt_stop((mqtt_stop_cb_t)vg_callbacks[CALLBACK_STOPPED]);
+}
+
+int WKStack_register_callback(callback_index_t id, generic_callback_fp fp)
+{
+    if(id >= CALLBACK_NR_MAX)
+        return -1;
+
+    vg_callbacks[id] = fp;
+}
+
+int WKStack_send_raw(unsigned char *raw_data, unsigned int size) {
+
+    int ret = 0;
+    int buf_sz = 0;
+
+    char buf_small[128];
+    buf_small[128-1] = 0;
+    
+    char *buf = 0;
+    int free_buf = 0;
+
+    if(size < 128) {
+        buf = buf_small;
+        buf_sz = 128;
+    }
+    else {
+        buf = vg_malloc(size + 1); 
+        if(!buf) {
+            LOG(LEVEL_ERROR, "Fatal: Not enough memory\n");
+            return -1;
+        }
+
+        buf[size] = 0;
+
+        free_buf = 1;
+        buf_sz = size + 1;
+    }
+
+    char tag[4] = {0, 0, WKSTACK_DATAPOINT_TYPE_STRING, 0};
+    *(unsigned short *)tag = WKSTACK_PASSTHROUGH_INDEX_RAW_DATA;
+
+    int packet_size = tlv_put_string(buf, tag, raw_data, buf_sz);
+    if(packet_size > 0)
+        ret = mqtt_publish(WKStack.passthrough_pub_topic, buf, packet_size, MQTT_QOS1, MQTT_RETAIN_FALSE, (mqtt_cb_t)0);
+    else
+        ret = -1;
+
+    if(free_buf)
+        vg_free(buf);
+
+    return ret;
 }
 
 int WKStack_report_datapoint(WKStack_datapoint_t *dp_group, unsigned int group_size, WKStack_report_cb_t cb)
@@ -149,10 +212,6 @@ int WKStack_report_datapoint(WKStack_datapoint_t *dp_group, unsigned int group_s
 
     return mqtt_publish(WKStack.report_topic, (unsigned char*)buf, offset, MQTT_QOS1, MQTT_RETAIN_FALSE, (mqtt_cb_t)cb);
 
-}
-
-int WKStack_report_raw(unsigned char *buf, unsigned int size) {
-    return mqtt_publish(WKStack.report_topic, buf, size, MQTT_QOS1, MQTT_RETAIN_FALSE, (mqtt_cb_t)0);
 }
 
 
@@ -370,7 +429,7 @@ void WKStack_rabbit() {
     mqtt_unsubscribe(WKStack.ota_sub_topic, NULL);    
 }
 
-
-
-
+int WKStack_report_raw(unsigned char *buf, unsigned int size) {
+    return mqtt_publish(WKStack.report_topic, buf, size, MQTT_QOS1, MQTT_RETAIN_FALSE, (mqtt_cb_t)0);
+}
 

@@ -266,6 +266,39 @@ static int WKStack_unpack_sync(unsigned char *payload, int len)
 }
 
 
+static int WKStack_unpack_passthrough(unsigned char *payload, int len)
+{
+    LOG(LEVEL_DEBUG, "WKStack_unpack_passthrough E\n");
+
+    int count = decode_payload((char *)payload, len);
+    if(count <= 0)  
+        return 0;
+
+    WKStack_raw_data_handler_t cb = 0;
+
+    if(vg_callbacks[CALLBACK_RAW_DATA])
+        cb = (WKStack_raw_data_handler_t)vg_callbacks[CALLBACK_RAW_DATA];
+
+    char *raw_data = 0;
+    int i = 0;
+
+     for(; i < count; i++) {
+
+        switch(dps[i].index) {
+            
+            case WKSTACK_PASSTHROUGH_INDEX_RAW_DATA: {
+                raw_data = dps[i].value.string;
+                if(raw_data)
+                    cb(raw_data, strlen(raw_data));
+            }
+            break;
+        }
+    }
+
+    LOG(LEVEL_DEBUG, "WKStack_unpack_passthrough X\n");
+    return 0;
+}
+
 static int WKStack_unpack_binding(unsigned char *payload, int len)
 {
     LOG(LEVEL_DEBUG, "WKStack_unpack_binding E\n");
@@ -619,7 +652,9 @@ int WKStack_unpack_welcome(unsigned char *payload, int len) {
                 char port[8] = {0,};
 
                 parse_url((char *)purl, WKStack.params.host, port);
-                WKStack.params.port = atoi(port);
+                //TODO CHRIS 
+                //WKStack.params.port = atoi(port);
+                WKStack.params.port = 1883;
                 LOG(LEVEL_NORMAL, "endpoint:%s:%d\n", WKStack.params.host, WKStack.params.port);
 
                 hasEndpoint = 1;
@@ -746,6 +781,13 @@ int WKStack_subscribe_control(mqtt_cb_t cb)
 int WKStack_subscribe_sync(mqtt_cb_t cb)
 {
     mqtt_subscribe(WKStack.sync_sub_topic, cb, WKStack_unpack_sync);
+
+    return 0;
+}
+
+int WKStack_subscribe_passthrough(mqtt_cb_t cb)
+{
+    mqtt_subscribe(WKStack.passthrough_sub_topic, cb, WKStack_unpack_passthrough);
 
     return 0;
 }

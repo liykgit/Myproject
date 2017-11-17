@@ -108,14 +108,14 @@ void exec_netstat(int argc, char *argv[], struct socketaddr_in *client_addr)
 
 void exec_online(int argc, char *argv[], struct socketaddr_in *client_addr)
 {
-    WKStack_start(NULL, NULL);
+    WKStack_start();
     udpserver_sendto(client_addr, OK, strlen(OK));
 }
 
 
 void exec_offline(int argc, char *argv[], struct socketaddr_in *client_addr)
 {    
-    WKStack_stop(0);
+    WKStack_stop();
     udpserver_sendto(client_addr, OK, strlen(OK));
 }
 

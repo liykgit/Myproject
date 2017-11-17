@@ -43,9 +43,11 @@ typedef struct{
     char sync_pub_topic[WKSTACK_TOPIC_LEN];
     char sync_sub_topic[WKSTACK_TOPIC_LEN];
 
+    char passthrough_sub_topic[WKSTACK_TOPIC_LEN];
+    char passthrough_pub_topic[WKSTACK_TOPIC_LEN];
+
     WKStack_ota_t ota;
 
-    WKStack_cb_t connect_cb;
     WKStack_ota_cb_t ota_cb;
     WKStack_datapoint_handler_t dp_handler;
 } WKStack_t;
@@ -78,5 +80,7 @@ void subscrption_map_unset(int id);
 
 int subscrption_map_check(int ids);
 
+
+extern generic_callback_fp vg_callbacks[CALLBACK_NR_MAX];
 
 #endif

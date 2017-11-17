@@ -14,6 +14,8 @@ int g_testmode = 0;
 const char *WKStack_version = "0.1.0";
 const char *wisper = "yJIB5nW1M3O-X-RQ";
 
+generic_callback_fp vg_callbacks[CALLBACK_NR_MAX];
+
 int WKStack_connect_cb(mqtt_errno_t err);
 
 void subscrption_map_set(int id) {
@@ -47,8 +49,9 @@ static void check_subscrptions(){
             LOG(LEVEL_NORMAL, "subscription check passed, ready to fly\n");
 
             WKStack.state = WKSTACK_READY;
-            if(WKStack.connect_cb != NULL)
-                WKStack.connect_cb(WKStack.state);
+
+            if(vg_callbacks[CALLBACK_CONNECTED])
+                vg_callbacks[CALLBACK_CONNECTED]();
         }
     }
     else {
@@ -78,6 +81,7 @@ static int subscribe_sync_cb(unsigned short msg_id, mqtt_errno_t err) {
     //check_subscrptions();
     return 0;
 }
+
 
 
 
@@ -119,22 +123,31 @@ static void subscribe_topics() {
     if(!subscription_map_check(SUBSCRIPTION_SYNC)) {
         WKStack_subscribe_sync(subscribe_sync_cb);
     }
+
+//TODO 
+#if PASSTHROUGH
+    //if(!subscription_map_check(SUBSCRIPTION_PASSTHROUGH)) {
+        WKStack_subscribe_passthrough(0);
+    //}
+#endif
 }
 
 static void doPrepare() {
     sprintf(WKStack.report_topic, WKSTACK_TOPIC_REPORT_FMT, WKStack.params.product_id, WKStack.params.did);
-
     sprintf(WKStack.control_topic, WKSTACK_TOPIC_CONTROL_FMT, WKStack.params.product_id, WKStack.params.did);
+
     sprintf(WKStack.ota_sub_topic, WKSTACK_TOPIC_OTA_SUB_FMT, WKStack.params.product_id, WKStack.params.did);
     sprintf(WKStack.ota_pub_topic, WKSTACK_TOPIC_OTA_PUB_FMT, WKStack.params.product_id, WKStack.params.did);
 
     sprintf(WKStack.binding_sub_topic, WKSTACK_TOPIC_BINDING_SUB_FMT, WKStack.params.product_id, WKStack.params.did);
     sprintf(WKStack.binding_pub_topic, WKSTACK_TOPIC_BINDING_PUB_FMT, WKStack.params.product_id, WKStack.params.did);
 
-
     sprintf(WKStack.sync_pub_topic, WKSTACK_TOPIC_SYNC_PUB_FMT, WKStack.params.product_id, WKStack.params.did);
     sprintf(WKStack.sync_sub_topic, WKSTACK_TOPIC_SYNC_SUB_FMT, WKStack.params.product_id, WKStack.params.did);
-    
+  
+    sprintf(WKStack.passthrough_pub_topic, WKSTACK_TOPIC_PASSTHROUGH_PUB_FMT, WKStack.params.product_id, WKStack.params.did);
+    sprintf(WKStack.passthrough_sub_topic, WKSTACK_TOPIC_PASSTHROUGH_SUB_FMT, WKStack.params.product_id, WKStack.params.did);
+
     subscribe_topics();
     WKStack_publish_sync();
 }
@@ -247,8 +260,8 @@ static void handle_connect_endpoint_result(mqtt_errno_t result) {
     if(WKStack.state == WKSTACK_OFFLINE) {
         
         subscription_map_clear();
-        if(WKStack.connect_cb != NULL)
-            WKStack.connect_cb(WKStack.state);
+
+
     }
 }
 
@@ -292,8 +305,12 @@ int WKStack_connect_cb(mqtt_errno_t err)
              WKStack.state = WKSTACK_OFFLINE;
         }
 
-        if(WKStack.state == WKSTACK_OFFLINE)
+        if(WKStack.state == WKSTACK_OFFLINE) {
             subscription_map_clear();
+
+            if(vg_callbacks[CALLBACK_DISCONNECTED])
+                vg_callbacks[CALLBACK_DISCONNECTED]();
+        }
     }
     else if(WKStack.state == WKSTACK_RECONNECT_ENDPOINT) {
         handle_connect_endpoint_result(err);

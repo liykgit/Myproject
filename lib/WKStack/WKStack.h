@@ -11,7 +11,7 @@
 // WKStack params max length
 
 #define WKSTACK_SN_LEN 48
-#define WKSTACK_KEY_LEN 32
+#define WKSTACK_KEY_LEN 16
 #define WKSTACK_DEVTYPE_LEN 16
 #define WKSTACK_MAC_LEN 16
 #define WKSTACK_VER_LEN 20

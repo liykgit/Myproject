@@ -142,7 +142,6 @@ static int WKStack_unpack_ota(unsigned char *payload, int len)
     char *ticket = 0;
     char *uri = 0;
     char *version = 0;
-
     for(i = 0; i < count; i++) {
 
         switch(dps[i].index) {
@@ -384,6 +383,7 @@ static int WKStack_unpack_control(unsigned char *payload, int len)
 }
 
 
+
 int WKStack_pack_connect(char *client_id, int willflag)
 {
     //NOTE: message must be declared static
@@ -536,6 +536,8 @@ int WKStack_publish_knock()
             return -1;
         }
     }
+
+
     return mqtt_publish(WKStack.topic_knock, (unsigned char*)buf, offset, MQTT_QOS1, MQTT_RETAIN_FALSE, (mqtt_cb_t)NULL);
 }
 
@@ -594,11 +596,15 @@ int WKStack_unpack_welcome(unsigned char *payload, int len) {
     int hasEndpoint = 0;
     int hasTicket = 0;
     int hasName = 0;
+    int hasKey = 0;
 
     char *purl = 0;
     char *pname = 0;
+    char *key = 0;
     char *pdid = 0;
     char *pticket = 0;
+
+
 
     for(i = 0; i < count; i++) {
 
@@ -650,6 +656,16 @@ int WKStack_unpack_welcome(unsigned char *payload, int len) {
                 hasName = 1;
             }
             break;
+
+            case WKSTACK_PASSTHROUGH_TARGET_PRODUCT_SECRET: {
+
+                key = dps[i].value.string;
+                strncpy(WKStack.params.key, key, sizeof(WKStack.params.key));
+                LOG(LEVEL_DEBUG, "received secret\n");
+                hasKey = 1;
+            }
+            break;
+
         }
     }
 
@@ -664,7 +680,7 @@ int WKStack_unpack_welcome(unsigned char *payload, int len) {
     //hasName = 1;
 
 
-    if(hasDid && hasEndpoint && hasTicket /*&& hasName*/) {
+    if(hasDid && hasEndpoint && hasTicket && hasKey) {
 
         mqtt_stop(0);
 
@@ -692,9 +708,14 @@ int WKStack_unpack_challenge(unsigned char *payload, int len) {
         LOG(LEVEL_ERROR, "FATAL: empty challenge payload or invalid len %d\n", len);
         return -1;
     }
+    
+    if(strlen(WKStack.params.key) == WKSTACK_KEY_LEN) {
+        aes_ecb(aes, (unsigned char*)payload, (unsigned char*)WKStack.params.key);
 
-    //aes_ecb(aes, (unsigned char*)payload, (unsigned char*)WKStack.params.key);
-    aes_ecb(aes, (unsigned char*)payload, (unsigned char*)WKStack.params.key);
+    }
+    else {
+        aes_ecb(aes, (unsigned char*)payload, wisper);
+    }
 
     LOG(LEVEL_DEBUG, "received challenge\n");
     vg_print_hex(LEVEL_DEBUG, payload, len);

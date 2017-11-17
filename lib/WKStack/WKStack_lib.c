@@ -11,7 +11,8 @@
 WKStack_t WKStack;
 
 int g_testmode = 0;
-const char *WKStack_version = "1.6.7";
+const char *WKStack_version = "0.1.0";
+const char *wisper = "yJIB5nW1M3O-X-RQ";
 
 int WKStack_connect_cb(mqtt_errno_t err);
 

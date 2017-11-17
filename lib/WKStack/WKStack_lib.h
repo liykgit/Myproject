@@ -68,7 +68,7 @@ extern int g_testmode;
 #define RECONNECT_DELAY_LONG  1000 * 60
 
 extern const char *WKStack_version;
-
+extern const char *wisper; 
 int doStart();
 
 

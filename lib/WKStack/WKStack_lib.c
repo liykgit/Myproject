@@ -50,8 +50,13 @@ static void check_subscrptions(){
 
             WKStack.state = WKSTACK_READY;
 
+
+            if(vg_callbacks[CALLBACK_SAVE_PARAMS])
+                ((WKStack_save_params_fn_t)vg_callbacks[CALLBACK_SAVE_PARAMS])(&WKStack.params, sizeof(WKStack.params));
+
             if(vg_callbacks[CALLBACK_CONNECTED])
                 vg_callbacks[CALLBACK_CONNECTED]();
+
         }
     }
     else {
@@ -218,6 +223,10 @@ static void handle_connect_endpoint_result(mqtt_errno_t result) {
                 LOG(LEVEL_ERROR,"MQTT socket error during reconnect, get offline\n");
 
                 WKStack.state = WKSTACK_OFFLINE;
+
+                if(vg_callbacks[CALLBACK_ERROR]) {
+                    ((WKStack_error_handler_t)vg_callbacks[CALLBACK_ERROR])(ERROR_CODE_NETWORK_ERROR);
+                }
             }
 
             break;
@@ -238,6 +247,12 @@ static void handle_connect_endpoint_result(mqtt_errno_t result) {
                 //memset(WKStack.params.host, 0, sizeof(WKStack.params.host));
 
                 WKStack.state = WKSTACK_QUERY_ENDPOINT;
+
+
+                if(vg_callbacks[CALLBACK_ERROR]) {
+                   ((WKStack_error_handler_t)vg_callbacks[CALLBACK_ERROR])(ERROR_CODE_NETWORK_ERROR);
+                }
+
                 //WKStack_connect_ep();
             }
             break;
@@ -249,6 +264,10 @@ static void handle_connect_endpoint_result(mqtt_errno_t result) {
                 LOG(LEVEL_ERROR,"MQTT auth failed during reconnect\n");
                 memset(WKStack.params.ticket, 0, sizeof(WKStack.params.ticket));
                 WKStack.state = WKSTACK_OFFLINE;
+
+                if(vg_callbacks[CALLBACK_ERROR]) {
+                     ((WKStack_error_handler_t)vg_callbacks[CALLBACK_ERROR])(ERROR_CODE_AUTH_FAILURE);
+                }
             }
             break;
 
@@ -287,6 +306,10 @@ int WKStack_connect_cb(mqtt_errno_t err)
             WKStack_connect_ep();
 
         } else {
+            if(vg_callbacks[CALLBACK_ERROR]) {
+                ((WKStack_error_handler_t)vg_callbacks[CALLBACK_ERROR])(ERROR_CODE_NETWORK_ERROR);
+            }
+
             LOG(LEVEL_ERROR,"mqtt err %d, go offline\n", err);
             WKStack.state = WKSTACK_OFFLINE;
         }
@@ -309,7 +332,7 @@ int WKStack_connect_cb(mqtt_errno_t err)
             subscription_map_clear();
 
             if(vg_callbacks[CALLBACK_DISCONNECTED])
-                vg_callbacks[CALLBACK_DISCONNECTED]();
+               vg_callbacks[CALLBACK_DISCONNECTED]();
         }
     }
     else if(WKStack.state == WKSTACK_RECONNECT_ENDPOINT) {

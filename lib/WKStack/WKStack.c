@@ -39,6 +39,11 @@ int WKStack_init(const char *mac, const char *product_id, const char *version, c
             return -1;
         }
 
+
+        if(vg_callbacks[CALLBACK_LOAD_PARAMS])
+            ((WKStack_load_params_fn_t)vg_callbacks[CALLBACK_LOAD_PARAMS])(&WKStack.params, sizeof(WKStack.params));
+
+
         memcpy(WKStack.params.product_id, product_id, strlen(product_id));
 
         memcpy(WKStack.params.mac, mac, strlen(mac));

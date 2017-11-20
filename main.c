@@ -9,7 +9,7 @@
 #include "common.h"
 
 
-#define PRODUCTID   "yEOBNYFxfyNfbm0P"
+#define PRODUCTID   "E3GF3s6f8WOC2bsh"
 #define MAC         "A1B2C3D4E916"
 #define VERSION     "0.1"
 
@@ -36,7 +36,10 @@ int disconnect_cb()
 
 int raw_data_handler(char *raw_data, int len) {
     
-    printf("received raw data %s\n", raw_data);
+    printf("received raw data: %s\n", raw_data);
+
+    WKStack_send_raw(raw_data, len);
+
     return 0;
 }
 
@@ -80,6 +83,7 @@ int main(int argc, char **argv)
             WKStack_start();
         }
         msleep(2000);
+
     }
 
 	return 0;

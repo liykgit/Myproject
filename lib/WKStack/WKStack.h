@@ -1,6 +1,7 @@
 #ifndef _WKSTACK_H_KLSJKLSDJFKLSDJFKLD_
 #define _WKSTACK_H_KLSJKLSDJFKLSDJFKLD_
 
+#define PASSTHROUGH 1
 
 //---------------------------  new for passthrough project
 
@@ -34,5 +35,8 @@ int WKStack_start();
 int WKStack_stop();
 int WKStack_register_callback(callback_index_t id, generic_callback_fp fp);
 
+#if PASSTHROUGH
+int WKStack_send_raw(unsigned char *raw_data, unsigned int size);
+#endif
 
 #endif

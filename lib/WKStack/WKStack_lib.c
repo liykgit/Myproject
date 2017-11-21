@@ -130,6 +130,7 @@ static void subscribe_topics() {
     }
 
 //TODO 
+//
 #if PASSTHROUGH
     //if(!subscription_map_check(SUBSCRIPTION_PASSTHROUGH)) {
         WKStack_subscribe_passthrough(0);

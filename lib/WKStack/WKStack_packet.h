@@ -5,9 +5,6 @@
 
 // First host, connect this host to get endpoint
 //#define WKSTACK_FIRST_CONNECT_HOST "35.165.194.227"
-#define WKSTACK_FIRST_CONNECT_HOST "192.168.3.2"
-//#define WKSTACK_FIRST_CONNECT_HOST "www.vengasz.com"
-#define WKSTACK_FIRST_CONNECT_PORT 1885
 #define WKSTACK_ENDPOINT_INQUIRY_PORT 80
 #define WKSTACK_ENDPOINT_INQUIRY_PATH "/endpoint"
 

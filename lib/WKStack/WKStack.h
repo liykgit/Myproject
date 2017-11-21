@@ -3,6 +3,28 @@
 
 #define PASSTHROUGH 1
 
+#define AWS_CLOUD 1
+#define ALI_CLOUD 2
+
+#define CLOUD ALI_CLOUD
+
+#if CLOUD == ALI_CLOUD
+#define WKSTACK_FIRST_CONNECT_HOST "cn.vengasz.com"
+#define WKSTACK_FIRST_CONNECT_PORT 3884
+
+#elif CLOUD == AWS_CLOUD
+
+
+#define WKSTACK_FIRST_CONNECT_HOST "www.vengasz.com"
+#define WKSTACK_FIRST_CONNECT_PORT 3884
+
+#else
+
+#define WKSTACK_FIRST_CONNECT_HOST "192.168.3.2"
+#define WKSTACK_FIRST_CONNECT_PORT 1884
+
+#endif
+
 //---------------------------  new for passthrough project
 
 #define ERROR_CODE_NETWORK_ERROR (-1)

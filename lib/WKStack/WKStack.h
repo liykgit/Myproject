@@ -1,6 +1,8 @@
 #ifndef _WKSTACK_H_KLSJKLSDJFKLSDJFKLD_
 #define _WKSTACK_H_KLSJKLSDJFKLSDJFKLD_
 
+
+
 #define PASSTHROUGH 1
 
 #define AWS_CLOUD 1
@@ -29,6 +31,16 @@
 
 #define ERROR_CODE_NETWORK_ERROR (-1)
 #define ERROR_CODE_AUTH_FAILURE (-2)
+
+
+enum log_level {
+	LEVEL_DEBUG = 0,
+	LEVEL_NORMAL = 1,
+	LEVEL_ERROR = 2
+} ;
+
+#define LOG_LEVEL LEVEL_DEBUG
+
 
 typedef enum {
     CALLBACK_CONNECTED, 

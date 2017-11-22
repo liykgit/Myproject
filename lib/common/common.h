@@ -1,7 +1,16 @@
 #ifndef _COMMON_H_SJKDFJSLDJFSDFSDF_
 #define _COMMON_H_SJKDFJSLDJFSDFSDF_
 
+
+#include "WKStack.h"
 #include "plat.h"
+
+#ifdef LOG_IN_FILE
+#define LOG(level, fmt, args...) do{if(level >= LOG_LEVEL){char buf[64];now(buf);fprintf(log_fp,"%s", buf);fprintf(log_fp, fmt, ##args);fflush(log_fp);}}while(0)
+#else
+#define LOG(level, fmt, args...) do{if(level >= LOG_LEVEL){printf(fmt, ##args);}}while(0)
+#endif
+
 
 int isValidMacAddress(const char* mac);
 

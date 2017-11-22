@@ -19,6 +19,7 @@
 
 
 #include "http.h"
+#include "common.h"
 
 //----------------------- sys ---------------------------------
 
@@ -106,24 +107,8 @@ int vg_start_thread(thread_fun_t fun, void **stk_addr, int stk_size);
 
 int vg_resolve_domain_name(char *domain_name, char *ip_buf, int ip_buf_length);
 
-enum log_level {
-	LEVEL_DEBUG = 0,
-	LEVEL_NORMAL = 1,
-	LEVEL_ERROR = 2
-} ;
-
-#define LOG_LEVEL LEVEL_DEBUG
-
-#ifdef LOG_IN_FILE
-extern FILE *log_fp;
-#endif
 
 void now(char *time_buf);
 
-#ifdef LOG_IN_FILE
-#define LOG(level, fmt, args...) do{if(level >= LOG_LEVEL){char buf[64];now(buf);fprintf(log_fp,"%s", buf);fprintf(log_fp, fmt, ##args);fflush(log_fp);}}while(0)
-#else
-#define LOG(level, fmt, args...) do{if(level >= LOG_LEVEL){printf(fmt, ##args);}}while(0)
-#endif
 
 #endif

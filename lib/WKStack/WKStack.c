@@ -75,7 +75,7 @@ int WKStack_init(const char *mac, const char *product_id, const char *version, c
 
 //-1 WKStack is online
 //-2 WKStack not init, please call WKStack_init() first
-int WKStack_start()
+int WKStack_start(void)
 {
     if(WKStack.state == WKSTACK_WAIT_INIT)
         return -1;
@@ -83,7 +83,7 @@ int WKStack_start()
         return doStart();
 }
 
-int WKStack_stop()
+int WKStack_stop(void)
 {
     return mqtt_stop((mqtt_stop_cb_t)vg_callbacks[CALLBACK_STOPPED]);
 }

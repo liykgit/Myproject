@@ -470,7 +470,7 @@ static void get_cb(unsigned char *buf, unsigned int len)
 }
 
 
-int doStart() {
+int doStart(void) {
 
     LOG(LEVEL_NORMAL, ".. %d\n", WKStack.state); 
     

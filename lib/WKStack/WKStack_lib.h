@@ -236,7 +236,7 @@ extern int g_testmode;
 
 extern const char *WKStack_version;
 extern const char *wisper; 
-int doStart();
+int doStart(void);
 
 
 void subscrption_map_set(int id);

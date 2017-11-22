@@ -53,8 +53,8 @@ typedef int (*WKStack_error_handler_t)(int err_code);
 
 int WKStack_init(const char *mac, const char *product_id, const char *version, const char *sn,  const char *key);
 
-int WKStack_start();
-int WKStack_stop();
+int WKStack_start(void);
+int WKStack_stop(void);
 int WKStack_register_callback(callback_index_t id, generic_callback_fp fp);
 
 #if PASSTHROUGH

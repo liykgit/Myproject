@@ -96,7 +96,7 @@ int WKStack_register_callback(callback_index_t id, generic_callback_fp fp)
     vg_callbacks[id] = fp;
 }
 
-int WKStack_send_raw(unsigned char *raw_data, unsigned int size) {
+int WKStack_send_raw(unsigned char *raw_data, unsigned int size, WKStack_send_cb_t cb) {
 
     int ret = 0;
     int buf_sz = 0;
@@ -129,7 +129,7 @@ int WKStack_send_raw(unsigned char *raw_data, unsigned int size) {
 
     int packet_size = tlv_put_string(buf, tag, raw_data, buf_sz);
     if(packet_size > 0)
-        ret = mqtt_publish(WKStack.passthrough_pub_topic, buf, packet_size, MQTT_QOS1, MQTT_RETAIN_FALSE, (mqtt_cb_t)0);
+        ret = mqtt_publish(WKStack.passthrough_pub_topic, buf, packet_size, MQTT_QOS1, MQTT_RETAIN_FALSE, (mqtt_cb_t)cb);
     else
         ret = -1;
 

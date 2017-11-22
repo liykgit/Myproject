@@ -32,6 +32,12 @@
 #define ERROR_CODE_NETWORK_ERROR (-1)
 #define ERROR_CODE_AUTH_FAILURE (-2)
 
+typedef enum{
+
+    PUBLISH_FAILED = 6,
+    PUBLISH_SUCCEED = 7,
+
+}publish_result_t;
 
 enum log_level {
 	LEVEL_DEBUG = 0,
@@ -62,6 +68,7 @@ typedef void (*WKStack_raw_data_handler_t)(char *buf, int size);
 typedef int (*WKStack_save_params_fn_t)(void *buf, int size);
 typedef int (*WKStack_load_params_fn_t)(char *buf, int size);
 typedef int (*WKStack_error_handler_t)(int err_code);
+typedef int (*WKStack_send_cb_t)(int msg_id, publish_result_t err_code);
 
 int WKStack_init(const char *mac, const char *product_id, const char *version, const char *sn,  const char *key);
 
@@ -69,8 +76,9 @@ int WKStack_start(void);
 int WKStack_stop(void);
 int WKStack_register_callback(callback_index_t id, generic_callback_fp fp);
 
+
 #if PASSTHROUGH
-int WKStack_send_raw(unsigned char *raw_data, unsigned int size);
+int WKStack_send_raw(unsigned char *raw_data, unsigned int size, WKStack_send_cb_t cb);
 #endif
 
 #endif

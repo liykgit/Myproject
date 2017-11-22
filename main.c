@@ -38,7 +38,7 @@ int raw_data_handler(char *raw_data, int len) {
     
     printf("received raw data: %s\n", raw_data);
 
-    WKStack_send_raw(raw_data, len);
+    WKStack_send_raw(raw_data, len, 0);
 
     return 0;
 }

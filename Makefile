@@ -48,6 +48,10 @@ clean:
 	rm -f $(MQTT)/*.o
 	rm -f $(COMMON)/*.o
 	rm -f $(OUTPUT)/*
+	rm -f $(WKSTACK)/*.o
+	rm -f $(UDPSERVER)/*.o
+	rm -f $(TCPSERVER)/*.o
+	rm -f $(PLATFORM)/$(P)/*.o
 
 cl:
 	rm -f ./log/*

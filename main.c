@@ -8,8 +8,13 @@
 
 #include "common.h"
 
+//85
+//#define PRODUCTID   "E3GF3s6f8WOC2bsh"
+//
 
-#define PRODUCTID   "E3GF3s6f8WOC2bsh"
+
+#define PRODUCTID   "yEOBNYFxfyNfbm0P"
+
 #define MAC         "A1B2C3D4E916"
 #define VERSION     "0.1"
 
@@ -34,11 +39,20 @@ int disconnect_cb()
     return 0;
 }
 
+
+int send_callback(int msg_id, publish_result_t err_code)
+{
+
+    printf("send result: %d\n", err_code);
+    return 0;
+}
+
+
 int raw_data_handler(char *raw_data, int len) {
     
     printf("received raw data: %s\n", raw_data);
 
-    WKStack_send_raw(raw_data, len, 0);
+    WKStack_send_raw(raw_data, len, send_callback);
 
     return 0;
 }
@@ -61,6 +75,20 @@ int error_handler(int error_code) {
     return 0;
 }
 
+int ota_event_handler(const WKStack_ota_msg_t *msg)
+{
+    printf("ota_event_handler E\n");
+
+    printf("ota msg  type: %d\n", msg->type);
+    printf("ota target :  %d\n", msg->target);
+    printf("ota version :  %s\n", msg->firmware->version);
+    printf("ota url:  %s\n", msg->firmware->url);
+    printf("ota port:  %d\n", msg->firmware->port);
+
+    printf("ota_event_handler X\n");
+    return 0;
+}
+
 int main(int argc, char **argv)
 {
 
@@ -75,6 +103,7 @@ int main(int argc, char **argv)
 
     WKStack_register_callback(CALLBACK_RAW_DATA, raw_data_handler);
 
+    WKStack_register_callback(CALLBACK_OTA_EVENT, ota_event_handler);
 
     WKStack_init(MAC, PRODUCTID, VERSION, 0, 0);
 

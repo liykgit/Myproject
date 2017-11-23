@@ -97,9 +97,9 @@ static int decode_payload(char *data, int len) {
     return i;
 }
 
-int WKStack_publish_ota_request(char *version)
+static int send_module_ota_request(char *version)
 {
-    LOG(LEVEL_DEBUG, "publish_ota_request E\n "); 
+    LOG(LEVEL_DEBUG, "send_module_ota_request E\n "); 
     char buf[128];
     int buf_size = 128;
 
@@ -128,9 +128,9 @@ int WKStack_publish_ota_request(char *version)
     return mqtt_publish(WKStack.ota_pub_topic, (unsigned char*)buf, offset, MQTT_QOS1, MQTT_RETAIN_FALSE, (mqtt_cb_t)0);
 }
 
-static int WKStack_unpack_ota(unsigned char *payload, int len)
+static int unpack_ota(unsigned char *payload, int len)
 {
-    LOG(LEVEL_DEBUG, "WKStack_unpack_ota E\n");
+    LOG(LEVEL_DEBUG, "unpack_ota E\n");
 
     int count = decode_payload((char *)payload, len);
     if(count <= 0)  
@@ -142,6 +142,8 @@ static int WKStack_unpack_ota(unsigned char *payload, int len)
     char *ticket = 0;
     char *uri = 0;
     char *version = 0;
+    WKStack_ota_target_t target;
+
     for(i = 0; i < count; i++) {
 
         switch(dps[i].index) {
@@ -163,39 +165,67 @@ static int WKStack_unpack_ota(unsigned char *payload, int len)
 
             case WKSTACK_OTA_INDEX_MOD_VER: {
                 version = dps[i].value.string;
+                target = OTA_TARGET_MOD;
+            }
+            break;
+
+            case WKSTACK_OTA_INDEX_MCU_VER: {
+                version = dps[i].value.string;
+                target = OTA_TARGET_MCU;
             }
             break;
         }
     }
 
-    if(type == WKSTACK_OTA_TYPE_VER) {
-        LOG(LEVEL_DEBUG, "WKStack_unpack_ota received version notification %s E\n", version);
+    if(type == OTA_MSG_TYPE_NEW_VERSION) {
+        LOG(LEVEL_NORMAL, "received version notification %s E\n", version);
 
         if(!version)
             return 0;
 
-        strcpy(WKStack.ota.mod_ver, version);
+        if(target == OTA_TARGET_MOD) {
+            strcpy(WKStack.module_firmware.version, version);
+            send_module_ota_request(version);
+        }
+        else {
 
-        WKStack_publish_ota_request(version);
-        LOG(LEVEL_DEBUG, "WKStack_unpack_ota received version notification %s X\n", version);
+            strcpy(WKStack.mcu_firmware.version, version);
+
+            WKStack_ota_msg_t msg;
+            msg.target = target;
+            msg.type = type;
+
+            msg.firmware = target == OTA_TARGET_MOD ? &WKStack.module_firmware : &WKStack.mcu_firmware;
+
+            ((WKStack_ota_event_cb_t)vg_callbacks[CALLBACK_OTA_EVENT])(&msg);
+        }
     }
-    else if (type == WKSTACK_OTA_TYPE_MSG) {
+    else if (type == OTA_MSG_TYPE_FIRMWARE_URL) {
         
         if(!uri || !ticket)
             return 0;
        
-        strcpy(WKStack.ota.mod_url, uri);
-        strcat(WKStack.ota.mod_url, "?ticket=");
-        strcat(WKStack.ota.mod_url, ticket);
+        strcpy(WKStack.module_firmware.url, uri);
+        strcat(WKStack.module_firmware.url, "?ticket=");
+        strcat(WKStack.module_firmware.url, ticket);
 
-        LOG(LEVEL_DEBUG, "ota url %s\n", WKStack.ota.mod_url);
+        LOG(LEVEL_DEBUG, "ota url %s\n", WKStack.module_firmware.url);
         LOG(LEVEL_DEBUG, "unsubscribe %s\n", WKStack.ota_sub_topic);
         mqtt_unsubscribe(WKStack.ota_sub_topic, NULL);    
         msleep(800);
-    }
-    else {
 
-        LOG(LEVEL_DEBUG, "WKStack_unpack_ota E\n");
+
+        if(vg_callbacks[CALLBACK_OTA_EVENT] != NULL) {
+
+            WKStack_ota_msg_t msg;
+            msg.target = target;
+            msg.type = type;
+
+            msg.firmware = target == OTA_TARGET_MOD ? &WKStack.module_firmware : &WKStack.mcu_firmware;
+
+            ((WKStack_ota_event_cb_t)vg_callbacks[CALLBACK_OTA_EVENT])(&msg);
+        }
+
     }
 
     for(i = 0; i < count; i++) {
@@ -205,10 +235,6 @@ static int WKStack_unpack_ota(unsigned char *payload, int len)
             dps[i].value.string = NULL;
         }
     }
-
-    if(WKStack.ota_cb != NULL)
-        //TODO target is hard-coded to 0
-        WKStack.ota_cb(&(WKStack.ota), 0, type);
 
 	return 0;
 }
@@ -230,10 +256,10 @@ predicate_t is_client(void *ele, void *arg) {
 }
 
 
-static int WKStack_unpack_sync(unsigned char *payload, int len)
+static int unpack_sync(unsigned char *payload, int len)
 {
 
-    LOG(LEVEL_DEBUG, "WKStack_unpack_sync E\n");
+    LOG(LEVEL_DEBUG, "unpack_sync E\n");
     int count = decode_payload((char *)payload, len);
     if(count <= 0)  
         return 0;
@@ -262,13 +288,13 @@ static int WKStack_unpack_sync(unsigned char *payload, int len)
     }
 
 	//printf("### MEM FREE : %d.\n", qcom_mem_heap_get_free_size());
-    LOG(LEVEL_DEBUG, "WKStack_unpack_sync X\n");
+    LOG(LEVEL_DEBUG, "unpack_sync X\n");
 }
 
 
-static int WKStack_unpack_passthrough(unsigned char *payload, int len)
+static int unpack_passthrough(unsigned char *payload, int len)
 {
-    LOG(LEVEL_DEBUG, "WKStack_unpack_passthrough E\n");
+    LOG(LEVEL_DEBUG, "unpack_passthrough E\n");
 
     int count = decode_payload((char *)payload, len);
     if(count <= 0)  
@@ -295,13 +321,13 @@ static int WKStack_unpack_passthrough(unsigned char *payload, int len)
         }
     }
 
-    LOG(LEVEL_DEBUG, "WKStack_unpack_passthrough X\n");
+    LOG(LEVEL_DEBUG, "unpack_passthrough X\n");
     return 0;
 }
 
-static int WKStack_unpack_binding(unsigned char *payload, int len)
+static int unpack_binding(unsigned char *payload, int len)
 {
-    LOG(LEVEL_DEBUG, "WKStack_unpack_binding E\n");
+    LOG(LEVEL_DEBUG, "unpack_binding E\n");
 
     int count = decode_payload((char *)payload, len);
     if(count <= 0)  
@@ -366,7 +392,7 @@ static int WKStack_unpack_binding(unsigned char *payload, int len)
     }
 
 	//printf("### MEM FREE : %d.\n", qcom_mem_heap_get_free_size());
-    LOG(LEVEL_DEBUG, "WKStack_unpack_binding X\n");
+    LOG(LEVEL_DEBUG, "unpack_binding X\n");
 
 	return 0;
 }
@@ -374,9 +400,9 @@ static int WKStack_unpack_binding(unsigned char *payload, int len)
 // control include command and set status
 // tmp_buffer: |  512  | 512 |
 // store:      |  arg1 | arg2|
-static int WKStack_unpack_control(unsigned char *payload, int len)
+static int unpack_control(unsigned char *payload, int len)
 {
-    LOG(LEVEL_DEBUG, "WKStack_unpack_control E\n");
+    LOG(LEVEL_DEBUG, "unpack_control E\n");
 
     int count = decode_payload((char *)payload, len);
     if(count <= 0)  
@@ -410,7 +436,7 @@ static int WKStack_unpack_control(unsigned char *payload, int len)
         vg_free(buf);
     }
 	//printf("### MEM FREE : %d.\n", qcom_mem_heap_get_free_size());
-    LOG(LEVEL_DEBUG, "WKStack_unpack_control X\n");
+    LOG(LEVEL_DEBUG, "unpack_control X\n");
 
 	return 0;
 }
@@ -574,7 +600,7 @@ int WKStack_publish_knock()
     return mqtt_publish(WKStack.topic_knock, (unsigned char*)buf, offset, MQTT_QOS1, MQTT_RETAIN_FALSE, (mqtt_cb_t)NULL);
 }
 
-static int WKStack_publish_answer(char *answer, int len)
+static int publish_answer(char *answer, int len)
 {
     int ret = -1;
 
@@ -587,9 +613,9 @@ static int WKStack_publish_answer(char *answer, int len)
 }
 
 
-int WKStack_unpack_welcome(unsigned char *payload, int len) {
+static int unpack_welcome(unsigned char *payload, int len) {
 
-    LOG(LEVEL_DEBUG, "WKStack_unpack_welcome E\n");
+    LOG(LEVEL_DEBUG, "unpack_welcome E\n");
 
 
     if(memcmp(payload, REGISTRY_ERR_SYSTEM_FAILURE, strlen(REGISTRY_ERR_SYSTEM_FAILURE)) == 0) {
@@ -652,9 +678,7 @@ int WKStack_unpack_welcome(unsigned char *payload, int len) {
                 char port[8] = {0,};
 
                 parse_url((char *)purl, WKStack.params.host, port);
-                //TODO CHRIS 
-                //WKStack.params.port = atoi(port);
-                WKStack.params.port = 1883;
+                WKStack.params.port = atoi(port);
                 LOG(LEVEL_NORMAL, "endpoint:%s:%d\n", WKStack.params.host, WKStack.params.port);
 
                 hasEndpoint = 1;
@@ -729,12 +753,12 @@ int WKStack_unpack_welcome(unsigned char *payload, int len) {
 int WKStack_subscribe_welcome()
 {
     sprintf(WKStack.topic_welcome, WKSTACK_TOPIC_WELCOME_FMT, WKStack.params.mac); 
-    mqtt_subscribe(WKStack.topic_welcome, NULL, WKStack_unpack_welcome);
+    mqtt_subscribe(WKStack.topic_welcome, NULL, unpack_welcome);
 
     return 0;
 }
 
-int WKStack_unpack_challenge(unsigned char *payload, int len) {
+static int unpack_challenge(unsigned char *payload, int len) {
   
 #define AES_LEN 16
     char aes[AES_LEN];
@@ -757,7 +781,7 @@ int WKStack_unpack_challenge(unsigned char *payload, int len) {
     LOG(LEVEL_DEBUG, "answer:\n");
     vg_print_hex(LEVEL_DEBUG, aes, AES_LEN);
 
-    WKStack_publish_answer(aes, len);
+    publish_answer(aes, len);
    
     return 0;
 }
@@ -765,14 +789,14 @@ int WKStack_unpack_challenge(unsigned char *payload, int len) {
 int WKStack_subscribe_challenge()
 {
     sprintf(WKStack.topic_challenge, WKSTACK_TOPIC_CHALLENGE_FMT, WKStack.params.mac); 
-    mqtt_subscribe(WKStack.topic_challenge, NULL, WKStack_unpack_challenge);
+    mqtt_subscribe(WKStack.topic_challenge, NULL, unpack_challenge);
 
     return 0;
 }
 
 int WKStack_subscribe_control(mqtt_cb_t cb)
 {
-    mqtt_subscribe(WKStack.control_topic, cb, WKStack_unpack_control);
+    mqtt_subscribe(WKStack.control_topic, cb, unpack_control);
 
     return 0;
 }
@@ -780,14 +804,14 @@ int WKStack_subscribe_control(mqtt_cb_t cb)
 
 int WKStack_subscribe_sync(mqtt_cb_t cb)
 {
-    mqtt_subscribe(WKStack.sync_sub_topic, cb, WKStack_unpack_sync);
+    mqtt_subscribe(WKStack.sync_sub_topic, cb, unpack_sync);
 
     return 0;
 }
 
 int WKStack_subscribe_passthrough(mqtt_cb_t cb)
 {
-    mqtt_subscribe(WKStack.passthrough_sub_topic, cb, WKStack_unpack_passthrough);
+    mqtt_subscribe(WKStack.passthrough_sub_topic, cb, unpack_passthrough);
 
     return 0;
 }
@@ -795,14 +819,14 @@ int WKStack_subscribe_passthrough(mqtt_cb_t cb)
 
 int WKStack_subscribe_ota(mqtt_cb_t cb)
 {
-	mqtt_subscribe(WKStack.ota_sub_topic, cb, WKStack_unpack_ota);
+	mqtt_subscribe(WKStack.ota_sub_topic, cb, unpack_ota);
 
     return 0;
 }
 
 int WKStack_subscribe_binding(mqtt_cb_t cb)
 {
-	mqtt_subscribe(WKStack.binding_sub_topic, cb, WKStack_unpack_binding);
+	mqtt_subscribe(WKStack.binding_sub_topic, cb, unpack_binding);
 
     return 0;
 }
@@ -810,7 +834,7 @@ int WKStack_subscribe_binding(mqtt_cb_t cb)
 
 int WKStack_publish_bind_request(char *userId) 
 {
-    LOG(LEVEL_DEBUG, "WKStack_publish_bind_request from userId %s E\n", userId);
+    LOG(LEVEL_DEBUG, "publish_bind_request from userId %s E\n", userId);
 
     char buf[32];
     int buf_size = 32;

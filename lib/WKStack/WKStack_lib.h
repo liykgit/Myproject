@@ -26,8 +26,6 @@
 #define WKSTACK_KEY_LEN 16
 #define WKSTACK_DEVTYPE_LEN 16
 #define WKSTACK_MAC_LEN 16
-#define WKSTACK_VER_LEN 20
-#define WKSTACK_OTA_URL_LEN 128
 
 // WKStack datapoint value type
 #define WKSTACK_TYPE_FLOAT	0x01
@@ -53,7 +51,6 @@
 #define TICKET_LEN (32) 
 #define TICKET_LEN_PADDING (4) //4 as padding
 
-
 typedef enum {
 
     WKSTACK_WAIT_INIT = 0, // Wait init
@@ -73,39 +70,10 @@ typedef enum {
 } WKStack_state_t;
 
 // Must be 6 and 7
-typedef enum{
+typedef enum {
     WKSTACK_PUBLISH_FAILED = 6,
     WKSTACK_PUBLISH_SUCCEED = 7,
-}WKStack_publish_state_t;
-
-typedef enum {
-	WKSTACK_OTA_TARGET_MOD = 0,
-	WKSTACK_OTA_TARGET_MCU = 1,
-}WKStack_ota_target_t;
-
-typedef enum {
-	WKSTACK_OTA_STATE_START = 0,
-	WKSTACK_OTA_STATE_ONGOING,
-	WKSTACK_OTA_STATE_END
-}WKStack_ota_state_t;
-
-typedef enum {
-	WKSTACK_OTA_RESULT_SUCCESS = 0,
-	WKSTACK_OTA_RESULT_FAILURE = 1
-}WKStack_ota_result_t;
-
-typedef struct {
-    WKStack_ota_state_t state;
-    WKStack_ota_result_t result;
-    unsigned int percent; 
-    char *curr_version; 
-    char *err_msg;
-} WKStack_ota_report_t;
-
-typedef enum {
-	WKSTACK_OTA_TYPE_VER = 0,
-	WKSTACK_OTA_TYPE_MSG = 1,
-}WKStack_ota_type_t;
+} WKStack_publish_state_t;
 
 typedef struct {
 
@@ -135,22 +103,10 @@ typedef struct{
     } value;
 } WKStack_datapoint_t;
 
-typedef struct {
-
-	char mod_ver[WKSTACK_VER_LEN];
-	char mod_url[WKSTACK_OTA_URL_LEN];
-	int mod_port;
-
-	char mcu_ver[WKSTACK_VER_LEN];
-	char mcu_url[WKSTACK_OTA_URL_LEN];
-	int mcu_port;
-}WKStack_ota_t;
-
 
 typedef int (*WKStack_cb_t)(WKStack_state_t state);
 typedef int (*WKStack_stop_cb_t)();
 typedef int (*WKStack_report_cb_t)(unsigned short id, WKStack_publish_state_t state);
-typedef int (*WKStack_ota_cb_t)(WKStack_ota_t *info, WKStack_ota_target_t target, WKStack_ota_type_t type);
 typedef void (*WKStack_datapoint_handler_t)(WKStack_datapoint_t *dps, int size);
 typedef int (*WKStack_restore_cb_t)(WKStack_publish_state_t state);
 
@@ -158,12 +114,6 @@ typedef int (*WKStack_restore_cb_t)(WKStack_publish_state_t state);
 int WKStack_register_datapoint_handler(WKStack_datapoint_handler_t cb);
 
 int WKStack_report_datapoint(WKStack_datapoint_t *dp_group, unsigned int group_size, WKStack_report_cb_t cb);
-
-
-// -1 no new version available
-int WKStack_ota_request(WKStack_ota_target_t target);
-
-int WKStack_report_ota_progress(WKStack_ota_target_t target, WKStack_ota_report_t report, WKStack_report_cb_t cb);
 
 WKStack_state_t WKStack_state(void);
 
@@ -174,10 +124,6 @@ int WKStack_name(char *buf, int size);
 int WKStack_params(char *buf, int size);
 
 int WKStack_restore_all(WKStack_restore_cb_t restore_cb);
-
-
-
-
 
 
 
@@ -212,9 +158,9 @@ typedef struct{
     char passthrough_sub_topic[WKSTACK_TOPIC_LEN];
     char passthrough_pub_topic[WKSTACK_TOPIC_LEN];
 
-    WKStack_ota_t ota;
+    firmware_info_t module_firmware;
+    firmware_info_t mcu_firmware;
 
-    WKStack_ota_cb_t ota_cb;
     WKStack_datapoint_handler_t dp_handler;
 } WKStack_t;
 

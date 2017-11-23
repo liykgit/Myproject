@@ -323,12 +323,12 @@ int WKStack_report_ota_progress(WKStack_ota_target_t target, WKStack_ota_report_
         offset += item_size;
 
     switch(report.state) {
-        case WKSTACK_OTA_STATE_START : 
+        case OTA_STATE_START : 
             {
                tag[2] = WKSTACK_DATAPOINT_TYPE_INT;
                 *(unsigned short*)tag = WKSTACK_OTA_INDEX_STATE;
 
-                item_size = tlv_put_int(buf+offset, tag, WKSTACK_OTA_STATE_START, buf_size - offset);
+                item_size = tlv_put_int(buf+offset, tag, OTA_STATE_START, buf_size - offset);
                 if(item_size >= 0)
                     offset += item_size;
                 else {
@@ -337,12 +337,12 @@ int WKStack_report_ota_progress(WKStack_ota_target_t target, WKStack_ota_report_
                 }
             }
             break;
-        case WKSTACK_OTA_STATE_ONGOING: 
+        case OTA_STATE_ONGOING: 
             {
                 tag[2] = WKSTACK_DATAPOINT_TYPE_INT;
                 *(unsigned short*)tag = WKSTACK_OTA_INDEX_STATE;
 
-                item_size = tlv_put_int(buf+offset, tag, WKSTACK_OTA_STATE_ONGOING, buf_size - offset);
+                item_size = tlv_put_int(buf+offset, tag, OTA_STATE_ONGOING, buf_size - offset);
                 if(item_size >= 0)
                     offset += item_size;
                 else {
@@ -366,12 +366,12 @@ int WKStack_report_ota_progress(WKStack_ota_target_t target, WKStack_ota_report_
             }
             break;
 
-        case WKSTACK_OTA_STATE_END: 
+        case OTA_STATE_END: 
             {
                tag[2] = WKSTACK_DATAPOINT_TYPE_INT;
                 *(unsigned short*)tag = WKSTACK_OTA_INDEX_STATE;
 
-                item_size = tlv_put_int(buf+offset, tag, WKSTACK_OTA_STATE_END, buf_size - offset);
+                item_size = tlv_put_int(buf+offset, tag, OTA_STATE_END, buf_size - offset);
                 if(item_size >= 0)
                     offset += item_size;
                 else {
@@ -390,14 +390,14 @@ int WKStack_report_ota_progress(WKStack_ota_target_t target, WKStack_ota_report_
                     LOG(LEVEL_NORMAL,"ota publish buffer not large enough\n");
                     return 0;
                 }
-                
+               
                tag[2] = WKSTACK_DATAPOINT_TYPE_STRING;
                *(unsigned short *)tag = WKSTACK_OTA_INDEX_MOD_VER;
                if(!!report.result)
                    //failure
                     item_size = tlv_put_string(buf+offset, tag, WKStack_version, buf_size - offset);
                else
-                    item_size = tlv_put_string(buf+offset, tag, WKStack.ota.mod_ver, buf_size - offset);
+                    item_size = tlv_put_string(buf+offset, tag, WKStack.module_firmware.version, buf_size - offset);
 
                if(item_size >= 0)
                    offset += item_size;         

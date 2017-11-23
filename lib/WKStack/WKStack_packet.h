@@ -79,6 +79,7 @@
 #define WKSTACK_OTA_INDEX_RESULT        65007
 #define WKSTACK_OTA_INDEX_ERR_MSG       65008
 #define WKSTACK_OTA_INDEX_MOD_VER       65020
+#define WKSTACK_OTA_INDEX_MCU_VER       65021
 
 #define WKSTACK_BINDING_INDEX_USERID    65040
 #define WKSTACK_BINDING_INDEX_TICKET    65041
@@ -98,6 +99,8 @@
 #define WKSTACK_PASSTHROUGH_TARGET_PRODUCT_SECRET     65086
 #define WKSTACK_PASSTHROUGH_INDEX_RAW_DATA      65087
 
+#define WKSTACK_OTA_UPGRADE_REQUEST 2
+#define WKSTACK_OTA_UPGRADE_REPORT 3
 
 
 #define INDEX_SZ (4)
@@ -107,13 +110,6 @@
 #define INT_SZ (4)
 #define FLOAT_SZ (4)
 #define BOOL_SZ (1)
-
-
-typedef enum {
-    WKSTACK_OTA_UPGRADE_REQUEST = 2,
-    WKSTACK_OTA_UPGRADE_REPORT
-} WKStack_ota_msg_type_t;
-
 
 extern mqtt_connect_data_t g_mqtt_data;
 

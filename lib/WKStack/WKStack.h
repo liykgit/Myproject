@@ -139,4 +139,8 @@ typedef void (*lan_cmd_hook_t)(int argc, char *argv[], struct socketaddr_in *cli
 int WKStack_register_lan_hook(char *cmd, lan_cmd_hook_t hook);
 //int WKStack_lan_sendto(struct sockaddr_in *client_addr, char *buf, int length);
 
+int WKStack_lan_atcmd_start();
+
+int WKStack_lan_atcmd_stop();
+
 #endif

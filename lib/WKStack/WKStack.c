@@ -442,3 +442,13 @@ int WKStack_lan_sendto(struct sockaddr_in *client_addr, char *buf, int length) {
     return udpserver_sendto(client_addr, buf, length);
 }
 
+int WKStack_lan_atcmd_start() {
+
+    UDPServer_start(UDP_SERVER_PORT); 
+}
+
+int WKStack_lan_atcmd_stop() {
+
+    UDPServer_stop(); 
+}
+

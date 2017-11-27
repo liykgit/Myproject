@@ -3,6 +3,8 @@
 #include "udp_atcmd.h"
 #include "common.h"
 
+static int _startFlag = 0;
+
 static int udpserver_sock = -1;
 
 static unsigned char udpserver_buffer[UDP_RECV_BUFFER_SIZE];
@@ -23,7 +25,7 @@ static int udp_recv(int sock, unsigned char *buffer, int length, struct sockaddr
 	ret	= vg_select(sock + 1, &fdRead, 0, 0, &tm);
 
 	if(ret < 0){// error
-		printf( "udp sockfd select error\n");
+		LOG(LEVEL_ERROR, "udp sockfd select error\n");
 		return -1;
 	}else if(ret == 0){
 		//printf( "udp sockfd select timeout\n");
@@ -37,42 +39,49 @@ static int udp_recv(int sock, unsigned char *buffer, int length, struct sockaddr
 
 				return ret;
 			}else if(ret < 0){//recv err
-				printf( "<ERR> udp recv error \n");
+				LOG(LEVEL_ERROR, "udp recv error \n");
 			    return ret;
 			}else{// == 0 //socket close
-				printf( "<ERR> udp close socket\n");
+				LOG(LEVEL_ERROR, "udp close socket\n");
 				return -3;// careful : sometime select =1 ,but read 0 byte data
 			}
 	    }else{
-			printf( "<ERR> udp sockfd is not set\n");
+			LOG(LEVEL_ERROR, "udp sockfd is not set\n");
 		}
 	}
 
 	return 0;
 }
 
- static thread_ret_t udp_handler_thread() {
+static thread_ret_t udp_handler_thread() {
 
     LOG(LEVEL_DEBUG, "udp_handler_thread \E");
 
     struct sockaddr_in client_addr;
     memset(&client_addr, 0, sizeof(struct sockaddr_in));
 
-    while(1) {
+    while(_startFlag) {
         
         unsigned int client_addr_len;
         udp_recv(udpserver_sock, (unsigned char *)&udpserver_buffer, sizeof(udpserver_buffer), &client_addr, &client_addr_len);
     }
+
+    vg_udp_close(udpserver_sock);
+    udpserver_sock = -1;
+
     LOG(LEVEL_DEBUG, "udp_handler_thread X");
 }
 
 int  UDPServer_start(int port) {
 
     int ret = 0;
-    
+
+    if(_startFlag)
+        return 0;
+
     ret = vg_udp_socket(&udpserver_sock);
     if(ret != 0){
-		printf("Create_udp_socket failed\n");
+		LOG(LEVEL_ERROR, "Create_udp_socket failed\n");
 		goto socket_fail;
     }
 
@@ -85,10 +94,11 @@ int  UDPServer_start(int port) {
 
     ret = vg_bind(udpserver_sock, (const struct sockaddr *)&local_addr, sizeof(struct sockaddr_in));
     if(ret != 0) {
-		printf("bind failed\n");
+		LOG(LEVEL_ERROR, "bind failed\n");
 		goto bind_fail;
     }
 
+    _startFlag = 1;
     vg_start_thread(udp_handler_thread, NULL, 2048);
 
     return 0;
@@ -126,5 +136,11 @@ int udpserver_broadcast(char *buf, int length, int port) {
     return vg_sendto(udpserver_sock, buf, length, &addrto);
 #endif 
     return 0;
+}
+
+
+int  UDPServer_stop() {
+    
+    _startFlag = 0;
 }
 

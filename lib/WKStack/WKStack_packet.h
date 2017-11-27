@@ -5,8 +5,24 @@
 
 // First host, connect this host to get endpoint
 //#define WKSTACK_FIRST_CONNECT_HOST "35.165.194.227"
-#define WKSTACK_ENDPOINT_INQUIRY_PORT 80
+#define ALI_VENGASZ 1
+
+#if ALI_VENGASZ
+// for aws production
+#define WKSTACK_FIRST_CONNECT_HOST "cn.vengasz.com"
+#define WKSTACK_FIRST_CONNECT_PORT 3884
+#define WKSTACK_ENDPOINT_INQUIRY_PORT 6969
 #define WKSTACK_ENDPOINT_INQUIRY_PATH "/endpoint"
+
+#else 
+
+#define WKSTACK_FIRST_CONNECT_HOST "192.168.3.6"
+#define WKSTACK_FIRST_CONNECT_PORT 1884
+#define WKSTACK_ENDPOINT_INQUIRY_PORT 6969
+#define WKSTACK_ENDPOINT_INQUIRY_PATH "/endpoint"
+
+#endif
+
 
 #define DP_COUNT_MAX 32
 // 10 s for keepalive time

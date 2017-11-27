@@ -133,4 +133,10 @@ int WKStack_send_ota_progress(WKStack_ota_target_t target, WKStack_ota_report_t 
 int WKStack_send_raw(unsigned char *raw_data, unsigned int size, WKStack_send_cb_t cb);
 #endif
 
+
+typedef void (*lan_cmd_hook_t)(int argc, char *argv[], struct socketaddr_in *client_addr);
+
+int WKStack_register_lan_hook(char *cmd, lan_cmd_hook_t hook);
+//int WKStack_lan_sendto(struct sockaddr_in *client_addr, char *buf, int length);
+
 #endif

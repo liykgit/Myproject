@@ -438,3 +438,7 @@ int WKStack_report_raw(unsigned char *buf, unsigned int size) {
     return mqtt_publish(WKStack.report_topic, buf, size, MQTT_QOS1, MQTT_RETAIN_FALSE, (mqtt_cb_t)0);
 }
 
+int WKStack_lan_sendto(struct sockaddr_in *client_addr, char *buf, int length) {
+    return udpserver_sendto(client_addr, buf, length);
+}
+

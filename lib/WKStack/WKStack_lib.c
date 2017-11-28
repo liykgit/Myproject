@@ -11,7 +11,7 @@
 WKStack_t WKStack;
 
 int g_testmode = 0;
-const char *WKStack_version = "0.1.0";
+const char *WKStack_version = "2.0.0";
 const char *wisper = "yJIB5nW1M3O-X-RQ";
 
 generic_callback_fp vg_callbacks[CALLBACK_NR_MAX];

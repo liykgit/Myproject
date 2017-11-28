@@ -302,7 +302,7 @@ int WKStack_params(char *buf, int size)
     return 0;
 }
 
-int WKStack_report_ota_progress(WKStack_ota_target_t target, WKStack_ota_report_t report, WKStack_report_cb_t cb)
+int WKStack_send_ota_progress(WKStack_ota_target_t target, WKStack_ota_report_t report, WKStack_send_cb_t cb)
 {
 
     if(WKStack.state != WKSTACK_READY)

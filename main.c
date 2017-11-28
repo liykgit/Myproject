@@ -13,7 +13,7 @@
 //
 
 
-#define PRODUCTID   "yEOBNYFxfyNfbm0P"
+#define PRODUCTID   "yEOBNYFx1vzL9js6"
 
 #define MAC         "A1B2C3D4E916"
 #define VERSION     "0.1"

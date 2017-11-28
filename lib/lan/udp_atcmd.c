@@ -25,7 +25,7 @@ typedef enum {
 
 typedef struct {
     char *command;
-    void (*execute)(int argc, char *argv[], struct socketaddr_in *client_addr);
+    void (*execute)(int argc, char *argv[], struct sockaddr_in *client_addr);
 }cmd_handle_t;
 
 #define FIND                "FIND"
@@ -38,7 +38,7 @@ typedef struct {
 #define TESTMODE            "TESTMODE"
 #define TCPSEND             "TCPSEND"
 
-void exec_testmode(int argc, char *argv[], struct socketaddr_in *client_addr)
+void exec_testmode(int argc, char *argv[], struct sockaddr_in *client_addr)
 {
     LOG(LEVEL_DEBUG, "exec_testmode E\n");
        
@@ -57,7 +57,7 @@ void exec_testmode(int argc, char *argv[], struct socketaddr_in *client_addr)
     LOG(LEVEL_DEBUG, "exec_testmode X\n");
 }
 
-void exec_tcpsend(int argc, char *argv[], struct socketaddr_in *client_addr)
+void exec_tcpsend(int argc, char *argv[], struct sockaddr_in *client_addr)
 {
     LOG(LEVEL_DEBUG, "exec_tcpsend E\n");
        
@@ -73,7 +73,7 @@ void exec_tcpsend(int argc, char *argv[], struct socketaddr_in *client_addr)
     LOG(LEVEL_DEBUG, "exec_tcpsend X\n");
 }
 
-void exec_broadcast(int argc, char *argv[], struct socketaddr_in *client_addr)
+void exec_broadcast(int argc, char *argv[], struct sockaddr_in *client_addr)
 {
     LOG(LEVEL_DEBUG, "exec_broadcast E\n");
 
@@ -88,7 +88,7 @@ void exec_broadcast(int argc, char *argv[], struct socketaddr_in *client_addr)
     LOG(LEVEL_DEBUG, "exec_broadcast X\n");
 }
 
-void exec_netstat(int argc, char *argv[], struct socketaddr_in *client_addr)
+void exec_netstat(int argc, char *argv[], struct sockaddr_in *client_addr)
 {
     LOG(LEVEL_DEBUG, "exec_netstat E\n");
     char stat = '0' + WKStack_state();
@@ -99,20 +99,20 @@ void exec_netstat(int argc, char *argv[], struct socketaddr_in *client_addr)
 }
 
 
-void exec_online(int argc, char *argv[], struct socketaddr_in *client_addr)
+void exec_online(int argc, char *argv[], struct sockaddr_in *client_addr)
 {
     WKStack_start();
     udpserver_sendto(client_addr, OK, strlen(OK));
 }
 
 
-void exec_offline(int argc, char *argv[], struct socketaddr_in *client_addr)
+void exec_offline(int argc, char *argv[], struct sockaddr_in *client_addr)
 {    
     WKStack_stop();
     udpserver_sendto(client_addr, OK, strlen(OK));
 }
 
-void exec_passthrough(int argc, char *argv[], struct socketaddr_in *client_addr)
+void exec_passthrough(int argc, char *argv[], struct sockaddr_in *client_addr)
 {
     LOG(LEVEL_DEBUG, "exec_passthrough E\n");
     if(argc <= 1) {
@@ -148,7 +148,7 @@ void exec_passthrough(int argc, char *argv[], struct socketaddr_in *client_addr)
     LOG(LEVEL_DEBUG, "exec_passthrough X\n");
 }
 
-void exec_find(int argc, char *argv[], struct socketaddr_in *client_addr)
+void exec_find(int argc, char *argv[], struct sockaddr_in *client_addr)
 {
     LOG(LEVEL_DEBUG, "exec_find E\n");
     
@@ -168,7 +168,7 @@ void exec_find(int argc, char *argv[], struct socketaddr_in *client_addr)
 
 extern int WKStack_publish_bind_request(char *userId);
 
-void exec_bind(int argc, char *argv[], struct socketaddr_in *client_addr)
+void exec_bind(int argc, char *argv[], struct sockaddr_in *client_addr)
 {
     LOG(LEVEL_DEBUG, "exec_bind E\n");
     if(argc <= 1) {

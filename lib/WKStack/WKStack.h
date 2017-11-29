@@ -18,6 +18,8 @@
 #define CLOUD ALI_CLOUD
 #define CONN_MODE CONN_NOSSL
 
+#define PASSTHROUGH 0
+
 #if CLOUD == ALI_CLOUD
 
 #define WKSTACK_FIRST_CONNECT_HOST "cn.vengasz.com"

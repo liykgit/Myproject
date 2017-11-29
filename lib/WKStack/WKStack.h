@@ -3,32 +3,47 @@
 
 #define PASSTHROUGH 1
 
+//------------- CLOUD definitions ---------------
 #define AWS_CLOUD 1
 #define ALI_CLOUD 2
 #define LOCAL   100
 
-#define CLOUD LOCAL
+
+//------------- connection mode definition ---------------
+#define CONN_NOSSL 0
+#define CONN_SSL   1
+
+
+
+#define CLOUD ALI_CLOUD
+#define CONN_MODE CONN_NOSSL
 
 #if CLOUD == ALI_CLOUD
 
 #define WKSTACK_FIRST_CONNECT_HOST "cn.vengasz.com"
-#define WKSTACK_FIRST_CONNECT_PORT 3884
 
+#if CONN_MODE == 1
+#define WKSTACK_FIRST_CONNECT_PORT 3884
+#else
+#define WKSTACK_FIRST_CONNECT_PORT 1884
+#endif
 
 #elif CLOUD == AWS_CLOUD
 
-
 #define WKSTACK_FIRST_CONNECT_HOST "www.vengasz.com"
+
+#if CONN_MODE == 1
 #define WKSTACK_FIRST_CONNECT_PORT 3884
+#else
+#define WKSTACK_FIRST_CONNECT_PORT 1884
+#endif
+
 
 
 #else
 
-#define WKSTACK_FIRST_CONNECT_HOST "192.168.3.2"
-#define WKSTACK_FIRST_CONNECT_PORT 8884
-
-
-
+#define WKSTACK_FIRST_CONNECT_HOST "192.168.3.3"
+#define WKSTACK_FIRST_CONNECT_PORT 1884
 
 #endif
 

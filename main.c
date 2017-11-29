@@ -17,8 +17,12 @@
 #define MAC         "A1B2C3D4E916"
 #define VERSION     "0.1"
 
-
+#define PRODUCTID   "zT6b3nuvC1HN38bD"
+#define KEY         "kkSMwooxz-nTqTD2"
 #define MAC         "A1B2C3D4E916"
+
+
+
 
 static int not_started = 1;
 
@@ -104,7 +108,7 @@ int main(int argc, char **argv)
 
     WKStack_register_callback(CALLBACK_OTA_EVENT, ota_event_handler);
 
-    WKStack_init(MAC, PRODUCTID, VERSION, 0, 0);
+    WKStack_init(MAC, PRODUCTID, VERSION, 0, KEY);
 
     while(1){
         if(not_started) {

@@ -1,8 +1,6 @@
 #ifndef _WKSTACK_H_KLSJKLSDJFKLSDJFKLD_
 #define _WKSTACK_H_KLSJKLSDJFKLSDJFKLD_
 
-#define PASSTHROUGH 1
-
 //------------- CLOUD definitions ---------------
 #define AWS_CLOUD 1
 #define ALI_CLOUD 2

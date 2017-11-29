@@ -1,5 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include <stdio.h> #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
 
@@ -71,7 +70,7 @@ int save_params(void *buf, int size) {
 
 int error_handler(int error_code) {
     printf("error : %d\n", error_code);
-    not_started = 0;
+    not_started = 1;
     return 0;
 }
 

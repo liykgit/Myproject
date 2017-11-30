@@ -1,7 +1,7 @@
 #ifndef __COMMAND_HANDLE_H__
 #define __COMMAND_HANDLE_H__
 
-#define PARAM_ADDR 0x180fd000
+#define PARAM_ADDR 0x180fe000
 
 typedef enum {
     SOFTAP_MODE = 1,

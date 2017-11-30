@@ -3,9 +3,16 @@
 
 #define BDKHASH
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 unsigned int Calc_binhash(unsigned char *buf, int len);
 unsigned int Calc_hash(char *str);
 
+#ifdef __cplusplus
+}
+#endif
 
 #ifdef BDKHASH
 #define HASH_IN_DP		0x41e9a216

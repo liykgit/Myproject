@@ -739,8 +739,11 @@ static int unpack_welcome(unsigned char *payload, int len) {
     //hasName = 1;
 
 
+#if PASSTHROUGH == 0
+    if(hasDid && hasEndpoint && hasTicket) {
+#else
     if(hasDid && hasEndpoint && hasTicket && hasKey) {
-
+#endif
         mqtt_stop(0);
 
         return 0;

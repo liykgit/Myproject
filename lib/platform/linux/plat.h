@@ -72,11 +72,6 @@ int vg_recvfrom(int s, char *buf, int len, int flags, struct sockaddr *from, int
 int vg_sendto(int sock, unsigned char *buffer, int length, struct sockaddr_in *client_addr);
 
 
-#define CONN_NOSSL 0
-#define CONN_SSL   1
-
-#define CONN_MODE CONN_NOSSL
-
 #define TCP_TIMEOUT_S  			(6)
 #define TCP_TIMEOUT_MS 			(0)
 

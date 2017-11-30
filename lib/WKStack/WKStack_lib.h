@@ -103,6 +103,9 @@ typedef struct{
     } value;
 } WKStack_datapoint_t;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef int (*WKStack_cb_t)(WKStack_state_t state);
 typedef int (*WKStack_stop_cb_t)();
@@ -183,6 +186,7 @@ extern int g_testmode;
 
 extern const char *WKStack_version;
 extern const char *wisper; 
+
 int doStart(void);
 
 
@@ -195,6 +199,8 @@ int subscrption_map_check(int ids);
 
 extern generic_callback_fp vg_callbacks[CALLBACK_NR_MAX];
 
-
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -11,8 +11,14 @@
 #define TARGET_ERROR         "+ERR=4\r\n" //param error\r\n"
 #define EXEC_ERROR          "FAILED\r\n" //param error\r\n"
 
-
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 int udp_user_cmd_handle(unsigned char *cmd, int len, struct sockaddr_in *client_addr);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

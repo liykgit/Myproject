@@ -1,28 +1,50 @@
 #ifndef _WKSTACK_H_KLSJKLSDJFKLSDJFKLD_
 #define _WKSTACK_H_KLSJKLSDJFKLSDJFKLD_
 
-
-
 #define PASSTHROUGH 1
 
+//------------- CLOUD definitions ---------------
 #define AWS_CLOUD 1
 #define ALI_CLOUD 2
+#define LOCAL   100
+
+
+//------------- connection mode definition ---------------
+#define CONN_NOSSL 0
+#define CONN_SSL   1
+
+
 
 #define CLOUD ALI_CLOUD
+#define CONN_MODE CONN_NOSSL
+
+#define PASSTHROUGH 0
 
 #if CLOUD == ALI_CLOUD
+
 #define WKSTACK_FIRST_CONNECT_HOST "cn.vengasz.com"
+
+#if CONN_MODE == 1
 #define WKSTACK_FIRST_CONNECT_PORT 3884
+#else
+#define WKSTACK_FIRST_CONNECT_PORT 1884
+#endif
 
 #elif CLOUD == AWS_CLOUD
 
-
 #define WKSTACK_FIRST_CONNECT_HOST "www.vengasz.com"
+
+#if CONN_MODE == 1
 #define WKSTACK_FIRST_CONNECT_PORT 3884
+#else
+#define WKSTACK_FIRST_CONNECT_PORT 1884
+#endif
+
+
 
 #else
 
-#define WKSTACK_FIRST_CONNECT_HOST "192.168.3.2"
+#define WKSTACK_FIRST_CONNECT_HOST "192.168.3.3"
 #define WKSTACK_FIRST_CONNECT_PORT 1884
 
 #endif
@@ -110,6 +132,10 @@ typedef struct {
     char *err_msg;
 } WKStack_ota_report_t;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef int (*generic_callback_fp)(void);
 
 typedef void (*WKStack_raw_data_handler_t)(char *buf, int size);
@@ -134,9 +160,17 @@ int WKStack_send_raw(unsigned char *raw_data, unsigned int size, WKStack_send_cb
 #endif
 
 
-typedef void (*lan_cmd_hook_t)(int argc, char *argv[], struct socketaddr_in *client_addr);
+typedef void (*lan_cmd_hook_t)(int argc, char *argv[], struct sockaddr_in *client_addr);
 
 int WKStack_register_lan_hook(char *cmd, lan_cmd_hook_t hook);
 //int WKStack_lan_sendto(struct sockaddr_in *client_addr, char *buf, int length);
+
+int WKStack_lan_atcmd_start();
+
+int WKStack_lan_atcmd_stop();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

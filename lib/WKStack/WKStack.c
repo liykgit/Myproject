@@ -302,7 +302,7 @@ int WKStack_params(char *buf, int size)
     return 0;
 }
 
-int WKStack_report_ota_progress(WKStack_ota_target_t target, WKStack_ota_report_t report, WKStack_report_cb_t cb)
+int WKStack_send_ota_progress(WKStack_ota_target_t target, WKStack_ota_report_t report, WKStack_send_cb_t cb)
 {
 
     if(WKStack.state != WKSTACK_READY)
@@ -440,5 +440,15 @@ int WKStack_report_raw(unsigned char *buf, unsigned int size) {
 
 int WKStack_lan_sendto(struct sockaddr_in *client_addr, char *buf, int length) {
     return udpserver_sendto(client_addr, buf, length);
+}
+
+int WKStack_lan_atcmd_start() {
+
+    UDPServer_start(UDP_SERVER_PORT); 
+}
+
+int WKStack_lan_atcmd_stop() {
+
+    UDPServer_stop(); 
 }
 

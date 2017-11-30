@@ -1,28 +1,41 @@
 #ifndef _PLAT_H
 #define _PLAT_H
 
-#include "qcom_common.h"
-#include "qcom_uart.h"
-#include "qcom/basetypes.h"
-#include "qcom_internal.h"
-#include "qcom/qcom_cli.h"
-#include "qcom/socket_api.h"
-#include "qcom/select_api.h"
-#include "qcom_ssl.h"
-#include "qca_ssl_client.h"
-#include "tx_api.h"
-#include "common.h"
-#include "http.h"
+#include <time.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-#define strcat strcat_ext
-#define msleep qcom_thread_msleep
+#include "mbedtls/platform.h"
+#include "mbedtls/ssl.h"
+#include "mbedtls/entropy.h"
+#include "mbedtls/ctr_drbg.h"
+#include "mbedtls/error.h"
+#include "mbedtls/debug.h"
+
+#include "lwip/sockets.h"
+#include "lwip/raw.h"
+#include "lwip/icmp.h"
+#include "lwip/netdb.h"
+#include "lwip/inet_chksum.h"
+
+#include "rda_sys_wrapper.h"
+
+#include "WKStack.h"
+#include "common.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+//#define strcat strcat_ext
+#define msleep osDelay
 
 
 void *vg_malloc(unsigned int sz); 
 void vg_free(void *ptr);
 
-
-#define vg_fd_set q_fd_set
+#define vg_fd_set fd_set
 
 
 unsigned long vg_get_tick(void);
@@ -31,22 +44,31 @@ unsigned long vg_get_tick(void);
 
 //-------------------- mutex & sem --------------------------------
 
-typedef TX_MUTEX vg_mutex_t;
-typedef TX_SEMAPHORE vg_sem_t;
+typedef struct{
+	void *lock;
+	char *name;
+} vg_mutex_t;
 
-int vg_create_sem(void *handle, char *name);
+typedef struct{
+	void *handle;
+	char *name;
+} vg_sem_t;
 
-int vg_release_sem(void *handle);
+int vg_create_sem(vg_sem_t *handle, char *name);
 
-int vg_wait_sem(void *handle, int tm);
+int vg_release_sem(vg_sem_t *handle);
 
-void vg_delete_sem(void *handle);
+int vg_wait_sem(vg_sem_t *handle, int tm);
 
-int vg_create_mutex(void *lock, char *name);
+void vg_delete_sem(vg_sem_t *handle);
 
-int vg_get_mutex(void *lock);
+int vg_create_mutex(vg_mutex_t *lock, char *name);
 
-int vg_put_mutex(void *lock);
+int vg_get_mutex(vg_mutex_t *lock);
+
+int vg_put_mutex(vg_mutex_t *lock);
+
+void vg_delete_mutex(vg_mutex_t *lock);
 
 //-------------- socket ------------------------
 
@@ -63,6 +85,11 @@ int vg_recvfrom(int s, char *buf, int len, int flags, struct sockaddr *from, int
 
 int vg_sendto(int sock, unsigned char *buffer, int length, struct sockaddr_in *client_addr);
 
+
+#define CONN_NOSSL 0
+#define CONN_SSL   1
+
+#define CONN_MODE CONN_NOSSL
 
 #define TCP_TIMEOUT_S  			(6)
 #define TCP_TIMEOUT_MS 			(0)
@@ -88,7 +115,21 @@ typedef thread_ret_t (*thread_fun_t)(thread_params_t args);
 int vg_start_thread(thread_fun_t fun, void **stk_addr, int stk_size);
 
 int vg_resolve_domain_name(char *domain_name, char *ip_buf, int ip_buf_length);
+
 //------------- log -----------------------
+
 void now(char *time_buf);
+
+//------------- flash ---------------------
+
+int vg_erase_flash(unsigned int addr, unsigned int len);
+
+int vg_write_flash(unsigned int addr, void *buf, unsigned int buf_len);
+
+int vg_read_flash(unsigned int addr, void *buf, unsigned int buf_len);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

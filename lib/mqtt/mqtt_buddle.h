@@ -34,6 +34,10 @@ typedef struct {
 	mqtt_cb_t cb;
 }mqtt_package_t;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int get_send_count();
 int get_pend_count();
 int get_flight_count();
@@ -57,6 +61,10 @@ void ClearSendBuddle();
 int GetFlightCount();
 int GetPendingCount();
 mqtt_package_t *check_flight(int ping_times);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 

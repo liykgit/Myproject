@@ -55,6 +55,10 @@ typedef union {
 
 }mqtt_connack_flags_t; /**< connack flags byte */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int mqtt_pack_connect(unsigned char *buf, int buflen, mqtt_connect_data_t *options);
 int mqtt_pack_publish(unsigned char *buf, int buflen, mqtt_package_t *msg);
 int mqtt_pack_puback(unsigned char *buf, int buflen, mqtt_package_t *msg);
@@ -64,5 +68,8 @@ int mqtt_pack_pingreq(unsigned char *buf, int buflen);
 int mqtt_pack_disconnect(unsigned char *buf, int buflen);
 int mqtt_unpack(unsigned char *buf, int len);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif

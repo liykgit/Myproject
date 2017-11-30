@@ -37,6 +37,10 @@ typedef struct
 
 extern mqtt_t mqtt;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 unsigned short mqtt_msgid();
 
 int mqtt_set_remain_length(unsigned char *buf, int length);
@@ -62,5 +66,8 @@ int mqtt_send(unsigned char *buf, int len);
 int mqtt_recv(unsigned char *buf, int len);
 int mqtt_socket(char *ip, int port);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif

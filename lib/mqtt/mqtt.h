@@ -93,6 +93,10 @@ typedef struct{
     char *password; //!< The password corresponding to the user who is connecting, which can be used for authentication
 }mqtt_connect_data_t;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // publish result callback and subscribe result callback, message id is the return code when call mqtt_publish() or mqtt_suscribe()
 typedef int (*mqtt_cb_t)(unsigned short msg_id, mqtt_errno_t err);
 // connect result callback
@@ -168,5 +172,9 @@ int mqtt_subscribe(char *topic, mqtt_cb_t result_cb, mqtt_topic_cb_t topic_cb);
 
 
 int mqtt_unsubscribe(char *topic, mqtt_cb_t result_cb);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

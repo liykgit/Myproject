@@ -5,6 +5,10 @@
 #include "WKStack.h"
 #include "plat.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifdef LOG_IN_FILE
 #define LOG(level, fmt, args...) do{if(level >= LOG_LEVEL){char buf[64];now(buf);fprintf(log_fp,"%s", buf);fprintf(log_fp, fmt, ##args);fflush(log_fp);}}while(0)
 #else
@@ -31,5 +35,9 @@ void vg_print_hex(enum log_level, unsigned char *buf, int len);
 void bin2hex(const char* src, int length, char* target);
 
 int hex2bin(const char* src, char* target);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -5,8 +5,12 @@
 
 // First host, connect this host to get endpoint
 //#define WKSTACK_FIRST_CONNECT_HOST "35.165.194.227"
-#define WKSTACK_ENDPOINT_INQUIRY_PORT 80
+
+
+
+#define WKSTACK_ENDPOINT_INQUIRY_PORT 6969
 #define WKSTACK_ENDPOINT_INQUIRY_PATH "/endpoint"
+
 
 #define DP_COUNT_MAX 32
 // 10 s for keepalive time
@@ -113,6 +117,10 @@
 
 extern mqtt_connect_data_t g_mqtt_data;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int WKStack_pack_connect(char *client_id, int flag);
 int WKStack_pack_connect_cb(char *client_id, int flag);
 int WKStack_subscribe_welcome();
@@ -123,5 +131,9 @@ int WKStack_subscribe_control(mqtt_cb_t cb);
 int WKStack_subscribe_ota(mqtt_cb_t cb);
 int WKStack_subscribe_binding(mqtt_cb_t cb);
 int WKStack_subscribe_sync(mqtt_cb_t cb);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -1,5 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include <stdio.h> #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
 
@@ -13,13 +12,17 @@
 //
 
 
-#define PRODUCTID   "yEOBNYFxfyNfbm0P"
+#define PRODUCTID   "yEOBNYFx1vzL9js6"
 
 #define MAC         "A1B2C3D4E916"
 #define VERSION     "0.1"
 
-
+#define PRODUCTID   "zT6b3nuvC1HN38bD"
+#define KEY         "kkSMwooxz-nTqTD2"
 #define MAC         "A1B2C3D4E916"
+
+
+
 
 static int not_started = 1;
 
@@ -71,7 +74,7 @@ int save_params(void *buf, int size) {
 
 int error_handler(int error_code) {
     printf("error : %d\n", error_code);
-    not_started = 0;
+    not_started = 1;
     return 0;
 }
 
@@ -105,7 +108,7 @@ int main(int argc, char **argv)
 
     WKStack_register_callback(CALLBACK_OTA_EVENT, ota_event_handler);
 
-    WKStack_init(MAC, PRODUCTID, VERSION, 0, 0);
+    WKStack_init(MAC, PRODUCTID, VERSION, 0, KEY);
 
     while(1){
         if(not_started) {

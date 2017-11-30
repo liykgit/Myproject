@@ -10,7 +10,15 @@ typedef struct client_info {
     char user_id[16];
 } client_info_t;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int udpserver_sendto(struct sockaddr_in *client_addr, char *buf, int length);
 int udpserver_broadcast(char *buf, int length, int port);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif 

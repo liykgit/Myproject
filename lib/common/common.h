@@ -36,6 +36,8 @@ void bin2hex(const char* src, int length, char* target);
 
 int hex2bin(const char* src, char* target);
 
+unsigned char cal_crc8(unsigned char *vptr, unsigned char len);
+
 #ifdef __cplusplus
 }
 #endif

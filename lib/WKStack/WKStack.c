@@ -39,10 +39,47 @@ int WKStack_init(const char *mac, const char *product_id, const char *version, c
             return -1;
         }
 
+        if(vg_callbacks[CALLBACK_LOAD_PARAMS]) {
+            
+            int sz = sizeof(WKStack.params) + 8;
+            void *pbuf = vg_malloc(sz);
+            if(!pbuf) {
+                LOG(LEVEL_ERROR, "OOM\n");
+                return -1;
+            }
 
-        if(vg_callbacks[CALLBACK_LOAD_PARAMS])
-            ((WKStack_load_params_fn_t)vg_callbacks[CALLBACK_LOAD_PARAMS])(&WKStack.params, sizeof(WKStack.params));
+            int r = ((WKStack_load_params_fn_t)vg_callbacks[CALLBACK_LOAD_PARAMS])(pbuf, sz);
 
+            if(r != 0) {
+                LOG(LEVEL_ERROR, "Error: loading params failed, restore device info\n");
+                memset(&WKStack.params, 0, sizeof(WKStack.params));
+            }
+            else if((strcmp(((WKStack_params_t*)pbuf)->magic, WKSTACK_MAGIC)) != 0){
+               
+
+                LOG(LEVEL_DEBUG, "CHRIS magic mismatches %s\n", ((WKStack_params_t*)pbuf)->magic);
+
+                LOG(LEVEL_DEBUG, "loaded params but magic mismatches\n");
+                memset(&WKStack.params, 0, sizeof(WKStack.params));
+            }
+            else {
+                unsigned char crc = cal_crc8(pbuf, sizeof(WKStack.params));
+                unsigned char saved_crc8 = *(((unsigned char*)pbuf)+sizeof(WKStack.params));                   
+                
+                if(crc == saved_crc8) {
+
+                    memcpy(&WKStack.params, pbuf, sizeof(WKStack.params)); 
+                    LOG(LEVEL_DEBUG, "load params successfully\n");   
+                }
+                else {
+                    LOG(LEVEL_ERROR, "loaded params but crc mismatches\n");
+                    memset(&WKStack.params, 0, sizeof(WKStack.params));
+                }
+            }
+            vg_free(pbuf);
+        }
+
+        strcpy(WKStack.params.magic, WKSTACK_MAGIC);
 
         memcpy(WKStack.params.product_id, product_id, strlen(product_id));
 

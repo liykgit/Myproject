@@ -40,8 +40,7 @@ void subscription_map_clear() {
     WKStack.subscription_map = 0;
 }
 
-
-static void check_subscrptions(){
+static void check_subscrptions() {
     if(subscription_map_check(SUBSCRIPTION_BINDING | SUBSCRIPTION_OTA | SUBSCRIPTION_CONTROL)) {
         
         if(WKStack.state == WKSTACK_ONLINE) { 
@@ -50,9 +49,27 @@ static void check_subscrptions(){
 
             WKStack.state = WKSTACK_READY;
 
+            if(vg_callbacks[CALLBACK_SAVE_PARAMS]) {
+                
+                int sz = sizeof(WKStack.params) + 8;
+                void *pbuf = vg_malloc(sz);
+                
+                if(!pbuf) {
+                    LOG(LEVEL_ERROR, "OOM:\n");
+                    //TODO reboot
+                }
+                else {
 
-            if(vg_callbacks[CALLBACK_SAVE_PARAMS])
-                ((WKStack_save_params_fn_t)vg_callbacks[CALLBACK_SAVE_PARAMS])(&WKStack.params, sizeof(WKStack.params));
+                    memcpy(pbuf, &WKStack.params, sizeof(WKStack.params));
+                    unsigned char crc8 = cal_crc8(pbuf, sizeof(WKStack.params));
+
+                    *((unsigned char*)pbuf + sizeof(WKStack.params)) = crc8;
+
+                    ((WKStack_save_params_fn_t)vg_callbacks[CALLBACK_SAVE_PARAMS])(pbuf, sz);
+                    
+                    vg_free(pbuf);
+                }
+            }
 
             if(vg_callbacks[CALLBACK_CONNECTED])
                 vg_callbacks[CALLBACK_CONNECTED]();

@@ -51,6 +51,9 @@
 #define TICKET_LEN (32) 
 #define TICKET_LEN_PADDING (4) //4 as padding
 
+#define WKSTACK_MAGIC_LEN (8) 
+#define WKSTACK_MAGIC "VENGASZ" //4 as padding
+
 typedef enum {
 
     WKSTACK_WAIT_INIT = 0, // Wait init
@@ -77,6 +80,7 @@ typedef enum {
 
 typedef struct {
 
+    char magic[WKSTACK_MAGIC_LEN];
     char name[WKSTACK_NAME_LEN];
     char did[WKSTACK_DID_LEN];
     char host[WKSTACK_HOST_LEN];

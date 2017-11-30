@@ -7,19 +7,20 @@
 
 #include "common.h"
 
+
 //85
 //#define PRODUCTID   "E3GF3s6f8WOC2bsh"
 //
 
 
-#define PRODUCTID   "yEOBNYFx1vzL9js6"
 
+
+
+
+#define PRODUCTID   "zT6b3nuvSt0i8kIt"
+#define KEY         "k1gyW7pefc02oowe"
 #define MAC         "A1B2C3D4E916"
 #define VERSION     "0.1"
-
-#define PRODUCTID   "zT6b3nuvC1HN38bD"
-#define KEY         "kkSMwooxz-nTqTD2"
-#define MAC         "A1B2C3D4E916"
 
 
 
@@ -61,14 +62,45 @@ int raw_data_handler(char *raw_data, int len) {
 }
 
 int load_params(void *buf, int size) {
-    
-    printf("loading params \n");
+
+    printf("loading params\n");
+   
+    FILE *ptr_file;
+
+    ptr_file =fopen("flash.bin", "rb");
+
+    if (!ptr_file) {
+        printf("open flash.bin failed\n");
+        memset(buf, 0, size); 
+    }
+    else {
+ 
+        fread(buf, size, 1, ptr_file);
+
+        fclose(ptr_file);
+    }
+
     return 0;
 }
 
+
 int save_params(void *buf, int size) {
-    
+
     printf("saving params\n");
+
+    FILE *ptr_file;
+
+    ptr_file =fopen("flash.bin", "wb+");
+
+    if (!ptr_file) {
+        printf("open flash.bin failed\n");
+        exit(0);
+    }
+    
+    fwrite(buf, size, 1, ptr_file);
+
+    fclose(ptr_file);
+
     return 0;
 }
 
@@ -94,7 +126,7 @@ int ota_event_handler(const WKStack_ota_msg_t *msg)
 
 int main(int argc, char **argv)
 {
-
+    
 
     WKStack_register_callback(CALLBACK_CONNECTED, connect_cb);
     WKStack_register_callback(CALLBACK_DISCONNECTED, disconnect_cb);

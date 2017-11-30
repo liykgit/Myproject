@@ -3,3 +3,4 @@ bin
 *.swp
 *.o
 output
+flash.bin

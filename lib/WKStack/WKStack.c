@@ -52,12 +52,12 @@ int WKStack_init(const char *mac, const char *product_id, const char *version, c
 
             if(r != 0) {
                 LOG(LEVEL_ERROR, "Loading params\n");
-                memset(&WKStack.params, 0, sizeof(WKStack.params));
+                //memset(&WKStack.params, 0, sizeof(WKStack.params));
             }
             else if((strcmp(((WKStack_params_t*)pbuf)->magic, WKSTACK_MAGIC)) != 0){
                
                 LOG(LEVEL_DEBUG, "params magic mismatch\n");
-                memset(&WKStack.params, 0, sizeof(WKStack.params));
+                //memset(&WKStack.params, 0, sizeof(WKStack.params));
             }
             else {
                 unsigned char crc = cal_crc8(pbuf, sizeof(WKStack.params));
@@ -65,12 +65,17 @@ int WKStack_init(const char *mac, const char *product_id, const char *version, c
                 
                 if(crc == saved_crc8) {
 
-                    memcpy(&WKStack.params, pbuf, sizeof(WKStack.params)); 
                     LOG(LEVEL_DEBUG, "load params successfully\n");   
+                    if((strcmp(((WKStack_params_t*)pbuf)->product_id, product_id)) != 0){
+                        LOG(LEVEL_NORMAL, "new product_id, restore\n");   
+                        //memset(&WKStack.params, 0, sizeof(WKStack.params));
+                    }
+                    else
+                        memcpy(&WKStack.params, pbuf, sizeof(WKStack.params)); 
                 }
                 else {
                     LOG(LEVEL_ERROR, "params crc\n");
-                    memset(&WKStack.params, 0, sizeof(WKStack.params));
+                    //memset(&WKStack.params, 0, sizeof(WKStack.params));
                 }
             }
             vg_free(pbuf);

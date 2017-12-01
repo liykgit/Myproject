@@ -120,9 +120,36 @@ int ota_event_handler(const WKStack_ota_msg_t *msg)
     return 0;
 }
 
-void datapoint_handler(WKStack_datapoint_t *dps, int size)
+void datapoint_handler(WKStack_datapoint_t dps[], int size)
 {
     printf("received %d datapoints\n", size);
+    int i = 0;
+    for(;i < size;i++) {
+        switch(dps[i].type) {
+            
+            case WKSTACK_DATAPOINT_TYPE_STRING:  {
+                printf("%d string: %s\n", dps[i].index, dps[i].value.string);
+            }
+            break;
+
+            case WKSTACK_DATAPOINT_TYPE_BOOL:  {
+                printf("%d bool : %d\n", dps[i].index, dps[i].value.boolean);
+
+            }
+            break;
+
+            case WKSTACK_DATAPOINT_TYPE_INT:  {
+                printf("%d int : %d\n", dps[i].index, dps[i].value.integer);
+
+            }
+            break;
+
+            case WKSTACK_DATAPOINT_TYPE_FLOAT:  {
+                printf("%d float : %f\n", dps[i].index, dps[i].value.floatpoint);
+            }
+            break;
+        }
+    }
 
     WKStack_send_datapoint(dps, size, NULL);
 }

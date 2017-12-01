@@ -36,11 +36,6 @@
 #define WKSTACK_TYPE_LONG 0x12
 
 #define WKSTACK_DATAPOINT_NR 32
-#define WKSTACK_DATAPOINT_TYPE_BOOL 0x01
-#define WKSTACK_DATAPOINT_TYPE_INT  0x02
-#define WKSTACK_DATAPOINT_TYPE_FLOAT 0x03
-#define WKSTACK_DATAPOINT_TYPE_STRING 0x04
-
 #define PADDING (4)
 
 //4: padding 128=24*4*8/6, where 24: max allowed characters, 4 : each utf-8 character up to 4 bytes, *8/6 base64 length

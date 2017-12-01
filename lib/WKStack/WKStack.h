@@ -57,6 +57,12 @@
 #define WKSTACK_VER_LEN 20
 #define WKSTACK_OTA_URL_LEN 128
 
+
+#define WKSTACK_DATAPOINT_TYPE_BOOL 0x01
+#define WKSTACK_DATAPOINT_TYPE_INT  0x02
+#define WKSTACK_DATAPOINT_TYPE_FLOAT 0x03
+#define WKSTACK_DATAPOINT_TYPE_STRING 0x04
+
 typedef enum{
 
     PUBLISH_FAILED = 6,
@@ -148,8 +154,6 @@ typedef struct{
 } WKStack_datapoint_t;
 
 
-
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -162,7 +166,7 @@ typedef int (*WKStack_load_params_fn_t)(char *buf, int size);
 typedef int (*WKStack_error_handler_t)(int err_code);
 typedef int (*WKStack_send_cb_t)(int msg_id, publish_result_t err_code);
 typedef int (*WKStack_ota_event_cb_t)(const WKStack_ota_msg_t *msg);
-typedef void (*WKStack_datapoint_handler_t)(WKStack_datapoint_t *dps, int size);
+typedef void (*WKStack_datapoint_handler_t)(WKStack_datapoint_t dps[], int size);
 
 int WKStack_init(const char *mac, const char *product_id, const char *version, const char *sn,  const char *key);
 

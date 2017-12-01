@@ -8,6 +8,8 @@
 static unsigned short g_packetid = 0x8;
 mqtt_t mqtt;
 
+char *ERR_TCP_RDLEN = "Tcp read rdlen"; 
+
 unsigned short mqtt_msgid()
 {
 	return ++g_packetid;
@@ -249,40 +251,39 @@ int mqtt_send(unsigned char *buf, int len)
 
 	if(buf == NULL || len == 0) {
 
-        LOG(LEVEL_DEBUG, "mqtt_send X\n");
-		return -1;
+	    goto out;	
     }
 
 repeat:
     ret = vg_send(mqtt.sockfd, buf, len, CONN_MODE);
     if(ret >= 0){
         if(ret == 0){
-            LOG(LEVEL_ERROR, "tcp send length 0\n");
+            LOG(LEVEL_DEBUG, "tcp send length 0\n");
         }
-        LOG(LEVEL_DEBUG, "mqtt_send X \n");
-        return ret;
+        goto out;
+
     }else if(ret == -100){
-        LOG(LEVEL_ERROR, "tcp send ret = -100\n");
+        LOG(LEVEL_ERROR, "vg_send -100\n");
         if(send_repeat-- > 0){
             msleep(2000);
             goto repeat;
         }else{
-            LOG(LEVEL_DEBUG, "mqtt_send X \n");
-            return -2;
+            ret = -2;
+            goto out;
         }
     }else{
-        LOG(LEVEL_ERROR, "tcp send error\n");
+        LOG(LEVEL_ERROR, "mqtt_send\n");
 		if(send_repeat-- > 0){
             msleep(2000);
             goto repeat;
         }else{
-            LOG(LEVEL_DEBUG, "mqtt_send X \n");
-			return -3;
+            ret = -3;
+            goto out;
         }
     }
-
+out:
     LOG(LEVEL_DEBUG, "mqtt_send X \n");
-	return -1;
+	return ret;
 }
 
 int mqtt_recv(unsigned char *buf, int len)
@@ -301,10 +302,10 @@ repeat:
 #endif
 		return rdlen;
 	}else if(rdlen == -1){//select return -1
-		LOG(LEVEL_ERROR, "Tcp read rdlen = -1\n");
+		LOG(LEVEL_ERROR, "%s,%d\n", ERR_TCP_RDLEN, -1);
 		return -1;
 	}else if(rdlen == -2){//recv return -1
-		LOG(LEVEL_ERROR, "Tcp read rdlen = -2\n");
+		LOG(LEVEL_ERROR, "%s,%d\n", ERR_TCP_RDLEN, -2);
 		if(read_count-- > 0){
 			msleep(100);
 			goto repeat;
@@ -313,7 +314,7 @@ repeat:
 		}
 	}
 	else if(rdlen == -3){//recv return 0, socked has been closed.
-		LOG(LEVEL_ERROR, "Tcp read rdlen = -3\n");
+		LOG(LEVEL_ERROR, "%s,%d\n", ERR_TCP_RDLEN, -3);
 		if(read_count-- > 0){
 			msleep(100);
 			goto repeat;

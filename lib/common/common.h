@@ -9,10 +9,11 @@
 extern "C" {
 #endif
 
+
 #ifdef LOG_IN_FILE
 #define LOG(level, fmt, args...) do{if(level >= LOG_LEVEL){char buf[64];now(buf);fprintf(log_fp,"%s", buf);fprintf(log_fp, fmt, ##args);fflush(log_fp);}}while(0)
 #else
-#define LOG(level, fmt, args...) do{if(level >= LOG_LEVEL){printf(fmt, ##args);}}while(0)
+#define LOG(level, fmt, args...) do{if(level >= LOG_LEVEL){printf((level==LEVEL_ERROR)?"<E>"fmt:fmt, ##args);}}while(0)
 #endif
 
 

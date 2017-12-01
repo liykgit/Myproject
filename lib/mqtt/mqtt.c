@@ -9,6 +9,9 @@
 vg_sem_t ctrl_thread_sem;
 vg_sem_t recv_thread_sem;
 
+static char *ERR_NO_FREE_BUDDLE = "no free buddle\n";
+static char *ERR_MQTT_NOT_RUNNING = "mqtt not running\n";
+
 mqtt_state_t mqtt_state()
 {
     return mqtt.state;
@@ -59,19 +62,19 @@ int mqtt_publish(char *topic, unsigned char *msg, int msg_len, mqtt_qos_t qos, m
     mqtt_package_t *package;
 
     if (mqtt.state != MQTT_STATE_RUNNING){
-        LOG(LEVEL_ERROR, "Not connected to cloud\n");
+        LOG(LEVEL_ERROR, "%s", ERR_MQTT_NOT_RUNNING);
         return -2;
     }
 
     package = GetFree2Send();
     if(package == NULL) {
-        LOG(LEVEL_ERROR, "send buddle not free\n");
+        LOG(LEVEL_ERROR, "%s", ERR_NO_FREE_BUDDLE);
 		return -1;
 	}
 
     package->payload = (unsigned char *)vg_malloc(msg_len);
     if(package->payload == NULL){
-        LOG(LEVEL_ERROR, "FATAL: OOM!!!\n");
+        LOG(LEVEL_ERROR, "OOM\n");
         FreeBuddle(package);
         return -3;
     }
@@ -102,13 +105,13 @@ int mqtt_subscribe(char *topic, mqtt_cb_t result_cb, mqtt_topic_cb_t topic_cb)
     int ret = 0;
 
     if (mqtt.state != MQTT_STATE_RUNNING){
-        LOG(LEVEL_ERROR, "Not connected\n");
+        LOG(LEVEL_ERROR, "%s", ERR_MQTT_NOT_RUNNING);
         return -2;
     }
 
 	msg	= GetFree2Send();
 	if(msg == NULL) {
-        LOG(LEVEL_ERROR, "send buddle not free\n");
+        LOG(LEVEL_ERROR, "%s", ERR_NO_FREE_BUDDLE);
 		return -1;
 	}
 
@@ -134,18 +137,18 @@ int mqtt_subscribe(char *topic, mqtt_cb_t result_cb, mqtt_topic_cb_t topic_cb)
 int mqtt_unsubscribe(char *topic, mqtt_cb_t result_cb)
 {
 
-    LOG(LEVEL_DEBUG, "<LOG> Mqtt unsubscribe %s\n", topic);
+    LOG(LEVEL_DEBUG, "Mqtt unsub %s\n", topic);
     mqtt_package_t *msg;
     int ret = 0;
 
     if (mqtt.state != MQTT_STATE_RUNNING){
-        LOG(LEVEL_ERROR, "Not connected to unsub\n");
+        LOG(LEVEL_ERROR, "%s", ERR_MQTT_NOT_RUNNING);
         return -2;
     }
 
 	msg	= GetFree2Send();
 	if(msg == NULL) {
-        LOG(LEVEL_ERROR, "send buddle not free\n");
+        LOG(LEVEL_ERROR, "%s", ERR_NO_FREE_BUDDLE);
 		return -1;
 	}
 
@@ -194,13 +197,14 @@ int mqtt_puback(unsigned short msg_id)
     mqtt_package_t *pmsg;
 
     if (mqtt.state != MQTT_STATE_RUNNING){
-        LOG(LEVEL_ERROR, "No connection to cloud\n");
+
+        LOG(LEVEL_ERROR, "%s", ERR_MQTT_NOT_RUNNING);
         return -2;
     }
 
     pmsg = GetFree2Send();
     if (pmsg == 0){
-        LOG(LEVEL_ERROR, "send buddle not free\n");
+        LOG(LEVEL_ERROR, "%s", ERR_NO_FREE_BUDDLE);
         return -1;
     }
 
@@ -221,13 +225,13 @@ int mqtt_pubrec(unsigned short msg_id)
     mqtt_package_t *pmsg;
 
     if (mqtt.state != MQTT_STATE_RUNNING){
-        LOG(LEVEL_ERROR, "Not connected to cloud\n");
+        LOG(LEVEL_ERROR, "%s", ERR_MQTT_NOT_RUNNING);
         return -2;
     }
 
     pmsg = GetFree2Send();
     if (pmsg == 0){
-        LOG(LEVEL_ERROR, "send buddle not free\n");
+        LOG(LEVEL_ERROR, "%s", ERR_NO_FREE_BUDDLE);
         return -1;
     }
 
@@ -247,13 +251,13 @@ int mqtt_pubrel(unsigned short msg_id)
     mqtt_package_t *pmsg;
 
     if (mqtt.state != MQTT_STATE_RUNNING){
-        LOG(LEVEL_ERROR, "Not connected to cloud\n");
+        LOG(LEVEL_ERROR, "%s", ERR_MQTT_NOT_RUNNING);
         return -2;
     }
 
     pmsg = GetFree2Send();
     if (pmsg == 0){
-        LOG(LEVEL_ERROR, "send buddle not free\n");
+        LOG(LEVEL_ERROR, "%s", ERR_NO_FREE_BUDDLE);
         return -1;
     }
 
@@ -273,13 +277,13 @@ int mqtt_pubcomp(unsigned short msg_id)
     mqtt_package_t *pmsg;
 
     if (mqtt.state != MQTT_STATE_RUNNING){
-        LOG(LEVEL_ERROR, "Not connected to cloud\n");
+        LOG(LEVEL_ERROR, "%s", ERR_MQTT_NOT_RUNNING);
         return -2;
     }
 
     pmsg = GetFree2Send();
     if (pmsg == 0){
-        LOG(LEVEL_ERROR, "send buddle not free\n");
+        LOG(LEVEL_ERROR, "%s", ERR_NO_FREE_BUDDLE);
         return -1;
     }
 
@@ -304,7 +308,7 @@ static int mqtt_connect()
     LOG(LEVEL_DEBUG, "mqtt_connect E\n");
     ret = mqtt_socket(mqtt.host, mqtt.port);
     if(ret < 0){
-        LOG(LEVEL_ERROR, "create socket failure\n");
+        LOG(LEVEL_ERROR, "mqtt create socket\n");
         if(ret == -1)
             flag = 1;
         goto err;
@@ -319,7 +323,7 @@ static int mqtt_connect()
         mqtt.state = MQTT_STATE_WAIT_CONNACK;
         vg_release_sem(&recv_thread_sem);
     }else{
-        LOG(LEVEL_ERROR, "send _connect_ failed\n");
+        LOG(LEVEL_ERROR, "send CONNECT\n");
         goto err;
     }
 
@@ -459,7 +463,6 @@ start:
                 vg_release_sem(&ctrl_thread_sem);
             }
 		}else if(len < 2){
-  			//LOG(LEVEL_NORMAL, "<LOG> read buf length less than 2bytes(%d)\n", len);
 			continue;
 		}else{
             mqtt_unpack(mqtt.recv_buf, len);

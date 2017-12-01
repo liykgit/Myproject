@@ -25,10 +25,9 @@ static int udp_recv(int sock, unsigned char *buffer, int length, struct sockaddr
 	ret	= vg_select(sock + 1, &fdRead, 0, 0, &tm);
 
 	if(ret < 0){// error
-		LOG(LEVEL_ERROR, "udp sockfd select error\n");
+		LOG(LEVEL_ERROR, "udp vg_select\n");
 		return -1;
 	}else if(ret == 0){
-		//printf( "udp sockfd select timeout\n");
 		return 0;
 	} else {
 	    if(FD_ISSET(sock, &fdRead)){
@@ -39,14 +38,14 @@ static int udp_recv(int sock, unsigned char *buffer, int length, struct sockaddr
 
 				return ret;
 			}else if(ret < 0){//recv err
-				LOG(LEVEL_ERROR, "udp recv error \n");
+				LOG(LEVEL_ERROR, "udp recv\n");
 			    return ret;
 			}else{// == 0 //socket close
-				LOG(LEVEL_ERROR, "udp close socket\n");
+				LOG(LEVEL_ERROR, "udp close\n");
 				return -3;// careful : sometime select =1 ,but read 0 byte data
 			}
 	    }else{
-			LOG(LEVEL_ERROR, "udp sockfd is not set\n");
+			//LOG(LEVEL_ERROR, "udp sockfd not set\n");
 		}
 	}
 
@@ -81,7 +80,7 @@ int  UDPServer_start(int port) {
 
     ret = vg_udp_socket(&udpserver_sock);
     if(ret != 0){
-		LOG(LEVEL_ERROR, "Create_udp_socket failed\n");
+		LOG(LEVEL_ERROR, "create_udp_socket\n");
 		goto socket_fail;
     }
 
@@ -94,7 +93,7 @@ int  UDPServer_start(int port) {
 
     ret = vg_bind(udpserver_sock, (const struct sockaddr *)&local_addr, sizeof(struct sockaddr_in));
     if(ret != 0) {
-		LOG(LEVEL_ERROR, "bind failed\n");
+		LOG(LEVEL_ERROR, "udp bind\n");
 		goto bind_fail;
     }
 

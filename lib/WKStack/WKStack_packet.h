@@ -12,7 +12,7 @@
 #define WKSTACK_ENDPOINT_INQUIRY_PATH "/endpoint"
 
 
-#define DP_COUNT_MAX 32
+#define DP_COUNT_MAX 24
 // 10 s for keepalive time
 #define WKSTACK_KEEPALIVE_TIME 20
 

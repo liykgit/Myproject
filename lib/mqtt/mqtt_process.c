@@ -252,7 +252,7 @@ int mqtt_process_error()
     ResetBuddle();
 
     if (mqtt.error_number != MQTT_DISCONNECT_SUCCEED)
-        LOG(LEVEL_ERROR, "connection error(%d)\n", mqtt.error_number);
+        LOG(LEVEL_ERROR, "mqtt error(%d)\n", mqtt.error_number);
 
     memset(mqtt.host, 0, MAX_HOST_NAME);
     mqtt.port = 0;

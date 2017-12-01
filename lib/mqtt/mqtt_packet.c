@@ -328,17 +328,17 @@ another:
 	if(msg_len + length_feild_size + 1 < len){
 		flag = 1;
 	}else if(msg_len + length_feild_size + 1 > len){
-		LOG(LEVEL_ERROR, "message length error\n");
+		LOG(LEVEL_ERROR, "mqtt msg len\n");
         return -2;
 	}
 
 	if(msg_len > mqtt.window_size){
-        LOG(LEVEL_ERROR, "message length error2\n");
+        LOG(LEVEL_ERROR, "mqtt msg len2\n");
         return -2;
     }
     pmsg = GetFree2Pending();
     if (pmsg == 0){
-        LOG(LEVEL_ERROR, "pending buddle not free\n");
+        LOG(LEVEL_ERROR, "no free buddle\n");
         return -1;
     }
 
@@ -370,7 +370,7 @@ another:
 		pmsg->payload = (unsigned char *)vg_malloc(pmsg->length);
 		if(pmsg->payload == NULL){
 			FreeBuddle(pmsg);
-			LOG(LEVEL_ERROR, "OOM!!!\n");
+			LOG(LEVEL_ERROR, "OOM!\n");
 			return -4;
 		}
         memcpy(pmsg->payload, p, pmsg->length);

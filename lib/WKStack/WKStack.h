@@ -65,12 +65,13 @@ typedef enum{
 }publish_result_t;
 
 enum log_level {
-	LEVEL_DEBUG = 0,
-	LEVEL_NORMAL = 1,
-	LEVEL_ERROR = 2
+	LEVEL_TRACE = 0,
+	LEVEL_DEBUG,
+	LEVEL_NORMAL,
+	LEVEL_ERROR
 } ;
 
-#define LOG_LEVEL LEVEL_DEBUG
+#define LOG_LEVEL LEVEL_NORMAL
 
 typedef enum {
     CALLBACK_CONNECTED, 

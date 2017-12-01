@@ -268,8 +268,6 @@ void MoveSend2Flight(mqtt_package_t *pItem)
 		memcpy(pRet, pItem, sizeof(mqtt_package_t));
 		pRet->attr = ATTR_FLIGHT;
 		pRet->used = BUDDLE_USED;
-//		printf("<LOG> pRet->msg_id = %d .\n", pRet->msg_id);
-//		printf("<LOG> move %d from send to flight.\n", pItem->msg_id);
 		//clean up the send buddle
 		// pRet->payload is pointer to pItem->payload, so, don't free pItem->payload in FreeBuddle()
 		pItem->payload = NULL;
@@ -534,7 +532,6 @@ void ClearSendBuddle()
 	int i;
 	mqtt_package_t *pRet = NULL;
 
-	//mqtt_printf("<LOG> clean send&flight buffer.\n");
 	for(i=0; i<SEND_MAX; i++)
 	{
 		//printf("send_buddle[%d].used = %d\n", i, send_buddle[i].used);
@@ -574,7 +571,6 @@ void RemoveTimeoutBuddle()
 			pRet = &flight_buddle[i];
 			if((vg_get_tick() - pRet->tick) > (mqtt.keepalive))
 			{
-				//mqtt_printf("<LOG> flight msg %d timeout, release.\n", pRet->msg_id);
 				FreeBuddle(pRet);
 			}
 		}
@@ -589,7 +585,6 @@ void RemoveTimeoutBuddle()
 			pRet = &pend_buddle[i];
 			if((vg_get_tick() - pRet->tick) > (mqtt.keepalive))
 			{
-				//mqtt_printf("<LOG> pend msg %d timeout, release.\n", pRet->msg_id);
 				FreeBuddle(pRet);
 			}
 		}

@@ -158,7 +158,7 @@ int vg_tcp_socket(int *sock)
 	*sock = qcom_socket(AF_INET, SOCK_STREAM, 0);
 
 	if(-1 == *sock){
-		LOG(LEVEL_ERROR, "<ERR> creat socket error");
+		LOG(LEVEL_ERROR, "creat socket error");
 		return -1;
 	}
     
@@ -166,11 +166,11 @@ int vg_tcp_socket(int *sock)
 
 	int ret = qcom_setsockopt(*sock, SOL_SOCKET, TCP_NODELAY, (char *)&flag, sizeof(flag));
 	if (ret < 0){
-		printf("tcp client setsockopt(TCP_NODELAY) error\r\n");
+		LOG(LEVEL_ERROR, "setsockopt(TCP_NODELAY) error\r\n");
 	}
 	ret = qcom_setsockopt(*sock, SOL_SOCKET, TCP_NOACKDELAY, (char *)&flag, sizeof(flag));
 	if (ret < 0){
-		printf("tcp client setsockopt(TCP_NOACKDELAY) error\r\n");
+		LOG(LEVEL_ERROR, "tcp client setsockopt(TCP_NOACKDELAY) error\r\n");
 	}
 
 	LOG(LEVEL_DEBUG, "Create sockfd(%d)\n", *sock);
@@ -196,9 +196,9 @@ int vg_send(int sock, unsigned char *buffer, int length, int ssl)
 {
 	int ret = 0;
 
-    LOG(LEVEL_DEBUG, "vg_send:\n");
-	vg_print_hex(LEVEL_DEBUG, buffer, length);
-    LOG(LEVEL_DEBUG, "\n");
+    LOG(LEVEL_TRACE, "vg_send:\n");
+	vg_print_hex(LEVEL_TRACE, buffer, length);
+    LOG(LEVEL_TRACE, "\n");
 
 	if(ssl)
 		return qca_ssl_write(buffer, length);
@@ -252,7 +252,7 @@ int vg_recv(int sock, unsigned char *buffer, int length, int ssl)
             system_restart();
         }
 
-		LOG(LEVEL_DEBUG, "vg_recv select timeout\n");
+		LOG(LEVEL_TRACE, "vg_recv select timeout\n");
 		return 0;
 	}else{
 	    if(FD_ISSET(sock, &fdRead)){
@@ -262,8 +262,8 @@ int vg_recv(int sock, unsigned char *buffer, int length, int ssl)
 			else
 				ret = qcom_recv(sock, (char *)(buffer), length, 0);
 			if(ret > 0){
-				LOG(LEVEL_DEBUG, "vg_recv: \n");
-				vg_print_hex(LEVEL_DEBUG, (char *)buffer, ret);
+				LOG(LEVEL_TRACE, "vg_recv: \n");
+				vg_print_hex(LEVEL_TRACE, (char *)buffer, ret);
 
 				return ret;
 			}else if(ret < 0){//recv err
@@ -288,18 +288,15 @@ int vg_udp_socket(int *sock)
 	*sock = qcom_socket(AF_INET, SOCK_DGRAM, 0);
 
 	if(-1 == *sock){
-		printf( "<ERR> creat socket error");
+		LOG(LEVEL_ERROR, "creat socket error");
 		return -1;
 	}
 
-	printf( "Create sockfd(%d)\n", *sock);
 	return 0;
 }
 
 int vg_udp_close(int sock)
 {
-
-	printf( "Close sockfd(%d)\n", sock);
     qcom_socket_close(sock);
 
 	return 0;
@@ -326,13 +323,13 @@ static int get_host_by_name(unsigned int *ipaddr, char *url)
 	{
 		if(qcom_dnsc_get_host_by_name(url, ipaddr) == A_OK)
 		{
-			LOG(LEVEL_DEBUG, "<LOG> Get ip address is %u.%u.%u.%u\n",
+			LOG(LEVEL_TRACE, "<LOG> Get ip address is %u.%u.%u.%u\n",
 				(unsigned)(*ipaddr >> 24), (unsigned)((*ipaddr >> 16) & 0xff),
 				(unsigned)((*ipaddr >> 8) & 0xff), (unsigned)(*ipaddr & 0xff));
 			return 0;
 		}
 
-		LOG(LEVEL_DEBUG, "<LOG> get ip address of host %s failed, retry...\n", url);
+		LOG(LEVEL_TRACE, "<LOG> get ip address of host %s failed, retry...\n", url);
 		msleep(1000);
 	}
 
@@ -395,7 +392,7 @@ again:
 	else
 		conn = qcom_connect(*sock,(struct sockaddr*)&address, sizeof(struct sockaddr_in));
 
-	LOG(LEVEL_DEBUG, "connect return %d\n", conn);
+	LOG(LEVEL_TRACE, "connect return %d\n", conn);
 /*
 	if(SOCKET_ERROR == conn)
 	{
@@ -411,17 +408,17 @@ again:
 
 int vg_accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
 {
-	LOG(LEVEL_DEBUG, "vg_accept E\n");
+	LOG(LEVEL_TRACE, "vg_accept E\n");
     int fd = qcom_accept(sockfd, addr, addrlen);
-	LOG(LEVEL_DEBUG, "vg_accept X\n");
+	LOG(LEVEL_TRACE, "vg_accept X\n");
 	return fd;
 }
 
 int vg_listen(int sock, int backlog)
 {
-	LOG(LEVEL_DEBUG, "vg_listen E\n");
+	LOG(LEVEL_TRACE, "vg_listen E\n");
     qcom_listen(sock, backlog);
-	LOG(LEVEL_DEBUG, "vg_listen X\n");
+	LOG(LEVEL_TRACE, "vg_listen X\n");
 }
 
 

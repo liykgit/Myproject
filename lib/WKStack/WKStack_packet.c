@@ -20,36 +20,36 @@ static WKStack_datapoint_t *fill_dp_chunk(WKStack_datapoint_t *pdp, TLV_t *ptlv)
 
     switch(ptlv->tag[2]) {
         case 1: {
-                LOG(LEVEL_DEBUG, "bool index %d, len %d\n", pdp->index, ptlv->len);
+                LOG(LEVEL_TRACE, "bool index %d, len %d\n", pdp->index, ptlv->len);
                 //memcpy(&pdp->value.boolean, ptlv->value, ptlv->len);
                 pdp->value.boolean = *(char *)ptlv->value;
-                LOG(LEVEL_DEBUG, "val %d\n", pdp->value.boolean);
+                LOG(LEVEL_TRACE, "val %d\n", pdp->value.boolean);
         }
         break;
 
         case 2: {
 
-                LOG(LEVEL_DEBUG, "int index %d, len %d\n", pdp->index, ptlv->len);
+                LOG(LEVEL_TRACE, "int index %d, len %d\n", pdp->index, ptlv->len);
                 memcpy(&pdp->value.integer, ptlv->value, ptlv->len);
-                LOG(LEVEL_DEBUG, "val %d\n", pdp->value.integer);
+                LOG(LEVEL_TRACE, "val %d\n", pdp->value.integer);
         }
         break;
 
         case 3: {
-                LOG(LEVEL_DEBUG, "float index %d, len %d\n", pdp->index, ptlv->len);
-                LOG(LEVEL_DEBUG, "type float\n");
+                LOG(LEVEL_TRACE, "float index %d, len %d\n", pdp->index, ptlv->len);
+                LOG(LEVEL_TRACE, "type float\n");
                 memcpy(&pdp->value.floatpoint, ptlv->value, ptlv->len);
         }
         break;
 
         case 4: {
-                LOG(LEVEL_DEBUG, "string index %d, len %d\n", pdp->index, ptlv->len);
+                LOG(LEVEL_TRACE, "string index %d, len %d\n", pdp->index, ptlv->len);
 
                 pdp->value.string = vg_malloc(ptlv->len + 1);
                 memset(pdp->value.string, 0, ptlv->len + 1);
                 memcpy(pdp->value.string, ptlv->value, ptlv->len);
 
-                LOG(LEVEL_DEBUG, "%s\n", pdp->value.string);
+                LOG(LEVEL_TRACE, "%s\n", pdp->value.string);
         }
         break;
     }
@@ -60,7 +60,7 @@ static WKStack_datapoint_t *fill_dp_chunk(WKStack_datapoint_t *pdp, TLV_t *ptlv)
 //return number of tlv items decoded */
 static int decode_payload(char *data, int len) {
 
-    LOG(LEVEL_DEBUG, "decoding tlv ...  E\n "); 
+    LOG(LEVEL_TRACE, "decoding tlv ...  E\n "); 
 
     int offset = 0;
     int item_size = 0;
@@ -69,18 +69,18 @@ static int decode_payload(char *data, int len) {
     while(len > 0) {
    
         TLV_t *ptlv = NULL;
-        LOG(LEVEL_DEBUG, "parse start at offset %d\n", offset);
+        LOG(LEVEL_TRACE, "parse start at offset %d\n", offset);
         item_size = tlv_next(data+offset, len, &ptlv);
-        LOG(LEVEL_DEBUG, "item size %d\n", item_size);
+        LOG(LEVEL_TRACE, "item size %d\n", item_size);
 
         if(item_size >= 0) {
-            LOG(LEVEL_DEBUG, "len :  %d\n", ptlv->len);
+            LOG(LEVEL_TRACE, "len :  %d\n", ptlv->len);
             len -= item_size;
 
-            LOG(LEVEL_DEBUG, "offset %d len-item_size %d\n", offset, len);
-            LOG(LEVEL_DEBUG, "index %d\n", *(unsigned short *)ptlv->tag);
+            LOG(LEVEL_TRACE, "offset %d len-item_size %d\n", offset, len);
+            LOG(LEVEL_TRACE, "index %d\n", *(unsigned short *)ptlv->tag);
 
-            LOG(LEVEL_DEBUG, "data type %d\n", ptlv->tag[2]);
+            LOG(LEVEL_TRACE, "data type %d\n", ptlv->tag[2]);
 
             fill_dp_chunk(&dps[i++], ptlv);
 
@@ -92,7 +92,7 @@ static int decode_payload(char *data, int len) {
         }
     }
 
-    LOG(LEVEL_DEBUG, "decoding...  X\n "); 
+    LOG(LEVEL_TRACE, "decoding...  X\n "); 
 
     return i;
 }
@@ -209,8 +209,8 @@ static int unpack_ota(unsigned char *payload, int len)
         strcat(WKStack.module_firmware.url, "?ticket=");
         strcat(WKStack.module_firmware.url, ticket);
 
-        LOG(LEVEL_DEBUG, "ota url %s\n", WKStack.module_firmware.url);
-        LOG(LEVEL_DEBUG, "unsubscribe %s\n", WKStack.ota_sub_topic);
+        LOG(LEVEL_TRACE, "ota url %s\n", WKStack.module_firmware.url);
+        LOG(LEVEL_TRACE, "unsubscribe %s\n", WKStack.ota_sub_topic);
         mqtt_unsubscribe(WKStack.ota_sub_topic, NULL);    
         msleep(800);
 
@@ -490,7 +490,7 @@ int WKStack_publish_sync()
 {
     int ret = -1;
 
-    LOG(LEVEL_NORMAL, "syncing to cloud\n");
+    LOG(LEVEL_NORMAL, "syncing\n");
 
     char buf[128];
     memset(buf, 0, sizeof(buf));
@@ -702,7 +702,7 @@ static int unpack_welcome(unsigned char *payload, int len) {
 
                 strncpy(WKStack.params.ticket, pticket, sizeof(WKStack.params.ticket));
                 LOG(LEVEL_NORMAL, "register completed\n");
-                LOG(LEVEL_DEBUG, "ticket:%s\n", WKStack.params.ticket);
+                LOG(LEVEL_TRACE, "ticket:%s\n", WKStack.params.ticket);
                 hasTicket = 1;
             }
             break;
@@ -720,7 +720,7 @@ static int unpack_welcome(unsigned char *payload, int len) {
 
                 key = dps[i].value.string;
                 strncpy(WKStack.params.key, key, sizeof(WKStack.params.key));
-                LOG(LEVEL_DEBUG, "received secret\n");
+                LOG(LEVEL_TRACE, "received secret\n");
                 hasKey = 1;
             }
             break;
@@ -779,10 +779,10 @@ static int unpack_challenge(unsigned char *payload, int len) {
         aes_ecb(aes, (unsigned char*)payload, wisper);
     }
 
-    LOG(LEVEL_DEBUG, "received challenge\n");
-    vg_print_hex(LEVEL_DEBUG, payload, len);
-    LOG(LEVEL_DEBUG, "answer:\n");
-    vg_print_hex(LEVEL_DEBUG, aes, AES_LEN);
+    LOG(LEVEL_TRACE, "received challenge\n");
+    vg_print_hex(LEVEL_TRACE, payload, len);
+    LOG(LEVEL_TRACE, "answer:\n");
+    vg_print_hex(LEVEL_TRACE, aes, AES_LEN);
 
     publish_answer(aes, len);
    
@@ -860,6 +860,4 @@ int WKStack_publish_bind_request(char *userId)
 
     return mqtt_publish(WKStack.binding_pub_topic, (unsigned char*)buf, offset, MQTT_QOS1, MQTT_RETAIN_FALSE, (mqtt_cb_t)0);
 }
-
-
 

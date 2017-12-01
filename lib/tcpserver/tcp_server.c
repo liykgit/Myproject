@@ -73,7 +73,7 @@ int  tcpserver_start(int port) {
 
     ret = vg_tcp_socket(&tcpserver_sock);
     if(ret != 0){
-		printf("Create tcp_socket failed\n");
+		LOG(LEVEL_ERROR, "Create tcp_socket failed\n");
 		goto socket_fail;
     }
 
@@ -86,7 +86,7 @@ int  tcpserver_start(int port) {
 
     ret = vg_bind(tcpserver_sock, (const struct sockaddr *)&local_addr, sizeof(struct sockaddr_in));
     if(ret != 0) {
-		printf("bind failed\n");
+		LOG(LEVEL_ERROR, "bind failed\n");
 		goto bind_fail;
     }
 

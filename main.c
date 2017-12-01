@@ -126,8 +126,6 @@ int ota_event_handler(const WKStack_ota_msg_t *msg)
 
 int main(int argc, char **argv)
 {
-    
-
     WKStack_register_callback(CALLBACK_CONNECTED, connect_cb);
     WKStack_register_callback(CALLBACK_DISCONNECTED, disconnect_cb);
 

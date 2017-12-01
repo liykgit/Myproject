@@ -15,27 +15,27 @@ int WKStack_init(const char *mac, const char *product_id, const char *version, c
     if(WKStack.state == WKSTACK_WAIT_INIT){
 
         if(key && strlen(key) != WKSTACK_KEY_LEN) {
-            LOG(LEVEL_ERROR, "Error: invalid product key %s\n", key);
+            LOG(LEVEL_ERROR, "key len\n");
             return -1;
         }
 
         if(!product_id || strlen(product_id) > WKSTACK_DEVTYPE_LEN) {
-            LOG(LEVEL_ERROR, "Error: invalid product id %s\n", product_id);
+            LOG(LEVEL_ERROR, "product_id len\n");
             return -1;
         }
 
         if(!mac || strlen(mac) <= 0 || strlen(mac) > WKSTACK_MAC_LEN || !isValidMacAddress(mac)) {
-            LOG(LEVEL_ERROR, "Error: invalid mac %s\n", mac);
+            LOG(LEVEL_ERROR, "mac %s\n", mac);
             return -1;
         }
 
         if(sn && strlen(sn) > WKSTACK_SN_LEN) {
-            LOG(LEVEL_ERROR, "Error: max allowed sn length %d\n", WKSTACK_SN_LEN);
+            LOG(LEVEL_ERROR, "Max sn len %d\n", WKSTACK_SN_LEN);
             return -1;
         }
 
         if(!version || strlen(version) > WKSTACK_VER_LEN) {
-            LOG(LEVEL_ERROR, "Error: max allowed version length %d\n", WKSTACK_VER_LEN);
+            LOG(LEVEL_ERROR, "Max version len %d\n", WKSTACK_VER_LEN);
             return -1;
         }
 
@@ -51,15 +51,12 @@ int WKStack_init(const char *mac, const char *product_id, const char *version, c
             int r = ((WKStack_load_params_fn_t)vg_callbacks[CALLBACK_LOAD_PARAMS])(pbuf, sz);
 
             if(r != 0) {
-                LOG(LEVEL_ERROR, "Error: loading params failed, restore device info\n");
+                LOG(LEVEL_ERROR, "Loading params\n");
                 memset(&WKStack.params, 0, sizeof(WKStack.params));
             }
             else if((strcmp(((WKStack_params_t*)pbuf)->magic, WKSTACK_MAGIC)) != 0){
                
-
-                LOG(LEVEL_DEBUG, "CHRIS magic mismatches %s\n", ((WKStack_params_t*)pbuf)->magic);
-
-                LOG(LEVEL_DEBUG, "loaded params but magic mismatches\n");
+                LOG(LEVEL_DEBUG, "params magic mismatch\n");
                 memset(&WKStack.params, 0, sizeof(WKStack.params));
             }
             else {
@@ -72,7 +69,7 @@ int WKStack_init(const char *mac, const char *product_id, const char *version, c
                     LOG(LEVEL_DEBUG, "load params successfully\n");   
                 }
                 else {
-                    LOG(LEVEL_ERROR, "loaded params but crc mismatches\n");
+                    LOG(LEVEL_ERROR, "params crc\n");
                     memset(&WKStack.params, 0, sizeof(WKStack.params));
                 }
             }
@@ -104,7 +101,7 @@ int WKStack_init(const char *mac, const char *product_id, const char *version, c
         UDPServer_start(UDP_SERVER_PORT); 
     }
 
-    LOG(LEVEL_NORMAL, "WKStack inited \n");
+    LOG(LEVEL_NORMAL, "_inited \n");
     WKStack.state = WKSTACK_OFFLINE;
 
     return 0;
@@ -151,7 +148,7 @@ int WKStack_send_raw(unsigned char *raw_data, unsigned int size, WKStack_send_cb
     else {
         buf = vg_malloc(size + 1); 
         if(!buf) {
-            LOG(LEVEL_ERROR, "Fatal: Not enough memory\n");
+            LOG(LEVEL_ERROR, "OOM\n");
             return -1;
         }
 
@@ -369,7 +366,7 @@ int WKStack_send_ota_progress(WKStack_ota_target_t target, WKStack_ota_report_t 
                 if(item_size >= 0)
                     offset += item_size;
                 else {
-                    LOG(LEVEL_NORMAL,"ota publish buffer not large enough\n");
+                    //LOG(LEVEL_DEBUG,"ota publish buffer not large enough\n");
                     return 0;
                 }
             }
@@ -383,7 +380,7 @@ int WKStack_send_ota_progress(WKStack_ota_target_t target, WKStack_ota_report_t 
                 if(item_size >= 0)
                     offset += item_size;
                 else {
-                    LOG(LEVEL_NORMAL,"ota publish buffer not large enough\n");
+                    //LOG(LEVEL_NORMAL,"ota publish buffer not large enough\n");
                     return 0;
                 }
 
@@ -396,7 +393,7 @@ int WKStack_send_ota_progress(WKStack_ota_target_t target, WKStack_ota_report_t 
                     if(item_size >= 0)
                         offset += item_size;
                     else {
-                        LOG(LEVEL_NORMAL,"ota publish buffer not large enough\n");
+                        //LOG(LEVEL_NORMAL,"ota publish buffer not large enough\n");
                         return 0;
                     }
                 }
@@ -405,6 +402,9 @@ int WKStack_send_ota_progress(WKStack_ota_target_t target, WKStack_ota_report_t 
 
         case OTA_STATE_END: 
             {
+                
+                char *ERR_PUBLISH_BUF_TOO_SMALL = "ota publish buffer too small";
+
                tag[2] = WKSTACK_DATAPOINT_TYPE_INT;
                 *(unsigned short*)tag = WKSTACK_OTA_INDEX_STATE;
 
@@ -412,7 +412,7 @@ int WKStack_send_ota_progress(WKStack_ota_target_t target, WKStack_ota_report_t 
                 if(item_size >= 0)
                     offset += item_size;
                 else {
-                    LOG(LEVEL_NORMAL,"ota publish buffer not large enough\n");
+                    //LOG(LEVEL_NORMAL,"ota publish buffer not large enough\n");
                     return 0;
                 }
 
@@ -424,7 +424,7 @@ int WKStack_send_ota_progress(WKStack_ota_target_t target, WKStack_ota_report_t 
                 if(item_size >= 0)
                     offset += item_size;
                 else {
-                    LOG(LEVEL_NORMAL,"ota publish buffer not large enough\n");
+                    //LOG(LEVEL_NORMAL,"ota publish buffer not large enough\n");
                     return 0;
                 }
                
@@ -439,7 +439,7 @@ int WKStack_send_ota_progress(WKStack_ota_target_t target, WKStack_ota_report_t 
                if(item_size >= 0)
                    offset += item_size;         
                else {
-                   LOG(LEVEL_NORMAL,"ota publish buffer not large enough\n");
+                   LOG(LEVEL_ERROR,"%s\n", ERR_PUBLISH_BUF_TOO_SMALL);
                    return 0;
                }
 
@@ -453,7 +453,7 @@ int WKStack_send_ota_progress(WKStack_ota_target_t target, WKStack_ota_report_t 
                    if(item_size >= 0)
                        offset += item_size;
                    else {
-                       LOG(LEVEL_NORMAL,"ota publish buffer not large enough\n");
+                       LOG(LEVEL_ERROR, "%s\n", ERR_PUBLISH_BUF_TOO_SMALL);
                        return 0;
                    }
                 }
@@ -467,7 +467,6 @@ int WKStack_send_ota_progress(WKStack_ota_target_t target, WKStack_ota_report_t 
 }
 
 void WKStack_rabbit() {
-    LOG(LEVEL_NORMAL,"WKStack_rabbit\n");
     mqtt_unsubscribe(WKStack.ota_sub_topic, NULL);    
 }
 

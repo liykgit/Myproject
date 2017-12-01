@@ -99,7 +99,7 @@ int parse_url(char *ep, char* url, char *port)
     pseptr2 = pseptr1;
     for ( i = 0; i < 2; i++ ) {
         if ( '/' != *pseptr2 ) {
-			LOG(LEVEL_ERROR, "url(pseptr2) failed!\n");
+			LOG(LEVEL_ERROR, "url(pseptr2)\n");
             return -1;
         }
         pseptr2++;
@@ -108,7 +108,7 @@ int parse_url(char *ep, char* url, char *port)
     if ( NULL == pseptr1 ){
         pseptr1 = strchr(pseptr2, '/');
         if ( NULL == pseptr1 ) {
-			LOG(LEVEL_ERROR, "url(pseptr1) failed!\n");
+			LOG(LEVEL_ERROR, "url(pseptr1)\n");
 			return -1;
 		}
         len = pseptr1 - pseptr2;

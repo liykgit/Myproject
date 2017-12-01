@@ -62,7 +62,7 @@ void exec_tcpsend(int argc, char *argv[], struct sockaddr_in *client_addr)
     LOG(LEVEL_DEBUG, "exec_tcpsend E\n");
        
     if(argc == 2){
-        printf("tcp sending %s\n", argv[1]);
+        LOG(LEVEL_TRACE, "tcp sending %s\n", argv[1]);
         tcpserver_send(argv[1], strlen(argv[1]));
         udpserver_sendto(client_addr, OK, strlen(OK));
     }
@@ -78,7 +78,6 @@ void exec_broadcast(int argc, char *argv[], struct sockaddr_in *client_addr)
     LOG(LEVEL_DEBUG, "exec_broadcast E\n");
 
     if(argc == 2){
-        printf("broadcasting %s\n", argv[1]);
         udpserver_broadcast(argv[1], strlen(argv[1]), 30320);
         //udpserver_sendto(client_addr, OK, strlen(OK));
     }
@@ -119,8 +118,6 @@ void exec_passthrough(int argc, char *argv[], struct sockaddr_in *client_addr)
         udpserver_sendto(client_addr, PARAM_ERROR, strlen(PARAM_ERROR));
     }
     else if(argc == 2){
-        
-        printf("passthrough to server %s\n", argv[1]);
         
         int buf_sz = strlen(argv[1]) >> 1 ;
 

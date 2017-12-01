@@ -410,8 +410,9 @@ static int unpack_control(unsigned char *payload, int len)
 
     int i = 0;
 
-    if(WKStack.dp_handler) {
-         WKStack.dp_handler(dps, count);
+    if(vg_callbacks[CALLBACK_DATAPOINT_EVENT]) {
+
+        ((WKStack_datapoint_handler_t)vg_callbacks[CALLBACK_DATAPOINT_EVENT])(dps, count);
     }
 
     for(i = 0; i < count; i++) {

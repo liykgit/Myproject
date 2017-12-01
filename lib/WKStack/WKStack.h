@@ -83,6 +83,7 @@ typedef enum {
     CALLBACK_LOAD_PARAMS,
     CALLBACK_ERROR,
     CALLBACK_OTA_EVENT,
+    CALLBACK_DATAPOINT_EVENT,
 
     CALLBACK_NR_MAX 
 } callback_index_t;
@@ -133,6 +134,22 @@ typedef struct {
     char *err_msg;
 } WKStack_ota_report_t;
 
+
+typedef struct{
+
+    int index;
+	int type;
+	union VAL{
+        int integer;
+        float floatpoint;
+        char boolean;
+        char *string;
+    } value;
+} WKStack_datapoint_t;
+
+
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -145,6 +162,7 @@ typedef int (*WKStack_load_params_fn_t)(char *buf, int size);
 typedef int (*WKStack_error_handler_t)(int err_code);
 typedef int (*WKStack_send_cb_t)(int msg_id, publish_result_t err_code);
 typedef int (*WKStack_ota_event_cb_t)(const WKStack_ota_msg_t *msg);
+typedef void (*WKStack_datapoint_handler_t)(WKStack_datapoint_t *dps, int size);
 
 int WKStack_init(const char *mac, const char *product_id, const char *version, const char *sn,  const char *key);
 
@@ -154,12 +172,13 @@ int WKStack_register_callback(callback_index_t id, generic_callback_fp fp);
 
 //int WKStack_send_mcu_ota_request(WKStack_ota_target_t target, char *version);
 //int WKStack_send_mcu_ota_request(WKStack_ota_target_t target, char *version);
-int WKStack_send_ota_progress(WKStack_ota_target_t target, WKStack_ota_report_t report, WKStack_send_cb_t cb);
+int WKStack_send_datapoint(WKStack_datapoint_t *dp_group, unsigned int group_size, WKStack_send_cb_t cb);
 
 #if PASSTHROUGH
 int WKStack_send_raw(unsigned char *raw_data, unsigned int size, WKStack_send_cb_t cb);
 #endif
 
+int WKStack_send_ota_progress(WKStack_ota_target_t target, WKStack_ota_report_t report, WKStack_send_cb_t cb);
 
 typedef void (*lan_cmd_hook_t)(int argc, char *argv[], struct sockaddr_in *client_addr);
 
@@ -169,6 +188,8 @@ int WKStack_register_lan_hook(char *cmd, lan_cmd_hook_t hook);
 int WKStack_lan_atcmd_start();
 
 int WKStack_lan_atcmd_stop();
+
+
 
 #ifdef __cplusplus
 }

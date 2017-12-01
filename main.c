@@ -15,14 +15,10 @@
 
 
 
-
-
 #define PRODUCTID   "zT6b3nuvSt0i8kIt"
 #define KEY         "k1gyW7pefc02oowe"
 #define MAC         "A1B2C3D4E916"
 #define VERSION     "0.1"
-
-
 
 
 static int not_started = 1;
@@ -124,6 +120,13 @@ int ota_event_handler(const WKStack_ota_msg_t *msg)
     return 0;
 }
 
+void datapoint_handler(WKStack_datapoint_t *dps, int size)
+{
+    printf("received %d datapoints\n", size);
+
+    WKStack_send_datapoint(dps, size, NULL);
+}
+
 int main(int argc, char **argv)
 {
     WKStack_register_callback(CALLBACK_CONNECTED, connect_cb);
@@ -137,6 +140,8 @@ int main(int argc, char **argv)
     WKStack_register_callback(CALLBACK_RAW_DATA, raw_data_handler);
 
     WKStack_register_callback(CALLBACK_OTA_EVENT, ota_event_handler);
+
+    WKStack_register_callback(CALLBACK_DATAPOINT_EVENT, datapoint_handler);
 
     WKStack_init(MAC, PRODUCTID, VERSION, 0, KEY);
 

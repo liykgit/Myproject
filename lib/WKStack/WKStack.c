@@ -178,7 +178,7 @@ int WKStack_send_raw(unsigned char *raw_data, unsigned int size, WKStack_send_cb
     return ret;
 }
 
-int WKStack_report_datapoint(WKStack_datapoint_t *dp_group, unsigned int group_size, WKStack_report_cb_t cb)
+int WKStack_send_datapoint(WKStack_datapoint_t *dp_group, unsigned int group_size, WKStack_send_cb_t cb)
 {
     if(WKStack.state != WKSTACK_READY)
         return -1;
@@ -293,15 +293,6 @@ int WKStack_restore_all(WKStack_restore_cb_t restore_cb)
     return mqtt_publish(WKStack.sync_pub_topic, (unsigned char*)buf, offset, MQTT_QOS1, MQTT_RETAIN_FALSE, (mqtt_cb_t)restore_cb_wrapper);
 }
 
-int WKStack_register_datapoint_handler(WKStack_datapoint_handler_t handler)
-{
-    if(handler == NULL)
-		return -1;
-
-	WKStack.dp_handler = handler;
-
-	return 0;
-}
 
 WKStack_state_t WKStack_state()
 {

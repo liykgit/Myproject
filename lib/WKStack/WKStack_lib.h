@@ -94,33 +94,13 @@ typedef struct {
     char mac[WKSTACK_MAC_LEN + PADDING];
 } WKStack_params_t;
 
-//TODO change struct name to include ota
-typedef struct{
-
-    int index;
-	int type;
-	union VAL{
-        int integer;
-        float floatpoint;
-        char boolean;
-        char *string;
-    } value;
-} WKStack_datapoint_t;
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 typedef int (*WKStack_cb_t)(WKStack_state_t state);
 typedef int (*WKStack_stop_cb_t)();
-typedef int (*WKStack_report_cb_t)(unsigned short id, WKStack_publish_state_t state);
-typedef void (*WKStack_datapoint_handler_t)(WKStack_datapoint_t *dps, int size);
 typedef int (*WKStack_restore_cb_t)(WKStack_publish_state_t state);
-
-
-int WKStack_register_datapoint_handler(WKStack_datapoint_handler_t cb);
-
-int WKStack_report_datapoint(WKStack_datapoint_t *dp_group, unsigned int group_size, WKStack_report_cb_t cb);
 
 WKStack_state_t WKStack_state(void);
 
@@ -131,8 +111,6 @@ int WKStack_name(char *buf, int size);
 int WKStack_params(char *buf, int size);
 
 int WKStack_restore_all(WKStack_restore_cb_t restore_cb);
-
-
 
 typedef struct{
 
@@ -168,7 +146,6 @@ typedef struct{
     firmware_info_t module_firmware;
     firmware_info_t mcu_firmware;
 
-    WKStack_datapoint_handler_t dp_handler;
 } WKStack_t;
 
 

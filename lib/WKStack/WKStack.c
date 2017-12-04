@@ -259,6 +259,7 @@ int WKStack_send_datapoint(WKStack_datapoint_t *dp_group, unsigned int group_siz
 }
 
 
+#ifdef RESTORE_CB_WRAPPER
 static WKStack_restore_cb_t _restore_cb = 0;
 
 static int restore_cb_wrapper(unsigned short msg_id, mqtt_errno_t err) {
@@ -270,13 +271,15 @@ static int restore_cb_wrapper(unsigned short msg_id, mqtt_errno_t err) {
     }
 }
 
-int WKStack_restore_all(WKStack_restore_cb_t restore_cb)
+int WKStack_restore(WKStack_restore_cb_t restore_cb)
 {
     LOG(LEVEL_NORMAL, "WKStack_restore_all E\n");
 
     if(WKStack.state != WKSTACK_READY)
         return -1;
 
+            
+            
     if(restore_cb)
         _restore_cb = restore_cb;
 
@@ -290,8 +293,33 @@ int WKStack_restore_all(WKStack_restore_cb_t restore_cb)
     *(unsigned short*)tag = WKSTACK_SYNC_INDEX_RESTORE;
     int offset = tlv_put_int(buf, tag, 1, sizeof(buf));
 
+
     return mqtt_publish(WKStack.sync_pub_topic, (unsigned char*)buf, offset, MQTT_QOS1, MQTT_RETAIN_FALSE, (mqtt_cb_t)restore_cb_wrapper);
+
 }
+
+#endif
+
+int WKStack_restore(WKStack_send_cb_t restore_cb)
+{
+    LOG(LEVEL_NORMAL, "WKStack_restore_all E\n");
+
+    if(WKStack.state != WKSTACK_READY)
+        return -1;
+
+
+    char buf[32];
+    memset(buf, 0, sizeof(buf));
+
+    char tag[4] = {0, 0, WKSTACK_DATAPOINT_TYPE_INT, 0};
+    *(unsigned short*)tag = WKSTACK_SYNC_INDEX_RESTORE;
+    int offset = tlv_put_int(buf, tag, 1, sizeof(buf));
+
+
+    return mqtt_publish(WKStack.sync_pub_topic, (unsigned char*)buf, offset, MQTT_QOS1, MQTT_RETAIN_FALSE, (mqtt_cb_t)restore_cb);
+
+}
+
 
 
 WKStack_state_t WKStack_state()

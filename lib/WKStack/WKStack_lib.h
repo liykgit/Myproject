@@ -95,7 +95,6 @@ extern "C" {
 
 typedef int (*WKStack_cb_t)(WKStack_state_t state);
 typedef int (*WKStack_stop_cb_t)();
-typedef int (*WKStack_restore_cb_t)(WKStack_publish_state_t state);
 
 WKStack_state_t WKStack_state(void);
 
@@ -104,8 +103,6 @@ int WKStack_did(char *buf, int size);
 int WKStack_name(char *buf, int size);
 
 int WKStack_params(char *buf, int size);
-
-int WKStack_restore_all(WKStack_restore_cb_t restore_cb);
 
 typedef struct{
 

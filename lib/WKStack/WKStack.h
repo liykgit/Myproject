@@ -193,6 +193,7 @@ int WKStack_lan_atcmd_start();
 
 int WKStack_lan_atcmd_stop();
 
+int WKStack_restore(WKStack_send_cb_t cb);
 
 
 #ifdef __cplusplus

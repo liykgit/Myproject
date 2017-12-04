@@ -39,6 +39,14 @@ int disconnect_cb()
     return 0;
 }
 
+int stop_cb()
+{
+    printf("stopped, all sockets should be closed gracefully\n");
+    not_started = 1;
+
+    return 0;
+}
+
 
 int send_callback(int msg_id, publish_result_t err_code)
 {
@@ -169,6 +177,8 @@ int main(int argc, char **argv)
     WKStack_register_callback(CALLBACK_OTA_EVENT, ota_event_handler);
 
     WKStack_register_callback(CALLBACK_DATAPOINT_EVENT, datapoint_handler);
+
+    WKStack_register_callback(CALLBACK_STOPPED, stop_cb);
 
     WKStack_init(MAC, PRODUCTID, VERSION, 0, KEY);
 

@@ -3,6 +3,8 @@
 
 #include "WKStack.h"
 
+
+#define MQTT_BUFFER_SIZE 512
 #define WKSTACK_TOPIC_LEN 96
 #define WKSTACK_SUBSCRIPTION_MAX sizeof(int)
 

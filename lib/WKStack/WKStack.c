@@ -101,7 +101,7 @@ int WKStack_init(const char *mac, const char *product_id, const char *version, c
 
         log_init(WKStack.params.mac);
 
-        mqtt_init(WKSTACK_KEEPALIVE_TIME, 1024);
+        mqtt_init(WKSTACK_KEEPALIVE_TIME, MQTT_BUFFER_SIZE);
 
         UDPServer_start(UDP_SERVER_PORT); 
     }

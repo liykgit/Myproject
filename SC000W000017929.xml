@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<f-device>
+  <dsn>SC000W000017929</dsn>
+  <public-key>-----BEGIN RSA PUBLIC KEY-----
+MIIBCgKCAQEAwwoN20svFgnkbP6SPsgNnWEVlmLP+Zmeev0bxB4GSUkz9weVjGCrtG6qpRgj41um
+JJrCxRK/1kGE6vdR2jx3SfzPiJL/HFYhhxxxHmrlENaPTnQHT9GZaflx6453VclJ1ZH2Nws8d4sy
++hnvAi9Pqan8c2e4EvR8dr2eJCsVORZ8hRFKR4wa/2Tp763mzMlW8vBgZHagwOivQP1gQhuItSC7
+cIMXrA9hI/sF27hiOp4UUvPvbAGqzMjMqQwjBa3c3jUnpiw9Xvm7wbsacqdVyFwsrB17xfHtTJOd
+81nBCjF6vzO4cPp5wiqVEoWDglYEq/zD+Xkj4VQSPOsmjqm2YwIDAQAB
+-----END RSA PUBLIC KEY-----
+</public-key>
+</f-device>
